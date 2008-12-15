@@ -436,6 +436,7 @@ int main(int argc, char** argv) {
 	const char* egroup = NULL;
 	assert((egroup = cfg_getstr(cfg_sec_global, C_GROUP)) != NULL);
 
+	slog(SLOG_INFO, "dropping privs to uid %s", euser);
 	struct passwd* pwd = NULL;
 	if ((pwd = getpwnam(euser)) == NULL) {
 	    slog(SLOG_ERROR, "No user %s: %s", euser, strerror(errno));
@@ -443,6 +444,7 @@ int main(int argc, char** argv) {
 	}
 	assert(pwd);
 
+	slog(SLOG_INFO, "dropping privs to uid %s", egroup);
 	struct group* grp = NULL;
 	if ((grp = getgrnam(egroup)) == NULL) {
 	    slog(SLOG_ERROR, "No group %s: %s", egroup, strerror(errno));
