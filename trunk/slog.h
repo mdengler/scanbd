@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/kmux/kmux-generate/helper/sane/scanbd/slog.h,v 1.2 2008/12/15 08:47:22 wimalopaan Exp $
+ * $Id$
  *
  *  scanbd - KMUX scanner button daemon
  *

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# $Header: /cvsroot/kmux/kmux-generate/helper/sane/scanbd/example.script,v 1.2 2008/12/15 10:26:23 wimalopaan Exp $
+# $Id$
 #
 #  scanbd - KMUX scanner button daemon
 #
