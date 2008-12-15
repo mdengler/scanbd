@@ -868,7 +868,7 @@ static void* sane_poll(void* arg) {
 		assert(strlen(st->opts[st->triggered_option].script) > 0);
 
 		// need to copy the values because we leave the
-		// crirical section
+		// critical section
 		// int triggered_option = st->triggered_option;
 		char* script = strdup(st->opts[st->triggered_option].script);
 		assert(script != NULL);
@@ -1007,6 +1007,12 @@ void sane_trigger_action(int number_of_dev, int action) {
 	goto cleanup_sane;
     }
 
+    if (sane_poll_threads == NULL) {
+	// no devices actually polling
+	slog(SLOG_WARN, "No polling at the moment");
+	goto cleanup_sane;
+    }
+    assert(sane_poll_threads != NULL);
     sane_thread_t* st = &sane_poll_threads[number_of_dev];
     assert(st != NULL);
     
@@ -1022,7 +1028,17 @@ void sane_trigger_action(int number_of_dev, int action) {
 	slog(SLOG_WARN, "No such action %d for device number %d", action, number_of_dev);
 	goto cleanup_dev;
     }
+
+    while(st->triggered == true) {
+	slog(SLOG_DEBUG, "sane_trigger_action: an action is active, waiting ...");
+	if (pthread_cond_wait(&st->cv, &st->mutex) < 0) {
+	    slog(SLOG_ERROR, "pthread_cond_wait: %s", strerror(errno));
+	    goto cleanup_dev;
+	}
+    }
     
+    slog(SLOG_DEBUG, "sane_trigger_action: an action is active, waiting ...");
+
     st->triggered = true;
     st->triggered_option = action;
     // we need to trigger all waiting threads
@@ -1172,6 +1188,7 @@ void stop_sane_threads(void) {
     // free the thread list
     free(sane_poll_threads);
     sane_poll_threads = NULL;
+    num_devices = 0;
     // no threads active anymore
 
  cleanup:

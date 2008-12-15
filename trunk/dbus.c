@@ -156,6 +156,9 @@ static void dbus_signal_device_removed(void) {
 static void dbus_method_release(void) {
     slog(SLOG_DEBUG, "dbus_method_release");
     // stop all threads
+    slog(SLOG_DEBUG, "sane_init");
+    sane_init(NULL, NULL);
+    get_sane_devices();
     start_sane_threads();
 }
 
@@ -163,6 +166,8 @@ static void dbus_method_acquire(void) {
     slog(SLOG_DEBUG, "dbus_method_acquire");
     // start all threads
     stop_sane_threads();
+    slog(SLOG_DEBUG, "sane_exit");
+    sane_exit();
 }
 
 static void dbus_method_trigger(DBusMessage *message) {
