@@ -22,6 +22,7 @@
 
 
 #include "common.h"
+#include "slog.h"
 
 void daemonize(void) {
     pid_t pid;
