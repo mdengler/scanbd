@@ -32,6 +32,12 @@
 pthread_mutex_t sane_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 pthread_cond_t  sane_cv    = PTHREAD_COND_INITIALIZER;
 
+// the following locking strategie must be obeyed:
+// 1) lock the sane_mutex
+// 2) lock the device specific mutex
+// in this order to avoid deadlocks
+// holding more than these two locks is not intended
+
 struct sane_opt_value {    
     unsigned long num_value; // before-value or after-value or actual-value (BOOL|INT|FIXED)
     struct {                 // (SRING)
@@ -1038,22 +1044,10 @@ void sane_trigger_action(int number_of_dev, int action) {
 
     while(st->triggered == true) {
 	slog(SLOG_DEBUG, "sane_trigger_action: an action is active, waiting ...");
-/* 	if (pthread_mutex_unlock(&sane_mutex) < 0) { */
-/* 	    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno)); */
-/* 	} */
 	if (pthread_cond_wait(&st->cv, &st->mutex) < 0) {
 	    slog(SLOG_ERROR, "pthread_cond_wait: %s", strerror(errno));
 	    goto cleanup_dev;
 	}
-/* 	if (pthread_mutex_unlock(&st->mutex) < 0) { */
-/* 	    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno)); */
-/* 	} */
-/* 	if (pthread_mutex_lock(&sane_mutex) < 0) { */
-/* 	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno)); */
-/* 	} */
-/* 	if (pthread_mutex_lock(&st->mutex) < 0) { */
-/* 	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno)); */
-/* 	} */
     }
     
     slog(SLOG_DEBUG, "sane_trigger_action: an action is active, waiting ...");
@@ -1158,22 +1152,10 @@ void stop_sane_threads(void) {
 	while(sane_poll_threads[i].triggered == true) {
 	    slog(SLOG_DEBUG, "stop_sane_threads: an action is active, waiting ...");
 
-/* 	    if (pthread_mutex_unlock(&sane_mutex) < 0) { */
-/* 		slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno)); */
-/* 	    } */
 	    if (pthread_cond_wait(&sane_poll_threads[i].cv,
 				  &sane_poll_threads[i].mutex) < 0) {
 		slog(SLOG_ERROR, "pthread_cond_wait: %s", strerror(errno));
 	    }
-/* 	    if (pthread_mutex_unlock(&sane_poll_threads[i].mutex) < 0) { */
-/* 		slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno)); */
-/* 	    } */
-/* 	    if (pthread_mutex_lock(&sane_mutex) < 0) { */
-/* 		slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno)); */
-/* 	    } */
-/* 	    if (pthread_mutex_lock(&sane_poll_threads[i].mutex) < 0) { */
-/* 		slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno)); */
-/* 	    } */
 	}
 	if (pthread_mutex_unlock(&sane_poll_threads[i].mutex) < 0) {
 	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
