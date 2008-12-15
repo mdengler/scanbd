@@ -30,6 +30,7 @@
 
 // all programm-global sane functions use this mutex to avoid races
 pthread_mutex_t sane_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+pthread_cond_t  sane_cv    = PTHREAD_COND_INITIALIZER;
 
 struct sane_opt_value {    
     unsigned long num_value; // before-value or after-value or actual-value (BOOL|INT|FIXED)
@@ -70,7 +71,7 @@ struct sane_thread {
     pthread_mutex_t mutex;	     // mutex for this data-structure
     pthread_cond_t cv;		     // cv for this data-structure
     bool triggered;		     // a rule for this device has fired (triggered == true)
-    int  triggered_option;           // the option_number which triggered
+    int  triggered_option;           // the action number which triggered
     const SANE_Device* dev;          // the device
     int num_of_options;	             // the number of all options for
 				     // this device
@@ -122,6 +123,9 @@ void get_sane_devices(void) {
 	num_devices += 1;
 	dev++;
     }    
+    if (pthread_cond_broadcast(&sane_cv)) {
+	slog(SLOG_ERROR, "pthread_cond_broadcast: %s", strerror(errno));
+    }
  cleanup:
     if (pthread_mutex_unlock(&sane_mutex) < 0) {
 	// if we can't unlock the mutex, something is heavily wrong!
@@ -743,7 +747,7 @@ static void* sane_poll(void* arg) {
 	    }
 
 	    // was there a value change?
-	    if (st->triggered) {
+	    if (st->triggered && (st->triggered_option >= 0)) {
 		assert(st->triggered_option >= 0); // index into the opts-array
 		assert(st->triggered_option < st->num_of_options_with_scripts);
 		
@@ -857,6 +861,7 @@ static void* sane_poll(void* arg) {
 
 		// sendout an dbus-signal with all the values as
 		// arguments
+		//dbus_send_signal_argv_async(SCANBD_DBUS_SIGNAL_TRIGGER, env);
 		dbus_send_signal_argv(SCANBD_DBUS_SIGNAL_TRIGGER, env);
 		// the action-script will use the device,
 		// so we have to release the device
@@ -928,12 +933,11 @@ static void* sane_poll(void* arg) {
 		}
 
 		st->triggered = false;
-		st->triggered_option = 0; // invalid
+		st->triggered_option = -1; // invalid
 		// we need to trigger all waiting threads
 		if (pthread_cond_broadcast(&st->cv) < 0) {
 		    slog(SLOG_ERROR, "pthread_cond_broadcats: this shouln't happen");
 		}
-
 		
 		// leave the critical section
 		if (pthread_mutex_unlock(&st->mutex) < 0) {
@@ -993,24 +997,28 @@ static void* sane_poll(void* arg) {
 void sane_trigger_action(int number_of_dev, int action) {
     assert(number_of_dev >= 0);
     assert(action >= 0); 
-
     slog(SLOG_DEBUG, "sane_trigger_action device=%d, action=%d", number_of_dev, action);
-    
+
     if (pthread_mutex_lock(&sane_mutex) < 0) {
-	// if we can't get the mutex, something is heavily wrong!
 	slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
 	return;
     }
-
+    if (num_devices <= 0) {
+	slog(SLOG_WARN, "No devices at all");
+	goto cleanup_sane;
+    }
     if (number_of_dev >= num_devices) {
 	slog(SLOG_WARN, "No such device number %d", number_of_dev);
 	goto cleanup_sane;
     }
 
-    if (sane_poll_threads == NULL) {
+    while(sane_poll_threads == NULL) {
 	// no devices actually polling
-	slog(SLOG_WARN, "No polling at the moment");
-	goto cleanup_sane;
+	slog(SLOG_WARN, "No polling at the moment, waiting ...");
+	if (pthread_cond_wait(&sane_cv, &sane_mutex) < 0) {
+	    slog(SLOG_ERROR, "pthread_cond_wait: ", strerror(errno));
+	    goto cleanup_sane;
+	}
     }
     assert(sane_poll_threads != NULL);
     sane_thread_t* st = &sane_poll_threads[number_of_dev];
@@ -1019,7 +1027,6 @@ void sane_trigger_action(int number_of_dev, int action) {
     // this thread uses the device and the sane_thread_t datastructure
     // lock it
     if (pthread_mutex_lock(&st->mutex) < 0) {
-	// if we can't get the mutex, something is heavily wrong!
 	slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
 	goto cleanup_sane;
     }
@@ -1031,10 +1038,22 @@ void sane_trigger_action(int number_of_dev, int action) {
 
     while(st->triggered == true) {
 	slog(SLOG_DEBUG, "sane_trigger_action: an action is active, waiting ...");
+/* 	if (pthread_mutex_unlock(&sane_mutex) < 0) { */
+/* 	    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno)); */
+/* 	} */
 	if (pthread_cond_wait(&st->cv, &st->mutex) < 0) {
 	    slog(SLOG_ERROR, "pthread_cond_wait: %s", strerror(errno));
 	    goto cleanup_dev;
 	}
+/* 	if (pthread_mutex_unlock(&st->mutex) < 0) { */
+/* 	    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno)); */
+/* 	} */
+/* 	if (pthread_mutex_lock(&sane_mutex) < 0) { */
+/* 	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno)); */
+/* 	} */
+/* 	if (pthread_mutex_lock(&st->mutex) < 0) { */
+/* 	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno)); */
+/* 	} */
     }
     
     slog(SLOG_DEBUG, "sane_trigger_action: an action is active, waiting ...");
@@ -1048,16 +1067,11 @@ void sane_trigger_action(int number_of_dev, int action) {
 
  cleanup_dev:
     if (pthread_mutex_unlock(&st->mutex) < 0) {
-	// if we can't unlock the mutex, something is heavily wrong!
 	slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
-	goto cleanup_sane;
     }
-
  cleanup_sane:
     if (pthread_mutex_unlock(&sane_mutex) < 0) {
-	// if we can't unlock the mutex, something is heavily wrong!
 	slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
-	return;
     }
     return;
 }
@@ -1092,7 +1106,7 @@ void start_sane_threads(void) {
 	sane_poll_threads[i].functions = NULL;
 	sane_poll_threads[i].num_of_options = 0;
 	sane_poll_threads[i].triggered = false;
-	sane_poll_threads[i].triggered_option = 0;
+	sane_poll_threads[i].triggered_option = -1;
 	sane_poll_threads[i].num_of_options_with_scripts = 0;
 	sane_poll_threads[i].num_of_options_with_functions = 0;
 	
@@ -1108,6 +1122,9 @@ void start_sane_threads(void) {
 	    exit(EXIT_FAILURE);
 	}
 	slog(SLOG_DEBUG, "Thread started for device %s", sane_device_list[i]->name);
+    }
+    if (pthread_cond_broadcast(&sane_cv)) {
+	slog(SLOG_ERROR, "pthread_cond_broadcast: %s", strerror(errno));
     }
  cleanup:
     if (pthread_mutex_unlock(&sane_mutex) < 0) {
@@ -1135,6 +1152,33 @@ void stop_sane_threads(void) {
     }
     // sending cancel request to all threads
     for(int i = 0; i < num_devices; i += 1) {
+	if (pthread_mutex_lock(&sane_poll_threads[i].mutex) < 0) {
+	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
+	}
+	while(sane_poll_threads[i].triggered == true) {
+	    slog(SLOG_DEBUG, "stop_sane_threads: an action is active, waiting ...");
+
+/* 	    if (pthread_mutex_unlock(&sane_mutex) < 0) { */
+/* 		slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno)); */
+/* 	    } */
+	    if (pthread_cond_wait(&sane_poll_threads[i].cv,
+				  &sane_poll_threads[i].mutex) < 0) {
+		slog(SLOG_ERROR, "pthread_cond_wait: %s", strerror(errno));
+	    }
+/* 	    if (pthread_mutex_unlock(&sane_poll_threads[i].mutex) < 0) { */
+/* 		slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno)); */
+/* 	    } */
+/* 	    if (pthread_mutex_lock(&sane_mutex) < 0) { */
+/* 		slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno)); */
+/* 	    } */
+/* 	    if (pthread_mutex_lock(&sane_poll_threads[i].mutex) < 0) { */
+/* 		slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno)); */
+/* 	    } */
+	}
+	if (pthread_mutex_unlock(&sane_poll_threads[i].mutex) < 0) {
+	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
+	}
+
 	slog(SLOG_DEBUG, "stopping poll thread for device %s", (*(sane_device_list + i))->name);
 	if (pthread_cancel(sane_poll_threads[i].tid) < 0) {
 	    if (errno == ESRCH) {
@@ -1178,19 +1222,20 @@ void stop_sane_threads(void) {
 	    sane_poll_threads[i].functions = NULL;	    
 	}
 
-	if (pthread_mutex_destroy(&sane_poll_threads[i].mutex) < 0) {
-	    slog(SLOG_ERROR, "pthread_mutex_destroy: %s", strerror(errno));
-	}
 	if (pthread_cond_destroy(&sane_poll_threads[i].cv) < 0) {
 	    slog(SLOG_ERROR, "pthread_cond_destroy: %s", strerror(errno));
+	}
+	if (pthread_mutex_destroy(&sane_poll_threads[i].mutex) < 0) {
+	    slog(SLOG_ERROR, "pthread_mutex_destroy: %s", strerror(errno));
 	}
     }
     // free the thread list
     free(sane_poll_threads);
     sane_poll_threads = NULL;
-    num_devices = 0;
     // no threads active anymore
-
+    if (pthread_cond_broadcast(&sane_cv)) {
+	slog(SLOG_ERROR, "pthread_cond_broadcast: %s", strerror(errno));
+    }
  cleanup:
     if (pthread_mutex_unlock(&sane_mutex) < 0) {
 	// if we can't unlock the mutex, something is heavily wrong!

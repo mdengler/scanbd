@@ -67,6 +67,9 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
     dbus_message_unref(signal);
 }
 
+
+
+
 void dbus_send_signal(const char* signal_name, const char* arg) {
     DBusMessage* signal = NULL;
 
@@ -142,7 +145,6 @@ static void hal_device_removed(LibHalContext* ctx, const char *udi) {
     sane_init(NULL, NULL);
     get_sane_devices();
     start_sane_threads();
-   
 }
 
 static void dbus_signal_device_added(void) {
@@ -153,21 +155,45 @@ static void dbus_signal_device_removed(void) {
     slog(SLOG_DEBUG, "dbus_signal_device_removed");
 }
 
+// is called when saned exited
 static void dbus_method_release(void) {
     slog(SLOG_DEBUG, "dbus_method_release");
-    // stop all threads
-    slog(SLOG_DEBUG, "sane_init");
-    sane_init(NULL, NULL);
-    get_sane_devices();
+    // start all threads
     start_sane_threads();
 }
 
+// is called before saned started
 static void dbus_method_acquire(void) {
     slog(SLOG_DEBUG, "dbus_method_acquire");
-    // start all threads
+    // stop all threads
     stop_sane_threads();
-    slog(SLOG_DEBUG, "sane_exit");
-    sane_exit();
+}
+
+struct sane_trigger_arg {
+    void (*f)(void*);
+    int device;
+    int action;
+};
+typedef struct sane_trigger_arg sane_trigger_arg_t;
+
+void* dbus_call_sane_trigger_action_thread(void* arg) {
+    sane_trigger_arg_t* a = (sane_trigger_arg_t*) arg;
+    assert(a != NULL);
+    sane_trigger_action(a->device, a->action);
+    return NULL;
+}
+
+void sane_trigger_action_async(int device, int action) {
+    sane_trigger_arg_t* arg = calloc(1, sizeof(sane_trigger_arg_t));
+    assert(arg != NULL);
+
+    arg->device = device;
+    arg->action = action;
+
+    pthread_t tid;
+    if (pthread_create(&tid, NULL, dbus_call_sane_trigger_action_thread, arg) < 0) {
+	slog(SLOG_WARN, "pthread_create: %s", strerror(errno));
+    }
 }
 
 static void dbus_method_trigger(DBusMessage *message) {
@@ -200,7 +226,7 @@ static void dbus_method_trigger(DBusMessage *message) {
 	slog(SLOG_WARN, "trigger has wrong argument type");
 	return;
     }
-    sane_trigger_action(device, action);
+    sane_trigger_action_async(device, action);
 }
 
 static void unregister_func(DBusConnection* connection, void* user_data) {
@@ -280,6 +306,7 @@ void* dbus_thread(void* arg) {
 
     while(dbus_connection_read_write_dispatch(conn, timeout)) {
 	slog(SLOG_DEBUG, "Iteration on dbus call");
+	usleep(timeout * 1000);
     }
     return NULL;
 }
@@ -287,6 +314,10 @@ void* dbus_thread(void* arg) {
 bool dbus_init(void) {
     slog(SLOG_DEBUG, "dbus_init");
 
+    if (!dbus_threads_init_default()) {
+	slog(SLOG_ERROR, "DBus thread initialization failure");
+    }
+    
     DBusError dbus_error;
     dbus_error_init(&dbus_error);
 
