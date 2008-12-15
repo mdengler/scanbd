@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 make 
 
+copy the executable scanbd and config-file scanbd.conf to useful places
+
 2) scanbd_dbus.conf
 
 copy this file into the dbus system-bus configuration directory
@@ -33,8 +35,15 @@ edit the saned-line to use scanbd as a wrapper
 
 4) scanbd.conf
 
-edit 
+e.g.
+sane-port stream tcp nowait saned.saned /usr/local/bin/scanbd scanbd -m -c /usr/local/etc/scanbd.conf
+
 
 5) scripts
 
 make some useful scripts
+
+6) start the scanbd 
+
+e.g.
+/usr/local/scanbd -c /usr/local/etc/scanbd.conf
