@@ -176,10 +176,14 @@ void sig_term_handler(int signal) {
     if (seteuid((pid_t)0) < 0) {
 	slog(SLOG_WARN, "Can't acquire uid root to unlink pidfile %s : %s",
 	     pidfile, strerror(errno));
+	slog(SLOG_DEBUG, "euid: %d, egid: %d",
+	     geteuid(), getegid());
 	// not an hard error, since sometimes this isn't neccessary
     }
     if (unlink(pidfile) < 0) {
 	slog(SLOG_ERROR, "Can't unlink pidfile: %s", strerror(errno));
+	slog(SLOG_DEBUG, "euid: %d, egid: %d",
+	     geteuid(), getegid());
 	exit(EXIT_FAILURE);
     }
     slog(SLOG_INFO, "exiting scanbd");
