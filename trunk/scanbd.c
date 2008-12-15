@@ -323,10 +323,6 @@ int main(int argc, char** argv) {
 	    dbus_call_trigger(trigger_device, trigger_action);
 	    exit(EXIT_SUCCESS);
 	}
-	else {
-	    slog(SLOG_DEBUG, "device and action must be >= 0");
-	    exit(EXIT_FAILURE);
-	}
 	
 	pid_t scanbd_pid = -1;
 	// get the name of the saned executable
