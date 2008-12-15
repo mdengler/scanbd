@@ -53,6 +53,7 @@
 
 extern void dbus_send_signal(const char*, const char*);
 extern void dbus_send_signal_argv(const char*, char**);
+extern void dbus_send_signal_argv_async(const char*, char**);
 
 extern bool dbus_init(void);
 extern void dbus_send(void);
