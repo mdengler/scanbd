@@ -391,6 +391,9 @@ int main(int argc, char** argv) {
 	    if (WIFEXITED(status)) {
 		slog(SLOG_INFO, "saned exited with status: %d", WEXITSTATUS(status));
 	    }
+	    if (WIFSIGNALED(status)) {
+		slog(SLOG_INFO, "saned exited due to signal: %d", WTERMSIG(status));
+	    }
 	    // saned finished and now
 	    // reactivate scandb
 	    if (scanbd_options.signal) {
@@ -411,6 +414,9 @@ int main(int argc, char** argv) {
 	    }
 	}
 	else { // child
+	    if (setsid() < 0) {
+		slog(SLOG_WARN, "setsid: %s", strerror(errno));
+	    }
 	    if (execl(saned, "saned", NULL) < 0) {
 		slog(SLOG_ERROR, "exec of saned failed: %s", strerror(errno));
 		exit(EXIT_FAILURE);
