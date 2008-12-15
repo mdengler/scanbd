@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/kmux/kmux-generate/helper/sane/scanbd/daemonize.c,v 1.1 2008/11/17 20:04:31 wimalopaan Exp $
+ * $Id$
  *
  *  scanbd - KMUX scanner button daemon
  *
