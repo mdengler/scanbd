@@ -26,7 +26,7 @@ cfg_t* cfg = NULL;
 
 // the actual values of the command-line options
 struct scanbdOptions scanbd_options = {
-    /* manager-mode */     false,
+    /* managerMode */     false,
     /* foreground */       false,
     /* signal */	   false,
     /* config_file_name */ "scanbd.conf"
@@ -162,30 +162,38 @@ void sig_usr2_handler(int signal) {
 
 void sig_term_handler(int signal) {
     slog(SLOG_DEBUG, "sig_term/int_handler called with signal %d", signal);
-    // stop all threads
-    stop_sane_threads();
 
-    // get the name of the pidfile
-    const char* pidfile = NULL;
-    cfg_t* cfg_sec_global = NULL;
-    assert((cfg_sec_global = cfg_getsec(cfg, "global")) != NULL);
-    assert((pidfile = cfg_getstr(cfg_sec_global, "pidfile")) != NULL);
+    if (scanbd_options.managerMode) {
+	// managerMode
+	slog(SLOG_INFO, "managerMode: do nothing");
+    }
+    else {
+	// not in manager-mode
+	// stop all threads
+	stop_sane_threads();
 
-    // reclaim the old uid (root) to unlink the pidfile
-    // mostly neccessary if the pidfile lives in /var/run
-    if (seteuid((pid_t)0) < 0) {
-	slog(SLOG_WARN, "Can't acquire uid root to unlink pidfile %s : %s",
-	     pidfile, strerror(errno));
-	slog(SLOG_DEBUG, "euid: %d, egid: %d",
-	     geteuid(), getegid());
-	// not an hard error, since sometimes this isn't neccessary
-    }
-    if (unlink(pidfile) < 0) {
-	slog(SLOG_ERROR, "Can't unlink pidfile: %s", strerror(errno));
-	slog(SLOG_DEBUG, "euid: %d, egid: %d",
-	     geteuid(), getegid());
-	exit(EXIT_FAILURE);
-    }
+	// get the name of the pidfile
+	const char* pidfile = NULL;
+	cfg_t* cfg_sec_global = NULL;
+	assert((cfg_sec_global = cfg_getsec(cfg, "global")) != NULL);
+	assert((pidfile = cfg_getstr(cfg_sec_global, "pidfile")) != NULL);
+
+	// reclaim the old uid (root) to unlink the pidfile
+	// mostly neccessary if the pidfile lives in /var/run
+	if (seteuid((pid_t)0) < 0) {
+	    slog(SLOG_WARN, "Can't acquire uid root to unlink pidfile %s : %s",
+		 pidfile, strerror(errno));
+	    slog(SLOG_DEBUG, "euid: %d, egid: %d",
+		 geteuid(), getegid());
+	    // not an hard error, since sometimes this isn't neccessary
+	}
+	if (unlink(pidfile) < 0) {
+	    slog(SLOG_ERROR, "Can't unlink pidfile: %s", strerror(errno));
+	    slog(SLOG_DEBUG, "euid: %d, egid: %d",
+		 geteuid(), getegid());
+	    exit(EXIT_FAILURE);
+	}
+    } 
     slog(SLOG_INFO, "exiting scanbd");
     exit(EXIT_SUCCESS);
 }
