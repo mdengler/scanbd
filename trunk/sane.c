@@ -290,16 +290,19 @@ static void sane_find_matching_functions(sane_thread_t* st, cfg_t* sec) {
 	    if ((odesc = sane_get_option_descriptor(st->h, opt)) == NULL) {
 		// no valid option-descriptor available
 		// skip it
+		slog(SLOG_INFO, "option[%d] has no valid descriptor", opt);
 		continue;
 	    }
 	    assert(odesc);
 	    if (!SANE_OPTION_IS_ACTIVE(odesc->cap)) {
-		continue;
+		slog(SLOG_INFO, "option[%d] is not active", opt);
+		//continue;
 	    }
 	    // option is active
 	    // only use active (user controllable) options
 	    if (odesc->name == NULL) {
 		// we need a valid option-name
+		slog(SLOG_INFO, "option[%d] has no name", opt);
 		continue;
 	    }
 	    assert(odesc->name);

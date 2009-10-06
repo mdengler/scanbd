@@ -23,11 +23,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-// we require POSIX 200112 compatibility
+// we require POSIX 200809 compatibility
 
-#define _POSIX_C_SOURCE 200112L
+#define _POSIX_C_SOURCE 200809L
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE	600
+#define _XOPEN_SOURCE	700
 #endif
 
 #if defined(__STDC__) && (__STDC_VERSION__ >= 199901L)
