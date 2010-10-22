@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
 	    debug = true;
 	    break;
 	case 'f':
-	    slog(SLOG_INFO, "forground");
+	    slog(SLOG_INFO, "foreground");
 	    scanbd_options.foreground = true;
 	    break;
 	case 'c':
