@@ -834,10 +834,23 @@ static void* sane_poll(void* arg) {
 		    slog(SLOG_DEBUG, "setting env: %s", env[e]);
 		    e += 1;
 		}
+		else {
+		    snprintf(env[e], NAME_MAX, "%s=%s", ev, "/usr/sbin:/usr/bin:/sbin:/bin");
+		    slog(SLOG_DEBUG, "No PATH, setting env: %s", env[e]);
+		    e += 1;
+		}
 		ev = "PWD";
 		if (getenv(ev) != NULL) {
 		    snprintf(env[e], NAME_MAX, "%s=%s", ev, getenv(ev));
 		    slog(SLOG_DEBUG, "setting env: %s", env[e]);
+		    e += 1;
+		}
+		else {
+		    char* ptr = getcwd(NULL, -1);
+		    assert(ptr);
+		    snprintf(env[e], NAME_MAX, "%s=%s", ev, ptr);
+		    free(ptr);
+		    slog(SLOG_DEBUG, "No PWD, setting env: %s", env[e]);
 		    e += 1;
 		}
 		ev = "USER";
@@ -846,10 +859,26 @@ static void* sane_poll(void* arg) {
 		    slog(SLOG_DEBUG, "setting env: %s", env[e]);
 		    e += 1;
 		}
+		else {
+		    struct passwd* pwd = NULL;
+		    pwd = getpwuid(geteuid());
+		    assert(pwd);
+		    snprintf(env[e], NAME_MAX, "%s=%s", ev, pwd->pw_name);
+		    slog(SLOG_DEBUG, "No USER, setting env: %s", env[e]);
+		    e += 1;
+		}
 		ev = "HOME";
 		if (getenv(ev) != NULL) {
 		    snprintf(env[e], NAME_MAX, "%s=%s", ev, getenv(ev));
 		    slog(SLOG_DEBUG, "setting env: %s", env[e]);
+		    e += 1;
+		}
+		else {
+		    struct passwd* pwd = 0;
+		    pwd = getpwuid(geteuid());
+		    assert(pwd);
+		    snprintf(env[e], NAME_MAX, "%s=%s", ev, pwd->pw_dir);
+		    slog(SLOG_DEBUG, "No HOME, setting env: %s", env[e]);
 		    e += 1;
 		}
 		ev = cfg_getstr(global_envs, C_DEVICE);
