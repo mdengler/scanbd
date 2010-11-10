@@ -34,6 +34,8 @@
 #include "slog.h"
 #include "scanbd_dbus.h"
 
+#define SANE_REINIT_TIMEOUT 3 // TODO: don't know if this is really neccessary
+
 #define C_FROM_VALUE "from-value"
 #define C_FROM_VALUE_DEF_INT 0
 #define C_FROM_VALUE_DEF_STR ""

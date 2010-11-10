@@ -146,7 +146,7 @@ void sig_hup_handler(int signal) {
     sane_exit();
 #ifdef SANE_REINIT_TIMEOUT
     sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
-                                // reallay neccessary
+				// really neccessary
 #endif
     slog(SLOG_DEBUG, "reread the config");
     cfg_do_parse();
