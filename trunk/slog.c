@@ -21,9 +21,10 @@
  */
 
 #include "common.h"
+#include "slog.h"
 
 bool debug = false;
-unsigned int debug_level = 0;
+unsigned int debug_level = SLOG_ERROR;
 
 static char lpre[LINE_MAX];
 static int isInitialized = 0;
