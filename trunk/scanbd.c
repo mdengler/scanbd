@@ -141,9 +141,23 @@ void sig_hup_handler(int signal) {
     (void)signal;
     // stop all threads
     stop_sane_threads();
+
+    slog(SLOG_DEBUG, "sane_exit");
+    sane_exit();
+#ifdef SANE_REINIT_TIMEOUT
+    sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
+                                // reallay neccessary
+#endif
+    slog(SLOG_DEBUG, "reread the config");
     cfg_do_parse();
-    start_sane_threads();
+
+    slog(SLOG_DEBUG, "sane_init");
+    sane_init(NULL, NULL);
+
+    get_sane_devices();
+
     // start all threads
+    start_sane_threads();
 }
 
 void sig_usr1_handler(int signal) {
