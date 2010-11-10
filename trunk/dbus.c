@@ -26,8 +26,6 @@
 static DBusConnection* conn = NULL;
 static pthread_t dbus_tid = 0;
 
-#define SANE_REINIT_TIMEOUT 3 // TODO: don't know if this is really neccessary
-
 void dbus_send_signal_argv(const char* signal_name, char** argv) {
     // TODO: we need a better dbus mainloop integrations, so that we
     // can wakeup the main thread to sendout the messages we generate here 
@@ -113,7 +111,7 @@ static void hal_device_added(LibHalContext* ctx, const char *udi) {
 	sane_exit();
 #ifdef SANE_REINIT_TIMEOUT
 	sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
-				    // reallay neccessary
+				    // really neccessary
 #endif
 	slog(SLOG_DEBUG, "sane_init");
 	sane_init(NULL, NULL);
@@ -139,7 +137,7 @@ static void hal_device_removed(LibHalContext* ctx, const char *udi) {
     slog(SLOG_DEBUG, "sane_exit");
     sane_exit();
 #ifdef SANE_REINIT_TIMEOUT
-    sleep(SANE_REINIT_TIMEOUT);// TODO: don't know if this is reallay neccessary
+    sleep(SANE_REINIT_TIMEOUT);// TODO: don't know if this is really neccessary
 #endif
     slog(SLOG_DEBUG, "sane_init");
     sane_init(NULL, NULL);
