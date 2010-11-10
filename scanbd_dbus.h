@@ -28,8 +28,8 @@
 #include "common.h"
 #include "slog.h"
 
-#include <dbus/dbus.h>
-#include <libhal.h>
+#include <dbus-1.0/dbus/dbus.h>
+#include <hal/libhal.h>
 
 // dbus interface
 #define SCANBD_DBUS_ADDRESS         "de.kmux.scanbd.server"
