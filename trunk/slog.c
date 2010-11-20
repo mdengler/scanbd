@@ -84,9 +84,9 @@ slog(unsigned int level, const char *format, ...) {
 
     if (debug) {
 	printf("%s: %s\n", lpre, buffer);
-	syslog(LOG_AUTHPRIV | LOG_DEBUG, "%s: %s\n", lpre, buffer);
+	syslog(LOG_DAEMON | LOG_DEBUG, "%s: %s\n", lpre, buffer);
     }
     else {
-	syslog(LOG_AUTHPRIV | LOG_DEBUG, "%s: %s\n", lpre, buffer);
+	syslog(LOG_DAEMON | LOG_DEBUG, "%s: %s\n", lpre, buffer);
     }
 }

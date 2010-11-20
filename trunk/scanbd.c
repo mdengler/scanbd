@@ -100,6 +100,7 @@ void cfg_do_parse(void) {
     cfg_opt_t cfg_device[] = {
 	CFG_STR(C_FILTER, "^fujitsu.*", CFGF_NONE),
 	CFG_STR(C_DESC, C_DESC_DEF, CFGF_NONE),
+	CFG_SEC(C_FUNCTION, cfg_function, CFGF_MULTI | CFGF_TITLE),
 	CFG_SEC(C_ACTION, cfg_action, CFGF_MULTI | CFGF_TITLE),
 	CFG_END()
     };
