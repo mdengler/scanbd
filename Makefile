@@ -20,6 +20,10 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+PREFIX = /usr/local
+SCANBD_DIR = $(PREFIX)/etc/scanbd
+BIN_DIR = $(PREFIX)/bin
+
 #CPPFLAGS += -DNDEBUG
 
 CPPFLAGS += -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/hal
@@ -44,6 +48,15 @@ clean:
 	$(RM) -f scanbd *.o *~
 
 install: scanbd
-	echo "Copy scanbd"
+	echo "Make $(SCANBD_DIR)"
+	mkdir -p $(SCANBD_DIR)
+	echo "Copy files to $(SCANBD_DIR)"
+	cp scanbd.conf $(SCANBD_DIR)
+	cp example.script $(SCANBD_DIR)
+	cp scanadf.script $(SCANBD_DIR)
+	cp test.script $(SCANBD_DIR)
+	echo "Copy scanbd to $(BIN_DIR)"
+	cp scanbd $(BIN_DIR)
+	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"
+	cp scanbd_dbus.conf /etc/dbus-1/system.d/
 	echo "Edit /etc/inetd.conf"
-	echo "Install scan scripts"

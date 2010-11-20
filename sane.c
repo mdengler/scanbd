@@ -296,7 +296,7 @@ static void sane_find_matching_functions(sane_thread_t* st, cfg_t* sec) {
 	    assert(odesc);
 	    if (!SANE_OPTION_IS_ACTIVE(odesc->cap)) {
 		slog(SLOG_INFO, "option[%d] is not active", opt);
-		//continue;
+		continue;
 	    }
 	    // option is active
 	    // only use active (user controllable) options
@@ -665,6 +665,8 @@ static void* sane_poll(void* arg) {
 		 loc_actions, st->dev->name, title);
 	    // get the local actions for this device
 	    sane_find_matching_options(st, loc_i);
+	    // get the local functions for this device
+	    sane_find_matching_functions(st, loc_i);
 	    continue;
 	}
     } // foreach local section
@@ -941,7 +943,7 @@ static void* sane_poll(void* arg) {
 			     script, WEXITSTATUS(status));
 		    }
 		    if (WIFSIGNALED(status)) {
-			slog(SLOG_INFO, "child % signaled with signal: %d",
+			slog(SLOG_INFO, "child %s signaled with signal: %d",
 			     script, WTERMSIG(status));
 		    }
 		}
