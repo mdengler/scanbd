@@ -848,12 +848,17 @@ static void* sane_poll(void* arg) {
 		    e += 1;
 		}
 		else {
-		    char* ptr = getcwd(NULL, -1);
-		    assert(ptr);
-		    snprintf(env[e], NAME_MAX, "%s=%s", ev, ptr);
-		    free(ptr);
-		    slog(SLOG_DEBUG, "No PWD, setting env: %s", env[e]);
-		    e += 1;
+		    char buf[PATH_MAX];
+		    char* ptr = getcwd(buf, PATH_MAX - 1);
+		    if (!ptr) {
+			slog(SLOG_ERROR, "can't get pwd");
+		    }
+		    else {
+			assert(ptr);
+			snprintf(env[e], NAME_MAX, "%s=%s", ev, ptr);
+			slog(SLOG_DEBUG, "No PWD, setting env: %s", env[e]);
+			e += 1;
+		    }
 		}
 		ev = "USER";
 		if (getenv(ev) != NULL) {
