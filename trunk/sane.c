@@ -419,7 +419,8 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
 	    }
 	    assert(odesc->name);
 	    if (!((odesc->type == SANE_TYPE_BOOL) || (odesc->type == SANE_TYPE_INT) ||
-		  (odesc->type == SANE_TYPE_FIXED)|| (odesc->type == SANE_TYPE_STRING))) {
+		  (odesc->type == SANE_TYPE_FIXED)|| (odesc->type == SANE_TYPE_STRING) ||
+		  (odesc->type == SANE_TYPE_BUTTON))) {
 		slog(SLOG_WARN, "option[%d] %s for device %s not of "
 		     "type BOOL|INT|FIXED|STRING. Skipping",
 		     opt, odesc->name, st->dev->name);
