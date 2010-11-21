@@ -26,7 +26,7 @@ cfg_t* cfg = NULL;
 
 // the actual values of the command-line options
 struct scanbdOptions scanbd_options = {
-    /* managerMode */     false,
+    /* managerMode */      false,
     /* foreground */       false,
     /* signal */	   false,
     /* config_file_name */ "scanbd.conf"
@@ -34,14 +34,14 @@ struct scanbdOptions scanbd_options = {
 
 // the options for getopt_long()
 static struct option options[] = {
-    {"manager", 0, NULL, 'm'},
-    {"signal", 0, NULL, 's'},
-    {"debug", 0, NULL, 'd'},
+    {"manager",    0, NULL, 'm'},
+    {"signal",     0, NULL, 's'},
+    {"debug",      0, NULL, 'd'},
     {"foreground", 0, NULL, 'f'},
-    {"config", 1, NULL, 'c'},
-    {"trigger", 1, NULL, 't'},
-    {"action", 1, NULL, 'a'},
-    { 0, 0, NULL, 0}
+    {"config",     1, NULL, 'c'},
+    {"trigger",    1, NULL, 't'},
+    {"action",     1, NULL, 'a'},
+    { 0,           0, NULL, 0}
 };
 
 // parsing the config-file via libconfuse

@@ -23,13 +23,19 @@
 #ifndef SCANBD_DBUS_H
 #define SCANBD_DBUS_H
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 
 #include "common.h"
 #include "slog.h"
 
 #include <dbus-1.0/dbus/dbus.h>
+//#include <dbus-1.0/dbus/dbus-bus.h>
+
+#ifdef USE_HAL
 #include <hal/libhal.h>
+#endif
 
 // dbus interface
 #define SCANBD_DBUS_ADDRESS         "de.kmux.scanbd.server"

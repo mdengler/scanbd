@@ -95,6 +95,7 @@ void dbus_send_signal(const char* signal_name, const char* arg) {
     dbus_message_unref(signal);
 }
 
+#ifdef USE_HAL
 static void hal_device_added(LibHalContext* ctx, const char *udi) {
     (void)ctx;
     slog(SLOG_DEBUG, "New Device: %s", udi);
@@ -119,7 +120,9 @@ static void hal_device_added(LibHalContext* ctx, const char *udi) {
 	start_sane_threads();
     }
 }
+#endif
 
+#ifdef USE_HAL
 static void hal_device_removed(LibHalContext* ctx, const char *udi) {
     (void)ctx;
     slog(SLOG_DEBUG, "Removed Device: %s", udi);
@@ -144,13 +147,42 @@ static void hal_device_removed(LibHalContext* ctx, const char *udi) {
     get_sane_devices();
     start_sane_threads();
 }
+#endif
 
 static void dbus_signal_device_added(void) {
+#ifndef USE_HAL
     slog(SLOG_DEBUG, "dbus_signal_device_added");
+    // look for new scanner
+    stop_sane_threads();
+    slog(SLOG_DEBUG, "sane_exit");
+    sane_exit();
+#ifdef SANE_REINIT_TIMEOUT
+    sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
+				// really neccessary
+#endif
+    slog(SLOG_DEBUG, "sane_init");
+    sane_init(NULL, NULL);
+    get_sane_devices();
+    start_sane_threads();
+#endif
 }
 
 static void dbus_signal_device_removed(void) {
+#ifdef USE_HAL
     slog(SLOG_DEBUG, "dbus_signal_device_removed");
+    // look for removed scanner
+    stop_sane_threads();
+    slog(SLOG_DEBUG, "sane_exit");
+    sane_exit();
+#ifdef SANE_REINIT_TIMEOUT
+    sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
+				// really neccessary
+#endif
+    slog(SLOG_DEBUG, "sane_init");
+    sane_init(NULL, NULL);
+    get_sane_devices();
+    start_sane_threads();
+#endif
 }
 
 // is called when saned exited
@@ -238,6 +270,7 @@ static DBusHandlerResult message_func(DBusConnection *connection, DBusMessage *m
     (void)connection;
     (void)user_data;
     
+    slog(SLOG_DEBUG, "message_func");
     DBusMessage* reply = NULL;
     if (dbus_message_is_method_call(message,
 				    SCANBD_DBUS_INTERFACE,
@@ -332,6 +365,7 @@ bool dbus_init(void) {
     }
     assert(conn);
 
+#ifdef USE_HAL
     LibHalContext *hal_ctx = NULL;
 
     hal_ctx = (LibHalContext*)libhal_ctx_new();
@@ -349,6 +383,23 @@ bool dbus_init(void) {
         slog(SLOG_WARN, "Couldn't initialise HAL!");
         return false;
     }
+#else
+    char match[PATH_MAX];
+    snprintf(match, PATH_MAX, "type='signal',interface='%s'", DBUS_HAL_INTERFACE);
+    slog(SLOG_ERROR, "dbus match %s", match);
+    dbus_bus_add_match(conn, match, &dbus_error);
+    if (dbus_error_is_set(&dbus_error)) {
+	slog(SLOG_ERROR, "DBus match error: %s", dbus_error.message);
+	dbus_error_free(&dbus_error);
+	return false;
+    }
+    dbus_connection_flush(conn);
+    if (dbus_error_is_set(&dbus_error)) {
+	slog(SLOG_ERROR, "DBus match error: %s", dbus_error.message);
+	dbus_error_free(&dbus_error);
+	return false;
+    }
+#endif
     return true;
 }
 

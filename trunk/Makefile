@@ -24,13 +24,20 @@ PREFIX = /usr/local
 SCANBD_DIR = $(PREFIX)/etc/scanbd
 BIN_DIR = $(PREFIX)/bin
 
+USE_HAL=yes
+
 #CPPFLAGS += -DNDEBUG
 
-CPPFLAGS += -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/hal
+CPPFLAGS += -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
+CFLAGS   += -Wall -Wextra -std=c99
+LDFLAGS  += -lconfuse -lsane -lpthread -ldbus-1
 
-CFLAGS += -Wall -Wextra -std=c99
+ifdef USE_HAL
+CPPFLAGS += -DUSE_HAL
+LDFLAGS  += -lhal
+endif
 
-LDFLAGS += -lconfuse -lsane -lpthread -ldbus-1 -lhal -lhal-storage 
+all: scanbd
 
 scanbd: scanbd.o slog.o sane.o daemonize.o dbus.o
 
