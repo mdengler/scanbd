@@ -28,17 +28,18 @@ images via email or place them on a fileserver.
 scanbd tries to solve the problem with managing the inexpensive, desktop scanners to make use of the
 scanner-buttons they have (in the case, they are supported by sane).
 Because the scanners are passive, the scan-software has to poll the buttons on a regularly basis (e.g. all
-500ms). For this purpose the software has to open the device ond look for value changes for the buttons. 
+500ms). For this purpose the software has to open the device ond look for value changes of the buttons.
 But if you do so, the devices is locked and no other scan-application (e.g. xsane) can open the device for 
-scanning. This is also true for saned, the network scanning daemon.
+scanning. This is also true for saned, the network scanning daemon. Periodically querying the buttons
+and scanning on the same host is mutual exclusive.
 
 0.1) the solution
 
 scanbd (the scanner button daemon) opens and polls the scanner and therefore locks the device. So no other 
-application can access the device directly (open the /dev/...). To solve this, we use a so called
-"manager-mode" of scanbd: scanbd is configured as a "proxy" to access the scanner and if another application
-tries to use the scanner, the polling is disabled for the time, the other scan-application wants to
-use the scanner. The make this happen, the scanbd is configured instead of saned as the network daemon. If
+application can access the device directly (open the /dev/..., usb). To solve this, we use a so called
+"manager-mode" of scanbd: scanbd is configured as a "proxy" to access the scanner and, if another application
+tries to use the scanner, the polling is disabled for the time the other scan-application wants to
+use the scanner. To make this happen, scanbd is configured instead of saned as the network scanning daemon. If
 a scan request arrives to scanbd (in manager-mode) on the sane-port, scanbd stops the polling by sending
 a dbus-signal (default) or a posix-signal (SIGUSR1) (signal-mode) to the polling scanbd-daemon. Then it 
 starts the real saned which scans and sends the data back to the application. Afterwords the scanbd-manager
@@ -47,6 +48,8 @@ restarts the polling by sending another dbus-signal (or the posix-signal SIGUSR2
 So all applications must be enabled to use network-scanning.
 
 1) build
+
+If you don't want scanbd to use HAL, comment the line in the Makefile (USE_HAL=yes)
 
 make 
 
@@ -85,25 +88,27 @@ make some useful scripts
 
 all desktop applications should only get access to the scanners via the net-backend, so edit /etc/sane.d/dll.conf
 to only contain the net-backend. Give the net-backend a suitable configuration and add the machines, where the 
-scanners (and scanbd) are.
+scanners (and scanbd) are (this could be also localhost).
 
 If scanbd is running on a desktop machine, saned needs another config which only includes local scanners. Therefore
 the env-var SANE_CONFIG_DIR is used in the debian-script and the upstart job. Put the directory of this dll.conf
-into this env-var (e.g. /usr/local/etc/scanbd)
+into this env-var (e.g. /usr/local/etc/scanbd) and remove the net-backend from this config-file.
 
 6) start the scanbd 
 
-e.g.
+e.g.:
+
+export SANE_CONFIG_DIR=/usr/local/etc/scanbd
 /usr/local/scanbd -c /usr/local/etc/scanbd/scanbd.conf
 
 or use the debian script or the upstart service
 
-
-
 Additional hints:
 
-- be sure to include only the necessary drivers in /etc/saned.d/dll.conf, since scandf wil hang,
-  if e.g. no network scanner is available but the "net" is included
+- if there are problems recognizing new / removed devices, it is possible to send scanbd a SIGHUP to reconfigure
+  and look for new devices. This can be done via udev-rules.
+
+- be sure to include only the necessary drivers in /etc/saned.d/dll.conf, since scanadf will hang (timeout)
 
 - to test an action for a specific device, use
 
