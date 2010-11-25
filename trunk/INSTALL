@@ -28,8 +28,8 @@ images via email or place them on a fileserver.
 scanbd tries to solve the problem with managing the inexpensive, desktop scanners to make use of the
 scanner-buttons they have (in the case, they are supported by sane).
 Because the scanners are passive, the scan-software has to poll the buttons on a regularly basis (e.g. all
-500ms). For this purpose the software has to open the device ond look for value changes of the buttons.
-But if you do so, the devices is locked and no other scan-application (e.g. xsane) can open the device for 
+100 - 500ms). For this purpose the software has to open the device and look for value changes of the buttons.
+But if you do so, the device is locked and no other scan-application (e.g. xsane) can open the device for 
 scanning. This is also true for saned, the network scanning daemon. Periodically querying the buttons
 and scanning on the same host is mutual exclusive.
 
@@ -42,10 +42,10 @@ tries to use the scanner, the polling is disabled for the time the other scan-ap
 use the scanner. To make this happen, scanbd is configured instead of saned as the network scanning daemon. If
 a scan request arrives to scanbd (in manager-mode) on the sane-port, scanbd stops the polling by sending
 a dbus-signal (default) or a posix-signal (SIGUSR1) (signal-mode) to the polling scanbd-daemon. Then it 
-starts the real saned which scans and sends the data back to the application. Afterwords the scanbd-manager
+starts the real saned which scans and sends the data back to the requesting application. Afterwords the scanbd-manager
 restarts the polling by sending another dbus-signal (or the posix-signal SIGUSR2). 
 
-So all applications must be enabled to use network-scanning.
+So all applications must be enabled to use network-scanning (even if the scanner is local).
 
 1) build
 
@@ -53,7 +53,7 @@ If you don't want scanbd to use HAL, comment the line in the Makefile (USE_HAL=y
 
 make 
 
-copy the executable scanbd and config-file scanbd.conf to useful places
+copy the executable scanbd and config-files scanbd.conf, etc. to useful places
 (or use "make install" to copy to /usr/local/etc/scanbd)
 
 2) scanbd_dbus.conf
@@ -72,9 +72,8 @@ or
 (if the saned user can't open the devices, e.g. ubuntu)
 sane-port stream tcp4 nowait root /usr/local/bin/scanbd scanbd -m -c /usr/local/etc/scanbd/scanbd.conf
 
-
 be sure to give the -m (and perhaps -s) flag to scanbd to enable the "manager-mode" (if you
-add also the -s flag the "signal-mode" is used)
+add also the -s flag the "signal-mode" is used, e.g. if dbus isn't available).
 
 4) scanbd.conf
 
@@ -82,7 +81,7 @@ edit the config file (in /usr/local/etc/scanbd)
 
 5) scripts
 
-make some useful scripts
+make some useful scripts (see the examples test.script, example.script or scanadf.script)
 
 6) sane config
 
@@ -101,7 +100,7 @@ e.g.:
 export SANE_CONFIG_DIR=/usr/local/etc/scanbd
 /usr/local/scanbd -c /usr/local/etc/scanbd/scanbd.conf
 
-or use the debian script or the upstart service
+or use the debian script (scanbd.script) or the upstart service (scanbdservice.conf)
 
 Additional hints:
 
@@ -112,7 +111,7 @@ Additional hints:
 
 - to test an action for a specific device, use
 
-  scanbd -m -t <device-number> -a <name_of_action>
+  scanbd -m -t <device_number> -a <name_of_action>
 
   e.g. for the first scanner found trigger the action "scan"
   scanbd -m -t 0 -a scan
@@ -132,4 +131,5 @@ Additional hints:
   b) select a scanner from the list
   c) do the scan: scanadf -d <device>
   
-  
+  Or use a web based application for scanning (see the frontends documentation on the sane-project page)
+
