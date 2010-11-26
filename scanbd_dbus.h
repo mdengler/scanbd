@@ -48,7 +48,11 @@
 #define SCANBD_DBUS_METHOD_TRIGGER  "trigger"
 
 // dbus signals send out 
-#define SCANBD_DBUS_SIGNAL_TRIGGER  "trigger"
+#define SCANBD_DBUS_SIGNAL_TRIGGER	"trigger"
+#define SCANBD_DBUS_SIGNAL_SANED_BEGIN	"saned_begin"
+#define SCANBD_DBUS_SIGNAL_SANED_END	"saned_end"
+#define SCANBD_DBUS_SIGNAL_SCAN_BEGIN	"scan_begin"
+#define SCANBD_DBUS_SIGNAL_SCAN_END	"scan_end"
 
 // dbus signals we receive
 #define DBUS_HAL_INTERFACE          "org.freedesktop.Hal.Manager"

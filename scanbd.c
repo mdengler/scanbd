@@ -84,6 +84,7 @@ void cfg_do_parse(void) {
 
     cfg_opt_t cfg_global[] = {
 	CFG_BOOL(C_DEBUG, C_DEBUG_DEF, CFGF_NONE),
+	CFG_BOOL(C_MULTIPLE_ACTIONS, C_MULTIPLE_ACTIONS_DEF, CFGF_NONE),
 	CFG_INT(C_DEBUG_LEVEL, C_DEBUG_LEVEL_DEF, CFGF_NONE),
 	CFG_STR(C_USER, C_USER_DEF, CFGF_NONE),
 	CFG_STR(C_GROUP, C_GROUP_DEF, CFGF_NONE),
@@ -393,6 +394,8 @@ int main(int argc, char** argv) {
 	    sleep(1);
 	} // signal-mode
 	else {
+	    slog(SLOG_DEBUG, "dbus signal saned-start");
+	    dbus_send_signal(SCANBD_DBUS_SIGNAL_SANED_BEGIN, NULL);
 	    slog(SLOG_DEBUG, "manager mode: dbus");
 	    slog(SLOG_DEBUG, "calling dbus method: %s", SCANBD_DBUS_METHOD_ACQUIRE);
 	    dbus_call_method(SCANBD_DBUS_METHOD_ACQUIRE, NULL);
@@ -435,6 +438,8 @@ int main(int argc, char** argv) {
 	    else {
 		slog(SLOG_DEBUG, "calling dbus method: %s", SCANBD_DBUS_METHOD_RELEASE);
 		dbus_call_method(SCANBD_DBUS_METHOD_RELEASE, NULL);
+		slog(SLOG_DEBUG, "dbus signal saned-end");
+		dbus_send_signal(SCANBD_DBUS_SIGNAL_SANED_END, NULL);
 	    }
 	}
 	else { // child

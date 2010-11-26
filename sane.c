@@ -163,6 +163,7 @@ static void sane_option_value_free(sane_opt_value_t* v) {
     }
     if (v->str_value.reg != NULL) {
 	regfree(v->str_value.reg);
+	free(v->str_value.reg);
 	v->str_value.reg = NULL;
     }
 }
@@ -250,7 +251,7 @@ static void sane_find_matching_functions(sane_thread_t* st, cfg_t* sec) {
     slog(SLOG_DEBUG, "sane_find_matching_functions");
     const char* title = cfg_title(sec);
     if (title == NULL) {
-	title = "(null)";
+	title = SCANBD_NULL_STRING;
     }
     int functions = cfg_size(sec, C_FUNCTION);
     if (functions <= 0) {
@@ -363,7 +364,7 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
     slog(SLOG_DEBUG, "sane_find_matching_options");
     const char* title = cfg_title(sec);
     if (title == NULL) {
-	title = "(null)";
+	title = SCANBD_NULL_STRING;
     }
     // TODO: use of recursive mutex???
     int actions = cfg_size(sec, C_ACTION);
@@ -422,7 +423,7 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
 		  (odesc->type == SANE_TYPE_FIXED)|| (odesc->type == SANE_TYPE_STRING) ||
 		  (odesc->type == SANE_TYPE_BUTTON))) {
 		slog(SLOG_WARN, "option[%d] %s for device %s not of "
-		     "type BOOL|INT|FIXED|STRING. Skipping",
+		     "type BOOL|INT|FIXED|STRING|BUTTON. Skipping",
 		     opt, odesc->name, st->dev->name);
 		continue;
 	    }
@@ -437,19 +438,45 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
 
 	    // now get the script 
 	    const char* script = cfg_getstr(action_i, C_SCRIPT);
+
+	    if (!script || (strlen(script) == 0)) {
+		script = SCANBD_NULL_STRING;
+	    }
+
 	    assert(script != NULL);
-	    slog(SLOG_INFO, "installing action %s for %s, option[%d]: %s as: %s",
-		 title, st->dev->name, opt, odesc->name, script);
+	    slog(SLOG_INFO, "installing action %s (%d) for %s, option[%d]: %s as: %s",
+		 title, st->num_of_options_with_scripts, st->dev->name, opt, odesc->name, script);
+
+
+	    cfg_t* cfg_sec_global = NULL;
+	    assert((cfg_sec_global = cfg_getsec(cfg, C_GLOBAL)) != NULL);
+	    bool multiple_actions = cfg_getbool(cfg_sec_global, C_MULTIPLE_ACTIONS);
+	    slog(SLOG_INFO, "multiple actions allowed");
 
 	    // looking for option already present in the
 	    // array
 	    int n = 0;
 	    for(n = 0; n < st->num_of_options_with_scripts; n += 1) {
 		if (st->opts[n].number == opt) {
-		    slog(SLOG_WARN, "action %s overrides script %s of option[%d] with %s",
-			 title, st->opts[n].script, n, script);
-		    // break out with n == index_of_found_option
-		    break;
+		    if (!multiple_actions) {
+			slog(SLOG_WARN, "action %s overrides script %s of option[%d] with %s",
+			     title, st->opts[n].script, opt, script);
+			// break out with n == index_of_found_option
+			break;
+		    }
+		    else {
+			if (n < st->num_of_options) {
+			    n = st->num_of_options_with_scripts;
+			    slog(SLOG_INFO, "adding additional action %s (%d) for option[%d] with %s",
+				 title, n, opt, script);
+			    break;
+			}
+			else {
+			    slog(SLOG_INFO, "can't add additional action %s for option[%d] with %s",
+				 title, opt, script);
+			    break;
+			}
+		    }
 		}
 	    }
 	    // 0 <= n < st->num_of_options_with_scripts:
@@ -668,8 +695,8 @@ static void* sane_poll(void* arg) {
 	    sane_find_matching_options(st, loc_i);
 	    // get the local functions for this device
 	    sane_find_matching_functions(st, loc_i);
-	    continue;
 	}
+	regfree(&creg);
     } // foreach local section
     
     int timeout = cfg_getint(cfg_sec_global, C_TIMEOUT);
@@ -691,7 +718,7 @@ static void* sane_poll(void* arg) {
 
 	    if (st->opts[i].script != NULL) {
 		if (strlen(st->opts[i].script) <= 0) {
-		    slog(SLOG_WARN, "No script for option %s for device %s",
+		    slog(SLOG_WARN, "No valid script for option %s for device %s",
 			 odesc->name, st->dev->name);
 		    continue;
 		}
@@ -708,17 +735,44 @@ static void* sane_poll(void* arg) {
 	    sane_option_value_init(&value);
 	    // push the cleanup-handle to free the value storage
 	    pthread_cleanup_push(sane_thread_cleanup_value, &value);
-	    // get the actual value
-	    value = get_sane_option_value(st->h, st->opts[i].number);
 
-	    slog(SLOG_INFO, "checking option %s for device %s: value: %d", odesc->name,
+	    // get the actual value
+	    // but don't query an option twice or more (see config multiple_actions)
+	    // because this may reset the values and no other value changes can be
+	    // detected
+	    int o = 0;
+	    bool gotAlready = false;
+	    for(o = 0; o < i; o += 1) {
+		if (st->opts[o].number == st->opts[i].number) {
+		    gotAlready = true;
+		    break;
+		}
+	    }
+	    if (!gotAlready) {
+		// first query of option with this number
+		value = get_sane_option_value(st->h, st->opts[i].number);
+	    }
+	    else {
+		// additional query, so copy the value
+		slog(SLOG_INFO, "got the value already -> copy");
+		// found: copy the value
+		slog(SLOG_DEBUG, "copy the value of option %d", st->opts[o].number);
+		value.num_value = st->opts[o].value.num_value;
+		if (st->opts[o].value.str_value.str != NULL) {
+		    value.str_value.str = strdup(st->opts[o].value.str_value.str);
+		    assert(value.str_value.str != NULL);
+		}
+	    }
+
+	    slog(SLOG_INFO, "checking option %s number %d (%d) for device %s: value: %d",
+		 odesc->name, st->opts[i].number, i,
 		 st->dev->name, value);
 
 	    if ((odesc->type == SANE_TYPE_BOOL) || (odesc->type == SANE_TYPE_INT) ||
 		(odesc->type == SANE_TYPE_FIXED)) {
 		if ((st->opts[i].from_value.num_value == st->opts[i].value.num_value) &&
 		    (st->opts[i].to_value.num_value == value.num_value)) {
-		    slog(SLOG_DEBUG, "value trigger: numerial");
+		    slog(SLOG_DEBUG, "value trigger: numerical");
 		    st->triggered = true;
 		    st->triggered_option = i;
 		    // we need to trigger all waiting threads
@@ -807,13 +861,6 @@ static void* sane_poll(void* arg) {
 			v = get_sane_option_value(st->h, st->functions[e].number);
 		    }
 		    else {
-			// found: copy the value
-			slog(SLOG_DEBUG, "copy the value of option %d", st->opts[o].number);
-			v.num_value = st->opts[o].value.num_value;
-			if (st->opts[o].value.str_value.str != NULL) {
-			    v.str_value.str = strdup(st->opts[o].value.str_value.str);
-			    assert(v.str_value.str != NULL);
-			}
 		    }
 		    if ((fdesc->type == SANE_TYPE_BOOL) || (fdesc->type == SANE_TYPE_INT) ||
 			(fdesc->type == SANE_TYPE_FIXED)) {
@@ -907,6 +954,8 @@ static void* sane_poll(void* arg) {
 
 		// sendout an dbus-signal with all the values as
 		// arguments
+		dbus_send_signal(SCANBD_DBUS_SIGNAL_SCAN_BEGIN, st->dev->name);
+
 		//dbus_send_signal_argv_async(SCANBD_DBUS_SIGNAL_TRIGGER, env);
 		dbus_send_signal_argv(SCANBD_DBUS_SIGNAL_TRIGGER, env);
 		// the action-script will use the device,
@@ -931,35 +980,39 @@ static void* sane_poll(void* arg) {
 		    return NULL;
 		}
 
-		assert(timeout > 0);
-		usleep(timeout * 1000); //ms
+		if (strcmp(script, SCANBD_NULL_STRING) != 0) {
 
-		pid_t cpid;
-		if ((cpid = fork()) < 0) {
-		    slog(SLOG_ERROR, "Can't fork: %s", strerror(errno));
-		}
-		else if (cpid > 0) { // parent
-		    slog(SLOG_INFO, "waiting for child: %s", script);
-		    int status;
-		    if (waitpid(cpid, &status, 0) < 0) {
-			slog(SLOG_ERROR, "waitpid: %s", strerror(errno));
+		    assert(timeout > 0);
+		    usleep(timeout * 1000); //ms
+
+		    pid_t cpid;
+		    if ((cpid = fork()) < 0) {
+			slog(SLOG_ERROR, "Can't fork: %s", strerror(errno));
 		    }
-		    if (WIFEXITED(status)) {
-			slog(SLOG_INFO, "child %s exited with status: %d",
-			     script, WEXITSTATUS(status));
+		    else if (cpid > 0) { // parent
+			slog(SLOG_INFO, "waiting for child: %s", script);
+			int status;
+			if (waitpid(cpid, &status, 0) < 0) {
+			    slog(SLOG_ERROR, "waitpid: %s", strerror(errno));
+			}
+			if (WIFEXITED(status)) {
+			    slog(SLOG_INFO, "child %s exited with status: %d",
+				 script, WEXITSTATUS(status));
+			}
+			if (WIFSIGNALED(status)) {
+			    slog(SLOG_INFO, "child %s signaled with signal: %d",
+				 script, WTERMSIG(status));
+			}
 		    }
-		    if (WIFSIGNALED(status)) {
-			slog(SLOG_INFO, "child %s signaled with signal: %d",
-			     script, WTERMSIG(status));
+		    else { // child
+			slog(SLOG_DEBUG, "exec for %s", script);
+			if (execle(script, script, NULL, env) < 0) {
+			    slog(SLOG_ERROR, "execlp: %s", strerror(errno));
+			}
+			exit(EXIT_FAILURE); // not reached
 		    }
-		}
-		else { // child
-		    slog(SLOG_DEBUG, "exec for %s", script);
-		    if (execle(script, script, NULL, env) < 0) {
-			slog(SLOG_ERROR, "execlp: %s", strerror(errno));
-		    }
-		    exit(EXIT_FAILURE); // not reached
-		}
+		} // script == SCANBD_NULL_STRING
+
 		assert(script != NULL);
 		free(script);
 
@@ -993,6 +1046,10 @@ static void* sane_poll(void* arg) {
 		}
 		// sleep the timeout to settle devices, necessary?
 		usleep(timeout * 1000); //ms
+
+		// send out the debus signal
+		dbus_send_signal(SCANBD_DBUS_SIGNAL_SCAN_END, st->dev->name);
+
 		// enter the critical section
 		if (pthread_mutex_lock(&st->mutex) < 0) {
 		    // if we can't get the mutex, something is heavily wrong!
