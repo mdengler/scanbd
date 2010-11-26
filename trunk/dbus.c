@@ -44,7 +44,7 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
 	DBusMessageIter args;
 	dbus_message_iter_init_append(signal, &args);
 	while(*argv != NULL) {
-	    slog(SLOG_DEBUG, "append string %s to signal", *argv);
+	    slog(SLOG_DEBUG, "append string %s to signal %s", *argv, signal_name);
 	    if (dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, argv) != TRUE) {
 		slog(SLOG_ERROR, "Can't append signal argument");
 	    }
@@ -52,7 +52,7 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
 	}
     }
 
-    slog(SLOG_DEBUG, "now sending signal");
+    slog(SLOG_DEBUG, "now sending signal %s", signal_name);
     dbus_uint32_t serial;
     if (dbus_connection_send(conn, signal, &serial) != TRUE) {
 	slog(SLOG_ERROR, "Can't send signal");
@@ -64,9 +64,6 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
     slog(SLOG_DEBUG, "unref the signal");
     dbus_message_unref(signal);
 }
-
-
-
 
 void dbus_send_signal(const char* signal_name, const char* arg) {
     DBusMessage* signal = NULL;
@@ -82,12 +79,14 @@ void dbus_send_signal(const char* signal_name, const char* arg) {
     if (arg != NULL) {
 	DBusMessageIter args;
 	dbus_message_iter_init_append(signal, &args);
-	if (dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, arg) != TRUE) {
+	slog(SLOG_DEBUG, "append string %s to signal %s", arg, signal_name);
+	if (dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &arg) != TRUE) {
 	    slog(SLOG_ERROR, "Can't append signal argument");
 	}
     }
 
     dbus_uint32_t serial;
+    slog(SLOG_DEBUG, "now sending signal %s", signal_name);
     if (dbus_connection_send(conn, signal, &serial) != TRUE) {
 	slog(SLOG_ERROR, "Can't send signal");
     }

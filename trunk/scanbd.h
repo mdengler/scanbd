@@ -71,6 +71,9 @@
 #define C_DEBUG "debug"
 #define C_DEBUG_DEF false
 
+#define C_MULTIPLE_ACTIONS "multiple_actions"
+#define C_MULTIPLE_ACTIONS_DEF true
+
 #define C_DEBUG_LEVEL "debug-level"
 #define C_DEBUG_LEVEL_DEF 1
 
@@ -103,6 +106,8 @@
 
 #define C_GLOBAL "global"
 #define C_DEVICE "device"
+
+#define SCANBD_NULL_STRING "(null)"
 
 struct scanbdOptions {
     bool        managerMode;
