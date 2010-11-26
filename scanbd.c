@@ -89,6 +89,7 @@ void cfg_do_parse(void) {
 	CFG_STR(C_GROUP, C_GROUP_DEF, CFGF_NONE),
 	CFG_STR(C_SANED, C_SANED_DEF, CFGF_NONE),
 	CFG_STR_LIST(C_SANED_OPTS, C_SANED_OPTS_DEF, CFGF_NONE),
+	CFG_STR_LIST(C_SANED_ENVS, C_SANED_ENVS_DEF, CFGF_NONE),
 	CFG_INT(C_TIMEOUT, C_TIMEOUT_DEF, CFGF_NONE),
 	CFG_STR(C_PIDFILE, C_PIDFILE_DEF, CFGF_NONE),
 	CFG_SEC(C_ENVIRONMENT, cfg_environment, CFGF_NONE),
@@ -437,6 +438,17 @@ int main(int argc, char** argv) {
 	    }
 	}
 	else { // child
+	    size_t numberOfEnvs = cfg_size(cfg_sec_global, "saned_env");
+	    for(size_t i = 0; i < numberOfEnvs; i += 1) {
+		const char* e = cfg_getnstr(cfg_sec_global, "saned_env", i);
+		assert(e);
+		if (putenv((char*)e) < 0) { // const-cast should not be neccessary
+		    slog(SLOG_WARN, "Can't set environment %s: %s", e, strerror(errno));
+		}
+		else {
+		    slog(SLOG_DEBUG, "Setting environment: %s", e);
+		}
+	    }
 	    if (setsid() < 0) {
 		slog(SLOG_WARN, "setsid: %s", strerror(errno));
 	    }

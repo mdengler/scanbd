@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deviceinfo version="0.2">
+  <device>
+    <match key="info.capabilities" contains="access_control">
+      <match key="access_control.type" contains="scanner">
+	<append key="access_control.grant_user"
+		type="strlist">saned</append>
+      </match>
+    </match>
+  </device>
+</deviceinfo>

@@ -86,6 +86,9 @@
 #define C_SANED_OPTS "saned_opt"
 #define C_SANED_OPTS_DEF "{}"
 
+#define C_SANED_ENVS "saned_env"
+#define C_SANED_ENVS_DEF "{}"
+
 #define C_TIMEOUT "timeout"
 #define C_TIMEOUT_DEF 500
 
