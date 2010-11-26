@@ -1,4 +1,3 @@
-# scanbd - scanner button daemon
 # $Id$
 #
 #  scanbd - KMUX scanner button daemon
@@ -20,20 +19,8 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-description	"Scanner button daemon Service"
+# change group to saned for sane devices
+# needed for saned to get scanner access
 
-start on network
-stop on runlevel S
+ENV{libsane_matched}=="yes", GROUP="saned"
 
-respawn
-
-# let this env-var point to the place where the real sane configs are
-# strip down the /etc/sane/dll.conf to the net-backend
-
-env SANE_CONFIG_DIR=/usr/local/etc/scanbd
-
-pre-start script
-	  rm -f /var/run/scanbd.pid
-end script
-
-exec /usr/local/bin/scanbd -f -c /usr/local/etc/scanbd/scanbd.conf

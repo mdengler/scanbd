@@ -70,7 +70,10 @@ sane-port stream tcp4 nowait saned /usr/local/bin/scanbd scanbd -m -c /usr/local
 or 
 
 (if the saned user can't open the devices, e.g. ubuntu)
+
 sane-port stream tcp4 nowait root /usr/local/bin/scanbd scanbd -m -c /usr/local/etc/scanbd/scanbd.conf
+
+(if you are worried about running scanbd with root privileges, see below on 7))
 
 be sure to give the -m (and perhaps -s) flag to scanbd to enable the "manager-mode" (if you
 add also the -s flag the "signal-mode" is used, e.g. if dbus isn't available).
@@ -102,7 +105,22 @@ export SANE_CONFIG_DIR=/usr/local/etc/scanbd
 
 or use the debian script (scanbd.script) or the upstart service (scanbdservice.conf)
 
-Additional hints:
+7) some words on access rights
+
+if the saned-user can't access the scanners, e.g. if 
+
+SANE_CONFIG_DIR=/usr/local/etc/scanbd scanimage -L
+
+doesn't get any results, but if you run the same command as root, you have wrong access rights to the 
+scanner devices. If you have have a scan-only devices (not an all-in-one type), use the file 99-saned.rules file
+an copy this file to /lib/udev/rules.d and then issue a rescan:
+
+udevadm trigger
+
+If you have an all-in-one scanner the devices is matched via an printer rule and the access is granted to the
+lp group. In this case you should simply add the saned user to the lp group.
+
+8) Additional hints:
 
 - if there are problems recognizing new / removed devices, it is possible to send scanbd a SIGHUP to reconfigure
   and look for new devices. This can be done via udev-rules.
