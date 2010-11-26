@@ -111,14 +111,16 @@ if the saned-user can't access the scanners, e.g. if
 
 SANE_CONFIG_DIR=/usr/local/etc/scanbd scanimage -L
 
-doesn't get any results, but if you run the same command as root, you have wrong access rights to the 
-scanner devices. If you have have a scan-only devices (not an all-in-one type), use the file 99-saned.rules file
+doesn't get any results, but if you run the same command as root with success, you have wrong access rights to the 
+scanner devices. If you have have a scan-only device (not an all-in-one type), use the file 99-saned.rules file
 an copy this file to /lib/udev/rules.d and then issue a rescan:
 
 udevadm trigger
 
-If you have an all-in-one scanner the devices is matched via an printer rule and the access is granted to the
-lp group. In this case you should simply add the saned user to the lp group.
+If you have an all-in-one scanner the device is matched via a printer rule and the access is granted to the
+lp group. In this case you should simply add the saned user to the lp group:
+
+usermod -a -G lp saned
 
 8) Additional hints:
 
