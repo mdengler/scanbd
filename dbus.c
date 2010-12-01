@@ -22,6 +22,7 @@
 
 #include "scanbd.h"
 #include "scanbd_dbus.h"
+#include "scanbuttond_wrapper.h"
 
 static DBusConnection* conn = NULL;
 static pthread_t dbus_tid = 0;
@@ -106,17 +107,50 @@ static void hal_device_added(LibHalContext* ctx, const char *udi) {
 				       HAL_SCANNER_CAPABILITY, &dbus_error) == TRUE) {
 	// found new scanner
 	slog(SLOG_INFO, "New Scanner: %s", udi);
+#ifdef USE_SANE
 	stop_sane_threads();
+#else
+	stop_scbtn_threads();
+#endif
 	slog(SLOG_DEBUG, "sane_exit");
+#ifdef USE_SANE
 	sane_exit();
+#else
+	scbtn_shutdown();
+#endif
+
 #ifdef SANE_REINIT_TIMEOUT
 	sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
 				    // really neccessary
 #endif
 	slog(SLOG_DEBUG, "sane_init");
+#ifdef USE_SANE
 	sane_init(NULL, NULL);
 	get_sane_devices();
 	start_sane_threads();
+#else
+	scanbtnd_set_libdir("./scanbuttond/backends");
+
+	if (scanbtnd_loader_init() != 0) {
+	    slog(SLOG_INFO, "Could not initialize module loader!\n");
+	    exit(EXIT_FAILURE);
+	}
+
+	backend = scanbtnd_load_backend("meta");
+	if (!backend) {
+	    slog(SLOG_INFO, "Unable to load backend library\n");
+	    scanbtnd_loader_exit();
+	    exit(EXIT_FAILURE);
+	}
+
+	if (backend->scanbtnd_init() != 0) {
+	    slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+	    exit(EXIT_FAILURE);
+	}
+
+	get_scbtn_devices();
+	start_scbtn_threads();
+#endif
     }
 }
 #endif
@@ -135,16 +169,47 @@ static void hal_device_removed(LibHalContext* ctx, const char *udi) {
 				       HAL_SCANNER_CAPABILITY, &dbus_error) == TRUE) {
 	slog(SLOG_INFO, "Removed Scanner: %s", udi);
     }
+#ifdef USE_SANE
     stop_sane_threads();
+#else
+    stop_scbtn_threads();
+#endif
+
     slog(SLOG_DEBUG, "sane_exit");
+#ifdef USE_SANE
     sane_exit();
+#else
+    scbtn_shutdown();
+#endif
+
 #ifdef SANE_REINIT_TIMEOUT
     sleep(SANE_REINIT_TIMEOUT);// TODO: don't know if this is really neccessary
 #endif
     slog(SLOG_DEBUG, "sane_init");
+#ifdef USE_SANE
     sane_init(NULL, NULL);
     get_sane_devices();
     start_sane_threads();
+#else
+    scanbtnd_set_libdir("./scanbuttond/backends");
+    if (scanbtnd_loader_init() != 0) {
+	slog(SLOG_INFO, "Could not initialize module loader!\n");
+	exit(EXIT_FAILURE);
+    }
+    backend = scanbtnd_load_backend("meta");
+    if (!backend) {
+	slog(SLOG_INFO, "Unable to load backend library\n");
+	scanbtnd_loader_exit();
+	exit(EXIT_FAILURE);
+    }
+    assert(backend);
+    if (backend->scanbtnd_init() != 0) {
+	slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+	exit(EXIT_FAILURE);
+    }
+    get_scbtn_devices();
+    start_scbtn_threads();
+#endif
 }
 #endif
 
@@ -170,17 +235,46 @@ static void dbus_signal_device_removed(void) {
 #ifdef USE_HAL
     slog(SLOG_DEBUG, "dbus_signal_device_removed");
     // look for removed scanner
+#ifdef USE_SANE
     stop_sane_threads();
+#else
+    stop_scbtn_threads();
+#endif
+
     slog(SLOG_DEBUG, "sane_exit");
+#ifdef USE_SANE
     sane_exit();
+#else
+    scbtn_shutdown();
+#endif
+
 #ifdef SANE_REINIT_TIMEOUT
     sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
 				// really neccessary
 #endif
     slog(SLOG_DEBUG, "sane_init");
+#ifdef USE_SANE
     sane_init(NULL, NULL);
     get_sane_devices();
     start_sane_threads();
+#else
+    scanbtnd_set_libdir("./scanbuttond/backends");
+    if (scanbtnd_loader_init() != 0) {
+	slog(SLOG_INFO, "Could not initialize module loader!\n");
+	exit(EXIT_FAILURE);
+    }
+    backend = scanbtnd_load_backend("meta");
+    if (!backend) {
+	slog(SLOG_INFO, "Unable to load backend library\n");
+	scanbtnd_loader_exit();
+	exit(EXIT_FAILURE);
+    }
+    assert(backend);
+    if (backend->scanbtnd_init() != 0) {
+	slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+	exit(EXIT_FAILURE);
+    }
+#endif
 #endif
 }
 
@@ -188,14 +282,22 @@ static void dbus_signal_device_removed(void) {
 static void dbus_method_release(void) {
     slog(SLOG_DEBUG, "dbus_method_release");
     // start all threads
+#ifdef USE_SANE
     start_sane_threads();
+#else
+    start_scbtn_threads();
+#endif
 }
 
 // is called before saned started
 static void dbus_method_acquire(void) {
     slog(SLOG_DEBUG, "dbus_method_acquire");
     // stop all threads
+#ifdef USE_SANE
     stop_sane_threads();
+#else
+    stop_scbtn_threads();
+#endif
 }
 
 struct sane_trigger_arg {
@@ -208,7 +310,11 @@ typedef struct sane_trigger_arg sane_trigger_arg_t;
 void* dbus_call_sane_trigger_action_thread(void* arg) {
     sane_trigger_arg_t* a = (sane_trigger_arg_t*) arg;
     assert(a != NULL);
+#ifdef USE_SANE
     sane_trigger_action(a->device, a->action);
+#else
+    scbtn_trigger_action(a->device, a->action);
+#endif
     return NULL;
 }
 

@@ -111,7 +111,6 @@ void get_sane_devices(void) {
 	slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
 	return;
     }
-    
     SANE_Status sane_status = 0;
     sane_device_list = NULL;
     if ((sane_status = sane_get_devices(&sane_device_list, SANE_TRUE)) != SANE_STATUS_GOOD) {
@@ -182,7 +181,7 @@ static sane_opt_value_t get_sane_option_value(SANE_Handle* h, int index) {
 	return res;
     }
     if ((odesc->type == SANE_TYPE_BOOL) || (odesc->type == SANE_TYPE_INT) ||
-	(odesc->type == SANE_TYPE_FIXED)) {
+	(odesc->type == SANE_TYPE_FIXED) || (odesc->type == SANE_TYPE_BUTTON)) {
 	unsigned long int value = 0;
 	if ((unsigned int)odesc->size <= sizeof(long int)) {
 	    //if we can store it in an long int
@@ -224,6 +223,7 @@ static sane_opt_value_t get_sane_option_value(SANE_Handle* h, int index) {
     }
     return res;
 }
+
 
 // cleanup handler for sane_poll
 static void sane_thread_cleanup_mutex(void* arg) {
@@ -308,9 +308,10 @@ static void sane_find_matching_functions(sane_thread_t* st, cfg_t* sec) {
 	    }
 	    assert(odesc->name);
 	    if (!((odesc->type == SANE_TYPE_BOOL) || (odesc->type == SANE_TYPE_INT) ||
-		  (odesc->type == SANE_TYPE_FIXED)|| (odesc->type == SANE_TYPE_STRING))) {
+		  (odesc->type == SANE_TYPE_FIXED)|| (odesc->type == SANE_TYPE_STRING) ||
+		  (odesc->type == SANE_TYPE_BUTTON))) {
 		slog(SLOG_WARN, "option[%d] %s for device %s not of "
-		     "type BOOL|INT|FIXED|STRING. Skipping",
+		     "type BOOL|INT|FIXED|STRING|BUTTON. Skipping",
 		     opt, odesc->name, st->dev->name);
 		continue;
 	    }
@@ -492,7 +493,7 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
 	    sane_option_value_free(&st->opts[n].value);
 
 	    if ((odesc->type == SANE_TYPE_BOOL) || (odesc->type == SANE_TYPE_INT) ||
-		(odesc->type == SANE_TYPE_FIXED)) {
+		(odesc->type == SANE_TYPE_FIXED) || (odesc->type == SANE_TYPE_BUTTON)) {
 		// numerical option
 		cfg_t* num_trigger = cfg_getsec(action_i, C_NUMERICAL_TRIGGER);
 		assert(num_trigger);
@@ -769,7 +770,7 @@ static void* sane_poll(void* arg) {
 		 st->dev->name, value);
 
 	    if ((odesc->type == SANE_TYPE_BOOL) || (odesc->type == SANE_TYPE_INT) ||
-		(odesc->type == SANE_TYPE_FIXED)) {
+		(odesc->type == SANE_TYPE_FIXED) || (odesc->type == SANE_TYPE_BUTTON)) {
 		if ((st->opts[i].from_value.num_value == st->opts[i].value.num_value) &&
 		    (st->opts[i].to_value.num_value == value.num_value)) {
 		    slog(SLOG_DEBUG, "value trigger: numerical");
@@ -863,7 +864,7 @@ static void* sane_poll(void* arg) {
 		    else {
 		    }
 		    if ((fdesc->type == SANE_TYPE_BOOL) || (fdesc->type == SANE_TYPE_INT) ||
-			(fdesc->type == SANE_TYPE_FIXED)) {
+			(fdesc->type == SANE_TYPE_FIXED) || (odesc->type == SANE_TYPE_BUTTON)) {
 			snprintf(env[e], NAME_MAX, "%s=%lud", st->functions[e].env,
 				 v.num_value);
 			slog(SLOG_DEBUG, "setting env: %s", env[e]);
@@ -1272,6 +1273,7 @@ void stop_sane_threads(void) {
     for(int i = 0; i < num_devices; i += 1) {
 	slog(SLOG_DEBUG, "waiting for poll thread for device %s",
 	     (*(sane_device_list + i))->name);
+	// joining all threads to prevent memory leaks
 	if (pthread_join(sane_poll_threads[i].tid, NULL) < 0) {
 	    slog(SLOG_ERROR, "pthread_join: %s", strerror(errno));
 	}
@@ -1321,6 +1323,4 @@ void stop_sane_threads(void) {
 	slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
 	return;
     }
-    
-
 }

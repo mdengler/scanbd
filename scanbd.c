@@ -22,6 +22,12 @@
 
 #include "scanbd.h"
 
+#ifdef USE_SCANBUTTOND
+#include "scanbuttond_loader.h"
+#include "scanbuttond_wrapper.h"
+backend_t* backend;
+#endif
+
 cfg_t* cfg = NULL;
 
 // the actual values of the command-line options
@@ -143,10 +149,19 @@ void sig_hup_handler(int signal) {
     slog(SLOG_DEBUG, "sig_hup_handler called");
     (void)signal;
     // stop all threads
+#ifdef USE_SANE
     stop_sane_threads();
+#else
+    stop_scbtn_threads();
+#endif
 
     slog(SLOG_DEBUG, "sane_exit");
+#ifdef USE_SANE
     sane_exit();
+#else
+    scbtn_shutdown();
+#endif
+
 #ifdef SANE_REINIT_TIMEOUT
     sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
 				// really neccessary
@@ -155,26 +170,64 @@ void sig_hup_handler(int signal) {
     cfg_do_parse();
 
     slog(SLOG_DEBUG, "sane_init");
+#ifdef USE_SANE
     sane_init(NULL, NULL);
+#else
+    scanbtnd_set_libdir("./scanbuttond/backends");
 
+    if (scanbtnd_loader_init() != 0) {
+	slog(SLOG_INFO, "Could not initialize module loader!\n");
+	exit(EXIT_FAILURE);
+    }
+
+    backend = scanbtnd_load_backend("meta");
+    if (!backend) {
+	slog(SLOG_INFO, "Unable to load backend library\n");
+	scanbtnd_loader_exit();
+	exit(EXIT_FAILURE);
+    }
+
+    if (backend->scanbtnd_init() != 0) {
+	slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+	exit(EXIT_FAILURE);
+    }
+#endif
+
+#ifdef USE_SANE
     get_sane_devices();
+#else
+    get_scbtn_devices();
+#endif
 
     // start all threads
+#ifdef USE_SANE
     start_sane_threads();
+#else
+    start_scbtn_threads();
+#endif
+
 }
 
 void sig_usr1_handler(int signal) {
     slog(SLOG_DEBUG, "sig_usr1_handler called");
     (void)signal;
     // stop all threads
+#ifdef USE_SANE
     stop_sane_threads();
+#else
+    stop_scbtn_threads();
+#endif
 }
 
 void sig_usr2_handler(int signal) {
     slog(SLOG_DEBUG, "sig_usr2_handler called");
     (void)signal;
     // start all threads
+#ifdef USE_SANE
     start_sane_threads();
+#else
+    start_scbtn_threads();
+#endif
 }
 
 void sig_term_handler(int signal) {
@@ -187,8 +240,11 @@ void sig_term_handler(int signal) {
     else {
 	// not in manager-mode
 	// stop all threads
+#ifdef USE_SANE
 	stop_sane_threads();
-
+#else
+	stop_scbtn_threads();
+#endif
 	// get the name of the pidfile
 	const char* pidfile = NULL;
 	cfg_t* cfg_sec_global = NULL;
@@ -555,18 +611,43 @@ int main(int argc, char** argv) {
 	// must be possible with the user from config file
 	dbus_init();
 
+#ifdef USE_SANE
 	// Init SANE
 	SANE_Int sane_version = 0;
 	sane_init(&sane_version, 0);
 	slog(SLOG_INFO, "sane version %d.%d",
 	     SANE_VERSION_MAJOR(sane_version),
 	     SANE_VERSION_MINOR(sane_version));
-
+#else
+	scanbtnd_set_libdir("./scanbuttond/backends");
+	if (scanbtnd_loader_init() != 0) {
+	    slog(SLOG_INFO, "Could not initialize module loader!\n");
+	    exit(EXIT_FAILURE);
+	}
+    	backend = scanbtnd_load_backend("meta");
+	if (!backend) {
+	    slog(SLOG_INFO, "Unable to load backend library\n");
+	    scanbtnd_loader_exit();
+	    exit(EXIT_FAILURE);
+	}
+	assert(backend);
+	if (backend->scanbtnd_init() != 0) {
+	    slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+	    exit(EXIT_FAILURE);
+	}
+#endif
 	// get all devices locally connected to the system 
+#ifdef USE_SANE
 	get_sane_devices();
-
+#else
+	get_scbtn_devices();
+#endif
 	// start the polling threads
+#ifdef USE_SANE
 	start_sane_threads();
+#else
+	start_scbtn_threads();
+#endif
 
 	// start dbus thread
 	dbus_start_dbus_thread();
