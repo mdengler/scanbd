@@ -23,13 +23,24 @@
 #ifndef SCANBD_H
 #define SCANBD_H
 
+#ifndef USE_SANE
+#ifndef USE_SCANBUTTOND
+#define USE_SCANBUTTOND
+#endif
+#endif
+
 #define _GNU_SOURCE
 
 #include "common.h"
 
 #include <getopt.h>
 #include <confuse.h>
+
+#ifdef USE_SANE
 #include <sane/sane.h>
+#else
+#include "scanbuttond/include/scanbuttond/libusbi.h"
+#endif
 
 #include "slog.h"
 #include "scanbd_dbus.h"

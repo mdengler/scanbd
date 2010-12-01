@@ -25,21 +25,54 @@ SCANBD_DIR = $(PREFIX)/etc/scanbd
 BIN_DIR = $(PREFIX)/bin
 
 USE_HAL=yes
+USE_SANE=yes # otherwise USE_SCANBUTTOND
 
 #CPPFLAGS += -DNDEBUG
 
 CPPFLAGS += -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
-CFLAGS   += -Wall -Wextra -std=c99
-LDFLAGS  += -lconfuse -lsane -lpthread -ldbus-1
+CFLAGS   += -Wall -Wextra -std=c99 -g
+LDFLAGS  += -lconfuse -lpthread -ldbus-1
+
+ifdef USE_SANE
+CPPFLAGS += -DUSE_SANE -UUSE_SCANBUTTOND
+LDFLAGS += -lsane
+else
+CFG_DIR=./scanbuttond/backends
+export CFG_DIR
+CPPFLAGS += -UUSE_SANE -DUSE_SCANBUTTOND -I./scanbuttond/include -DCFG_DIR=$(CFG_DIR) 
+LDFLAGS += -rdynamic -lusb -ldl
+endif
 
 ifdef USE_HAL
 CPPFLAGS += -DUSE_HAL
 LDFLAGS  += -lhal
 endif
 
+.PHONY: scanbuttond all
+
+ifdef USE_SANE
+
 all: scanbd
 
 scanbd: scanbd.o slog.o sane.o daemonize.o dbus.o
+
+else # USE_SANE
+
+all: scanbuttond scanbd test
+
+testonly: scanbuttond test
+
+scanbd: scanbd.o slog.o daemonize.o dbus.o scanbuttond_wrapper.o scanbuttond_loader.o
+	$(LINK.c) $^ scanbuttond/interface/libusbi.o -o $@
+
+test: test.o scanbuttond_loader.o slog.o scanbuttond_wrapper.o dbus.o
+	$(LINK.c) $^ scanbuttond/interface/libusbi.o -o $@
+
+endif # USE_SANE
+
+scanbuttond_wrapper.o: scanbuttond_wrapper.c scanbuttond_wrapper.h
+
+scanbuttond_loader.o: scanbuttond_loader.c scanbuttond_loader.h
 
 scanbd.o: scanbd.c scanbd.h common.h slog.h scanbd_dbus.h
 
@@ -51,8 +84,12 @@ daemonize.o: daemonize.c common.h
 
 sane.o: sane.c scanbd.h common.h
 
+scanbuttond:
+	$(MAKE) -C scanbuttond all
+
 clean:
-	$(RM) -f scanbd *.o *~
+	$(MAKE) -C scanbuttond clean
+	$(RM) -f scanbd test *.o *~
 
 install: scanbd
 	echo "Make $(SCANBD_DIR)"
