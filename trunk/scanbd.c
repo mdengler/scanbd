@@ -97,6 +97,7 @@ void cfg_do_parse(void) {
 	CFG_STR(C_SANED, C_SANED_DEF, CFGF_NONE),
 	CFG_STR_LIST(C_SANED_OPTS, C_SANED_OPTS_DEF, CFGF_NONE),
 	CFG_STR_LIST(C_SANED_ENVS, C_SANED_ENVS_DEF, CFGF_NONE),
+	CFG_STR(C_SCANBUTTONS_BACKENDS_DIR_DEF, C_SCANBUTTONS_BACKENDS_DIR_DEF, CFGF_NONE),
 	CFG_INT(C_TIMEOUT, C_TIMEOUT_DEF, CFGF_NONE),
 	CFG_STR(C_PIDFILE, C_PIDFILE_DEF, CFGF_NONE),
 	CFG_SEC(C_ENVIRONMENT, cfg_environment, CFGF_NONE),
@@ -140,7 +141,9 @@ void cfg_do_parse(void) {
     }
 
     cfg_t* cfg_sec_global = NULL;
-    assert((cfg_sec_global = cfg_getsec(cfg, C_GLOBAL)) != NULL);
+    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+    assert(cfg_sec_global);
+
     debug |= cfg_getbool(cfg_sec_global, C_DEBUG);
     debug_level = cfg_getint(cfg_sec_global, C_DEBUG_LEVEL);
 }
@@ -173,7 +176,10 @@ void sig_hup_handler(int signal) {
 #ifdef USE_SANE
     sane_init(NULL, NULL);
 #else
-    scanbtnd_set_libdir("./scanbuttond/backends");
+    const char* backends_dir = NULL;
+    backends_dir = cfg_getstr(cfg_getsec(cfg, C_GLOBAL), C_SCANBUTTONS_BACKENDS_DIR);
+    assert(backends_dir);
+    scanbtnd_set_libdir(backends_dir);
 
     if (scanbtnd_loader_init() != 0) {
 	slog(SLOG_INFO, "Could not initialize module loader!\n");
@@ -248,8 +254,10 @@ void sig_term_handler(int signal) {
 	// get the name of the pidfile
 	const char* pidfile = NULL;
 	cfg_t* cfg_sec_global = NULL;
-	assert((cfg_sec_global = cfg_getsec(cfg, "global")) != NULL);
-	assert((pidfile = cfg_getstr(cfg_sec_global, "pidfile")) != NULL);
+	cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+	assert(cfg_sec_global);
+	pidfile = cfg_getstr(cfg_sec_global, C_PIDFILE);
+	assert(pidfile);
 
 	// reclaim the old uid (root) to unlink the pidfile
 	// mostly neccessary if the pidfile lives in /var/run
@@ -412,14 +420,17 @@ int main(int argc, char** argv) {
 	// get the name of the saned executable
 	const char* saned = NULL;
 	cfg_t* cfg_sec_global = NULL;
-	assert((cfg_sec_global = cfg_getsec(cfg, "global")) != NULL);
-	assert((saned = cfg_getstr(cfg_sec_global, "saned")) != NULL);
+	cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+	assert(cfg_sec_global);
+	saned = cfg_getstr(cfg_sec_global, C_SANED);
+	assert(saned);
 
 	if (scanbd_options.signal) {
 	    slog(SLOG_DEBUG, "manager mode: signal");
 	    // get the path of the pid-file of the running scanbd
 	    const char* scanbd_pid_file = NULL;
-	    assert((scanbd_pid_file = cfg_getstr(cfg_sec_global, "pidfile")) != NULL);
+	    scanbd_pid_file = cfg_getstr(cfg_sec_global, C_PIDFILE);
+	    assert(scanbd_pid_file);
 
 	    // get the pid of the running scanbd out of the pidfile
 	    FILE* pidfile;
@@ -530,13 +541,16 @@ int main(int argc, char** argv) {
 	}
 
 	cfg_t* cfg_sec_global = NULL;
-	assert((cfg_sec_global = cfg_getsec(cfg, C_GLOBAL)) != NULL);
+	cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+	assert(cfg_sec_global);
 
 	// drop the privilegies
 	const char* euser = NULL;
-	assert((euser = cfg_getstr(cfg_sec_global, C_USER)) != NULL);
+	euser = cfg_getstr(cfg_sec_global, C_USER);
+	assert(euser);
 	const char* egroup = NULL;
-	assert((egroup = cfg_getstr(cfg_sec_global, C_GROUP)) != NULL);
+	egroup = cfg_getstr(cfg_sec_global, C_GROUP);
+	assert(egroup);
 
 	slog(SLOG_INFO, "dropping privs to uid %s", euser);
 	struct passwd* pwd = NULL;
@@ -556,7 +570,8 @@ int main(int argc, char** argv) {
 	
 	// write pid file
 	const char* pidfile = NULL;
-	assert((pidfile = cfg_getstr(cfg_sec_global, "pidfile")) != NULL);
+	pidfile = cfg_getstr(cfg_sec_global, C_PIDFILE);
+	assert(pidfile);
 
 	int pid_fd = 0;
 	if ((pid_fd = open(pidfile, O_RDWR | O_CREAT | O_EXCL,
@@ -619,7 +634,11 @@ int main(int argc, char** argv) {
 	     SANE_VERSION_MAJOR(sane_version),
 	     SANE_VERSION_MINOR(sane_version));
 #else
-	scanbtnd_set_libdir("./scanbuttond/backends");
+	const char* backends_dir = NULL;
+	backends_dir = cfg_getstr(cfg_getsec(cfg, C_GLOBAL), C_SCANBUTTONS_BACKENDS_DIR);
+	assert(backends_dir);
+	scanbtnd_set_libdir(backends_dir);
+
 	if (scanbtnd_loader_init() != 0) {
 	    slog(SLOG_INFO, "Could not initialize module loader!\n");
 	    exit(EXIT_FAILURE);

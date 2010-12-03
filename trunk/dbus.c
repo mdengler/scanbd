@@ -421,8 +421,9 @@ static DBusObjectPathVTable dbus_vtable = {
 };
 
 void dbus_thread_cleanup(void* arg) {
-    assert(arg != NULL);
+    assert(arg);
     slog(SLOG_DEBUG, "dbus_thread_cleanup");
+    (void)arg;
 }
 
 void* dbus_thread(void* arg) {
@@ -433,7 +434,9 @@ void* dbus_thread(void* arg) {
     pthread_sigmask(SIG_BLOCK, &mask, NULL);
     
     cfg_t* cfg_sec_global = NULL;
-    assert((cfg_sec_global = cfg_getsec(cfg, C_GLOBAL)) != NULL);
+    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+    assert(cfg_sec_global);
+
     int timeout = cfg_getint(cfg_sec_global, C_TIMEOUT);
     if (timeout <= 0) {
 	timeout = C_TIMEOUT_DEF;

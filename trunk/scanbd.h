@@ -100,6 +100,9 @@
 #define C_SANED_OPTS "saned_opt"
 #define C_SANED_OPTS_DEF "{}"
 
+#define C_SCANBUTTONS_BACKENDS_DIR "scanbuttond_backends_dir"
+#define C_SCANBUTTONS_BACKENDS_DIR_DEF "/usr/local/etc/scanbd/scanbuttond/backends"
+
 #define C_SANED_ENVS "saned_env"
 #define C_SANED_ENVS_DEF "{}"
 

@@ -34,19 +34,23 @@ CFLAGS   += -Wall -Wextra -std=c99 -g
 LDFLAGS  += -lconfuse -lpthread -ldbus-1
 
 ifdef USE_SANE
+
 CPPFLAGS += -DUSE_SANE -UUSE_SCANBUTTOND
 LDFLAGS += -lsane
-else
+
+else # USE_SANE
+
 CFG_DIR=./scanbuttond/backends
 export CFG_DIR
 CPPFLAGS += -UUSE_SANE -DUSE_SCANBUTTOND -I./scanbuttond/include -DCFG_DIR=$(CFG_DIR) 
 LDFLAGS += -rdynamic -lusb -ldl
-endif
+
+endif # USE_SANE
 
 ifdef USE_HAL
 CPPFLAGS += -DUSE_HAL
 LDFLAGS  += -lhal
-endif
+endif # USE_HAL
 
 .PHONY: scanbuttond all
 

@@ -227,7 +227,9 @@ static void scbtn_find_matching_options(scbtn_thread_t* st, cfg_t* sec) {
 		 title, st->num_of_options_with_scripts, st->dev->product, opt, name, script);
 
 	    cfg_t* cfg_sec_global = NULL;
-	    assert((cfg_sec_global = cfg_getsec(cfg, C_GLOBAL)) != NULL);
+	    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+	    assert(cfg_sec_global);
+
 	    bool multiple_actions = cfg_getbool(cfg_sec_global, C_MULTIPLE_ACTIONS);
 	    slog(SLOG_INFO, "multiple actions allowed");
 
@@ -386,7 +388,8 @@ void* scbtn_poll(void* arg) {
     // find out the functions and actions
     // get the global sconfig section
     cfg_t* cfg_sec_global = NULL;
-    assert((cfg_sec_global = cfg_getsec(cfg, C_GLOBAL)) != NULL);
+    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+    assert(cfg_sec_global);
 
     // find the global actions
     scbtn_find_matching_options(st, cfg_sec_global);
