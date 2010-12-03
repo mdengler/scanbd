@@ -450,7 +450,9 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
 
 
 	    cfg_t* cfg_sec_global = NULL;
-	    assert((cfg_sec_global = cfg_getsec(cfg, C_GLOBAL)) != NULL);
+	    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+	    assert(cfg_sec_global);
+
 	    bool multiple_actions = cfg_getbool(cfg_sec_global, C_MULTIPLE_ACTIONS);
 	    slog(SLOG_INFO, "multiple actions allowed");
 
@@ -650,7 +652,8 @@ static void* sane_poll(void* arg) {
     // find out the functions and actions
     // get the global sconfig section
     cfg_t* cfg_sec_global = NULL;
-    assert((cfg_sec_global = cfg_getsec(cfg, C_GLOBAL)) != NULL);
+    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+    assert(cfg_sec_global);
 
     // find the global actions
     sane_find_matching_options(st, cfg_sec_global);
@@ -715,7 +718,8 @@ static void* sane_poll(void* arg) {
 	
 	for(int i = 0; i < st->num_of_options_with_scripts; i += 1) {
 	    const SANE_Option_Descriptor* odesc = NULL;
-	    assert((odesc = sane_get_option_descriptor(st->h, st->opts[i].number)) != NULL);
+	    odesc = sane_get_option_descriptor(st->h, st->opts[i].number);
+	    assert(odesc);
 
 	    if (st->opts[i].script != NULL) {
 		if (strlen(st->opts[i].script) <= 0) {
@@ -840,8 +844,9 @@ static void* sane_poll(void* arg) {
 		int e = 0;
 		for(e = 0; e < st->num_of_options_with_functions; e += 1) {
 		    const SANE_Option_Descriptor* fdesc = NULL;
-		    assert((fdesc = sane_get_option_descriptor(st->h,
-							       st->functions[e].number)) != NULL);
+		    fdesc = sane_get_option_descriptor(st->h,
+						       st->functions[e].number);
+		    assert(fdesc);
 
 		    // check if the function-option is the same
 		    // as a action-option. If so, use the
