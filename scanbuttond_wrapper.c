@@ -326,6 +326,9 @@ void* scbtn_poll(void* arg) {
 	if (ores == -ENODEV) {
 	    slog(SLOG_WARN, "scanbtnd_open failed, no device -> canceling thread");
 	}
+	if (alarm(SCANBUTTOND_ALARM_TIMEOUT) > 0) {
+	    slog(SLOG_WARN, "alarm error, there was a pending alarm");
+	}
 	pthread_exit(NULL);
     }
 
@@ -728,6 +731,9 @@ void* scbtn_poll(void* arg) {
 		    if (ores == -ENODEV) {
 			slog(SLOG_WARN, "scanbtnd_open failed, no device -> canceling thread");
 		    }
+		    if (alarm(SCANBUTTOND_ALARM_TIMEOUT) > 0) {
+			slog(SLOG_WARN, "alarm error, there was a pending alarm");
+		    }
 		    pthread_exit(NULL);
 		}
 	    } // if triggered
@@ -786,9 +792,9 @@ void start_scbtn_threads() {
 	slog(SLOG_DEBUG, "Starting poll thread for %s", dev->product);
 	scbtn_poll_threads[i].tid = 0;
 	scbtn_poll_threads[i].dev = dev;
-//	scbtn_poll_threads[i].opts = NULL;
+	scbtn_poll_threads[i].opts = NULL;
 	scbtn_poll_threads[i].functions = NULL;
-//	scbtn_poll_threads[i].num_of_options = 0;
+	scbtn_poll_threads[i].num_of_options = 0;
 	scbtn_poll_threads[i].triggered = false;
 	scbtn_poll_threads[i].triggered_option = -1;
 	scbtn_poll_threads[i].num_of_options_with_scripts = 0;
@@ -874,22 +880,21 @@ void stop_scbtn_threads() {
 	scbtn_poll_threads[i].tid = 0;
 	// close the associated device of the thread
 	slog(SLOG_DEBUG, "closing device %s", scbtn_poll_threads[i].dev->product);
-//	if (scbtn_poll_threads[i].h != NULL) {
-//	    scbtn_close(scbtn_poll_threads[i].h);
-//	    scbtn_poll_threads[i].h = NULL;
-//	}
-//	if (scbtn_poll_threads[i].opts) {
-//	    slog(SLOG_DEBUG, "freeing opt ressources for device %s thread",
-//		 scbtn_poll_threads[i].dev->name);
-//	    // free the matching options list of that device / threads
+	assert(scbtn_poll_threads[i].dev);
+	backend->scanbtnd_close((scanner_t*)scbtn_poll_threads[i].dev);
+
+	if (scbtn_poll_threads[i].opts) {
+	    slog(SLOG_DEBUG, "freeing opt ressources for device %s thread",
+		 scbtn_poll_threads[i].dev->product);
+	    // free the matching options list of that device / threads
 //	    for (int k = 0; k < scbtn_poll_threads[i].num_of_options; k += 1) {
 //		scbtn_option_value_free(&scbtn_poll_threads[i].opts[k].from_value);
 //		scbtn_option_value_free(&scbtn_poll_threads[i].opts[k].to_value);
 //		scbtn_option_value_free(&scbtn_poll_threads[i].opts[k].value);
 //	    }
-//	    free(scbtn_poll_threads[i].opts);
-//	    scbtn_poll_threads[i].opts = NULL;
-//	}
+	    free(scbtn_poll_threads[i].opts);
+	    scbtn_poll_threads[i].opts = NULL;
+	}
 	if (scbtn_poll_threads[i].functions) {
 	    slog(SLOG_DEBUG, "freeing funtion ressources for device %s thread",
 		 scbtn_poll_threads[i].dev->product);
