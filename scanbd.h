@@ -101,7 +101,14 @@
 #define C_SANED_OPTS_DEF "{}"
 
 #define C_SCANBUTTONS_BACKENDS_DIR "scanbuttond_backends_dir"
+#ifdef CFG_DIR
+#define C_SCANBUTTONS_BACKENDS_DIR_DEF CFG_DIR
+#else
+#ifndef USE_SANE
+#warning "Using predefined directory: /usr/local/etc/scanbd/scanbuttond/backends"
+#endif
 #define C_SCANBUTTONS_BACKENDS_DIR_DEF "/usr/local/etc/scanbd/scanbuttond/backends"
+#endif
 
 #define C_SANED_ENVS "saned_env"
 #define C_SANED_ENVS_DEF "{}"

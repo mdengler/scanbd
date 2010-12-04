@@ -24,26 +24,25 @@
 #include "scanbuttond_loader.h"
 #include <dlfcn.h>
 
-static char lib_dir[PATH_MAX];
+// this file is basicly the same as loader.c from the scanbuttond-project,
+// but modified to meet the needs of scanbd
 
-void scanbtnd_set_libdir(const char* dir)
-{
+static char lib_dir[PATH_MAX] = CFG_DIR;
+
+void scanbtnd_set_libdir(const char* dir){
     strncpy(lib_dir, dir, PATH_MAX);
 }
 
 
-int scanbtnd_loader_init()
-{
+int scanbtnd_loader_init(){
     return 0;
 }
 
-void scanbtnd_loader_exit(void)
-{
+void scanbtnd_loader_exit(void){
     return;
 }
 
-backend_t* scanbtnd_load_backend(const char* filename)
-{
+backend_t* scanbtnd_load_backend(const char* filename){
     const char* error;
     void* dll_handle;
 
@@ -120,8 +119,7 @@ backend_t* scanbtnd_load_backend(const char* filename)
 	return NULL;
 }
 
-void scanbtnd_unload_backend(backend_t* backend)
-{
+void scanbtnd_unload_backend(backend_t* backend){
     if (backend->handle != NULL) {
 	dlclose(backend->handle);
 	backend->handle = NULL;
