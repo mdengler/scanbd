@@ -113,6 +113,7 @@ void get_sane_devices(void) {
     }
     SANE_Status sane_status = 0;
     sane_device_list = NULL;
+    num_devices = 0;
     if ((sane_status = sane_get_devices(&sane_device_list, SANE_TRUE)) != SANE_STATUS_GOOD) {
 	slog(SLOG_WARN, "Can't get the sane device list");
     }
@@ -121,7 +122,6 @@ void get_sane_devices(void) {
 	slog(SLOG_DEBUG, "device list null");
 	goto cleanup;
     }
-    num_devices = 0;
     while(*dev != NULL) {
 	slog(SLOG_DEBUG, "found device: %s %s %s %s",
 	     (*dev)->name, (*dev)->vendor, (*dev)->model, (*dev)->type);
@@ -586,7 +586,7 @@ static void* sane_poll(void* arg) {
     if (pthread_mutex_lock(&st->mutex) < 0) {
 	// if we can't get the mutex, something is heavily wrong!
 	slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
-	return NULL;
+	pthread_exit(NULL);
     }
     
     // open the device this thread should poll
@@ -594,7 +594,7 @@ static void* sane_poll(void* arg) {
     if ((status = sane_open(st->dev->name, &st->h)) != SANE_STATUS_GOOD) {
 	slog(SLOG_ERROR, "Can't open device %s: %s", st->dev->name, sane_strstatus(status));
 	slog(SLOG_WARN, "abandon polling of %s", st->dev->name);
-	return NULL;
+	pthread_exit(NULL);
     }
     // figure out the number of options this device has
     // option 0 (zero) is guaranteed to exist with the total number of
@@ -603,12 +603,12 @@ static void* sane_poll(void* arg) {
     if ((status = sane_control_option(st->h, 0, SANE_ACTION_GET_VALUE,
 				      &st->num_of_options, 0)) != SANE_STATUS_GOOD) {
 	slog(SLOG_ERROR, "Can't get the number of scanner options");
-	return NULL;
+	pthread_exit(NULL);
     }
     if (st->num_of_options == 0) {
 	// no options -> nothing to poll
 	slog(SLOG_INFO, "No options for device %s", st->dev->name);
-	return NULL;
+	pthread_exit(NULL);
     }
     slog(SLOG_INFO, "found %d options for device %s", st->num_of_options, st->dev->name);
 
@@ -983,7 +983,7 @@ static void* sane_poll(void* arg) {
 		if (pthread_mutex_unlock(&st->mutex) < 0) {
 		    // if we can't unlock the mutex, something is heavily wrong!
 		    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 
 		if (strcmp(script, SCANBD_NULL_STRING) != 0) {
@@ -1034,7 +1034,7 @@ static void* sane_poll(void* arg) {
 		if (pthread_mutex_lock(&st->mutex) < 0) {
 		    // if we can't get the mutex, something is heavily wrong!
 		    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 
 		st->triggered = false;
@@ -1048,7 +1048,7 @@ static void* sane_poll(void* arg) {
 		if (pthread_mutex_unlock(&st->mutex) < 0) {
 		    // if we can't release the mutex, something is heavily wrong!
 		    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 		// sleep the timeout to settle devices, necessary?
 		usleep(timeout * 1000); //ms
@@ -1060,7 +1060,7 @@ static void* sane_poll(void* arg) {
 		if (pthread_mutex_lock(&st->mutex) < 0) {
 		    // if we can't get the mutex, something is heavily wrong!
 		    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 
 		slog(SLOG_DEBUG, "reopen device %s", st->dev->name);
@@ -1069,7 +1069,7 @@ static void* sane_poll(void* arg) {
 			 st->dev->name, sane_strstatus(status));
 		    if (status == SANE_STATUS_ACCESS_DENIED) {
 			slog(SLOG_WARN, "abandon polling of %s", st->dev->name);
-			return NULL;
+			pthread_exit(NULL);
 		    }
 		}
 	    } // if triggered
@@ -1082,7 +1082,7 @@ static void* sane_poll(void* arg) {
 	if (pthread_mutex_unlock(&st->mutex) < 0) {
 	    // if we can't unlock the mutex, something is heavily wrong!
 	    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
-	    return NULL;
+	    pthread_exit(NULL);
 	}
 
 	// sleep the polling timeout
@@ -1094,11 +1094,11 @@ static void* sane_poll(void* arg) {
 	if (pthread_mutex_lock(&st->mutex) < 0) {
 	    // if we can't get the mutex, something is heavily wrong!
 	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
-	    return NULL;
+	    pthread_exit(NULL);
 	}
     }
     pthread_cleanup_pop(1); // release the mutex
-    return NULL;
+    pthread_exit(NULL);
 }
 
 // helper to trigger a specified action from another thread

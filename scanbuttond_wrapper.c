@@ -115,7 +115,8 @@ void get_scbtn_devices(void) {
 	return;
     }
     scbtn_device_list = NULL;
-    if ((scbtn_device_list = backend->scanbtnd_get_supported_devices()) != NULL) {
+    num_devices = 0;
+    if ((scbtn_device_list = backend->scanbtnd_get_supported_devices()) == NULL) {
 	slog(SLOG_WARN, "Can't get the scbtn device list");
     }
     const scanner_t* dev = scbtn_device_list;
@@ -123,7 +124,6 @@ void get_scbtn_devices(void) {
 	slog(SLOG_DEBUG, "device list null");
 	goto cleanup;
     }
-    num_devices = 0;
     while(dev != NULL) {
 	slog(SLOG_DEBUG, "found device: %s %s %s",
 	     dev->product, dev->vendor, dev->sane_device);
@@ -324,7 +324,7 @@ void* scbtn_poll(void* arg) {
     if (pthread_mutex_lock(&st->mutex) < 0) {
 	// if we can't get the mutex, something is heavily wrong!
 	slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
-	return NULL;
+	pthread_exit(NULL);
     }
 
     int ores = backend->scanbtnd_open((scanner_t*)st->dev);
@@ -334,7 +334,7 @@ void* scbtn_poll(void* arg) {
 	if (ores == -ENODEV) {
 	    slog(SLOG_WARN, "scanbtnd_open failed, no device -> canceling thread");
 	}
-	return NULL;
+	pthread_exit(NULL);
     }
 
     // figure out the number of options this device has
@@ -344,7 +344,7 @@ void* scbtn_poll(void* arg) {
     if (st->num_of_options == 0) {
 	// no options -> nothing to poll
 	slog(SLOG_INFO, "No options for device %s", st->dev->product);
-	return NULL;
+	pthread_exit(NULL);
     }
     slog(SLOG_INFO, "found %d options for device %s", st->num_of_options, st->dev->product);
 
@@ -484,34 +484,6 @@ void* scbtn_poll(void* arg) {
 	    //	    scbtn_option_value_init(&value);
 	    // push the cleanup-handle to free the value storage
 	    pthread_cleanup_push(scbtn_thread_cleanup_value, NULL);
-
-	    // get the actual value
-	    // but don't query an option twice or more (see config multiple_actions)
-	    // because this may reset the values and no other value changes can be
-	    // detected
-	    //	    int o = 0;
-	    //	    bool gotAlready = false;
-	    //	    for(o = 0; o < i; o += 1) {
-	    //		if (st->opts[o].number == st->opts[i].number) {
-	    //		    gotAlready = true;
-	    //		    break;
-	    //		}
-	    //	    }
-	    //	    if (!gotAlready) {
-	    //		// first query of option with this number
-	    //		value = get_scbtn_option_value(st->h, st->opts[i].number);
-	    //	    }
-	    //	    else {
-	    //		// additional query, so copy the value
-	    //		slog(SLOG_INFO, "got the value already -> copy");
-	    //		// found: copy the value
-	    //		slog(SLOG_DEBUG, "copy the value of option %d", st->opts[o].number);
-	    //		value.num_value = st->opts[o].value.num_value;
-	    //		if (st->opts[o].value.str_value.str != NULL) {
-	    //		    value.str_value.str = strdup(st->opts[o].value.str_value.str);
-	    //		    assert(value.str_value.str != NULL);
-	    //		}
-	    //	    }
 
 	    slog(SLOG_INFO, "checking option %s number %d (%d) for device %s",
 		 name, st->opts[i].number, i,
@@ -675,7 +647,7 @@ void* scbtn_poll(void* arg) {
 		if (pthread_mutex_unlock(&st->mutex) < 0) {
 		    // if we can't unlock the mutex, something is heavily wrong!
 		    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 
 		if (strcmp(script, SCANBD_NULL_STRING) != 0) {
@@ -726,7 +698,7 @@ void* scbtn_poll(void* arg) {
 		if (pthread_mutex_lock(&st->mutex) < 0) {
 		    // if we can't get the mutex, something is heavily wrong!
 		    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 
 		st->triggered = false;
@@ -740,7 +712,7 @@ void* scbtn_poll(void* arg) {
 		if (pthread_mutex_unlock(&st->mutex) < 0) {
 		    // if we can't release the mutex, something is heavily wrong!
 		    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 		// sleep the timeout to settle devices, necessary?
 		usleep(timeout * 1000); //ms
@@ -752,7 +724,7 @@ void* scbtn_poll(void* arg) {
 		if (pthread_mutex_lock(&st->mutex) < 0) {
 		    // if we can't get the mutex, something is heavily wrong!
 		    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 
 		slog(SLOG_DEBUG, "reopen device %s", st->dev->product);
@@ -764,7 +736,7 @@ void* scbtn_poll(void* arg) {
 		    if (ores == -ENODEV) {
 			slog(SLOG_WARN, "scanbtnd_open failed, no device -> canceling thread");
 		    }
-		    return NULL;
+		    pthread_exit(NULL);
 		}
 	    } // if triggered
 	} // foreach option
@@ -776,7 +748,7 @@ void* scbtn_poll(void* arg) {
 	if (pthread_mutex_unlock(&st->mutex) < 0) {
 	    // if we can't unlock the mutex, something is heavily wrong!
 	    slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
-	    return NULL;
+	    pthread_exit(NULL);
 	}
 
 	// sleep the polling timeout
@@ -788,11 +760,11 @@ void* scbtn_poll(void* arg) {
 	if (pthread_mutex_lock(&st->mutex) < 0) {
 	    // if we can't get the mutex, something is heavily wrong!
 	    slog(SLOG_ERROR, "pthread_mutex_lock: %s", strerror(errno));
-	    return NULL;
+	    pthread_exit(NULL);
 	}
     }
     pthread_cleanup_pop(1); // release the mutex
-    return NULL;
+    pthread_exit(NULL);
 }
 
 void start_scbtn_threads() {

@@ -25,9 +25,14 @@ SCANBD_DIR = $(PREFIX)/etc/scanbd
 BIN_DIR = $(PREFIX)/bin
 
 USE_HAL=yes
-USE_SANE=yes # otherwise USE_SCANBUTTOND
 
-#CPPFLAGS += -DNDEBUG
+ifndef USE_SCANBUTTOND
+USE_SANE=yes # otherwise USE_SCANBUTTOND
+endif
+
+ifdef NDEBUG
+CPPFLAGS += -DNDEBUG
+endif
 
 CPPFLAGS += -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
 CFLAGS   += -Wall -Wextra -std=c99 -g
@@ -105,6 +110,9 @@ install: scanbd
 	cp test.script $(SCANBD_DIR)
 	echo "Copy scanbd to $(BIN_DIR)"
 	cp scanbd $(BIN_DIR)
+	echo "Copy scanbuttond backends to $(SCANBD_DIR)/scanbuttond/backends"
+	mkdir -p "$(SCANBD_DIR)/scanbuttond/backends"
+	cp scanbuttond/backends/*.so "$(SCANBD_DIR)/scanbuttond/backends"
 	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"
 	cp scanbd_dbus.conf /etc/dbus-1/system.d/
 	echo "Edit /etc/inetd.conf"
