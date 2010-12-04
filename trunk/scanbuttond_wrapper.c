@@ -42,10 +42,6 @@ pthread_cond_t  scbtn_cv    = PTHREAD_COND_INITIALIZER;
 
 struct scbtn_opt_value {
     unsigned long num_value; // before-value or after-value or actual-value (BOOL|INT|FIXED)
-//    struct {                 // (SRING)
-//	char*     str;       // actual-value
-//	regex_t*  reg;       // before-regex or after-regex
-//    } str_value;
 };
 typedef struct scbtn_opt_value scbtn_opt_value_t;
 
@@ -83,9 +79,8 @@ struct scbtn_thread {
     const scanner_t* dev;	     // the device
     int num_of_options;	             // the number of all options for
 				     // this device
-//    scbtn_Handle h;                   // the handle of the opened device
     scbtn_dev_option_t *opts;        // the list of matched actions
-//				     // for this device
+				     // for this device
     int num_of_options_with_scripts; // the number of elements in the
 				     // above list
     scbtn_dev_function_t *functions;  // the list of matched functions
@@ -103,7 +98,6 @@ static const scanner_t* scbtn_device_list = NULL;
 
 // the number of devices = the number of polling threads
 static int num_devices = 0;
-
 
 void get_scbtn_devices(void) {
     // detect all the scanners we have
@@ -303,13 +297,11 @@ void scbtn_find_matching_functions(scbtn_thread_t* st, cfg_t* sec) {
 	slog(SLOG_INFO, "no matching functions in section %s", title);
 	return;
     }
-
+    slog(SLOG_INFO, "scanbuttond backends can't use function definitions");
     st->num_of_options_with_functions = 0;
 }
 
 void* scbtn_poll(void* arg) {
-//    assert(false);
-
     scbtn_thread_t* st = (scbtn_thread_t*)arg;
     assert(st != NULL);
     slog(SLOG_DEBUG, "scbtn_poll");
@@ -329,7 +321,7 @@ void* scbtn_poll(void* arg) {
 
     int ores = backend->scanbtnd_open((scanner_t*)st->dev);
     if (ores != 0) {
-	slog(SLOG_WARN, "scanbtnd_open failed, error code: %d", ores);
+	slog(SLOG_WARN, "scanbtnd_open failed, error code: %s", strerror(ores));
 	slog(SLOG_WARN, "abandon polling of %s", st->dev->product);
 	if (ores == -ENODEV) {
 	    slog(SLOG_WARN, "scanbtnd_open failed, no device -> canceling thread");
@@ -768,7 +760,6 @@ void* scbtn_poll(void* arg) {
 }
 
 void start_scbtn_threads() {
-//    assert(false);
     slog(SLOG_DEBUG, "start_scbtn_threads");
 
     if (pthread_mutex_lock(&scbtn_mutex) < 0) {
@@ -828,7 +819,6 @@ void start_scbtn_threads() {
 }
 
 void stop_scbtn_threads() {
-//    assert(false);
     slog(SLOG_DEBUG, "stop_scbtn_threads");
 
     if (pthread_mutex_lock(&scbtn_mutex) < 0) {
@@ -930,7 +920,6 @@ void stop_scbtn_threads() {
 }
 
 void scbtn_trigger_action(int number_of_dev, int action) {
-    assert(false);
     assert(number_of_dev >= 0);
     assert(action >= 0);
     slog(SLOG_DEBUG, "sane_trigger_action device=%d, action=%d", number_of_dev, action);
@@ -998,12 +987,10 @@ void scbtn_trigger_action(int number_of_dev, int action) {
 	slog(SLOG_ERROR, "pthread_mutex_unlock: %s", strerror(errno));
     }
     return;
-
 }
 
 void scbtn_shutdown(void)
 {
-//    assert(false);
     slog(SLOG_INFO, "shutting down...");
     backend->scanbtnd_exit();
     scanbtnd_unload_backend(backend);

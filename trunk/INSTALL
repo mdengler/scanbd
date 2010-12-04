@@ -53,10 +53,16 @@ If you don't want scanbd to use HAL, comment the line in the Makefile (USE_HAL=y
 If you want to use the sane-backends, set USE_SANE=yes in the Makefile. Otherwise the
 scanbuttond backends are used.
 
-make 
+make clean all
+-or-
+USE_SCANBUTTOND=yes make -e clean all
+-or-
+USE_SANE=yes make -e clean all
 
 copy the executable scanbd and config-files scanbd.conf, etc. to useful places
-(or use "make install" to copy to /usr/local/etc/scanbd)
+(or use "make install" to copy to /usr/local/etc/scanbd).
+If you use the scanbuttond-backends copy the shared-objects from scanbuttond/backends directory
+to /usr/local/etc/scanbd/scanbuttond/backends.
 
 2) scanbd_dbus.conf
 
@@ -155,3 +161,7 @@ usermod -a -G lp saned
   
   Or use a web based application for scanning (see the frontends documentation on the sane-project page)
 
+9) Actual problems
+
+- if you use USE_SCANBUTTOND: the usb-device can't be opened if another applications (say cupsd) does the
+  same. In this case scanbd stops polling the device, but does not start the polling again.

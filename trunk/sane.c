@@ -40,7 +40,7 @@ pthread_cond_t  sane_cv    = PTHREAD_COND_INITIALIZER;
 
 struct sane_opt_value {    
     unsigned long num_value; // before-value or after-value or actual-value (BOOL|INT|FIXED)
-    struct {                 // (SRING)
+    struct {                 // (STRING)
 	char*     str;       // actual-value 
 	regex_t*  reg;       // before-regex or after-regex
     } str_value;

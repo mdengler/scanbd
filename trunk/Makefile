@@ -45,9 +45,9 @@ LDFLAGS += -lsane
 
 else # USE_SANE
 
-CFG_DIR=./scanbuttond/backends
+CFG_DIR=$(SCANBD_DIR)/scanbuttond/backends
 export CFG_DIR
-CPPFLAGS += -UUSE_SANE -DUSE_SCANBUTTOND -I./scanbuttond/include -DCFG_DIR=$(CFG_DIR) 
+CPPFLAGS += -UUSE_SANE -DUSE_SCANBUTTOND -I./scanbuttond/include -DCFG_DIR=\"$(CFG_DIR)\"
 LDFLAGS += -rdynamic -lusb -ldl
 
 endif # USE_SANE
