@@ -150,7 +150,11 @@ void cfg_do_parse(void) {
 
 void sig_hup_handler(int signal) {
     slog(SLOG_DEBUG, "sig_hup_handler called");
-    (void)signal;
+
+    if (signal == SIGALRM) {
+	slog(SLOG_INFO, "reconfiguration due to SIGALARM, device was busy?");
+    }
+
     // stop all threads
 #ifdef USE_SANE
     stop_sane_threads();
@@ -296,6 +300,16 @@ int main(int argc, char** argv) {
 	slog(SLOG_ERROR, "Can't install signalhandler for SIGHUP: %s", strerror(errno));
 	exit(EXIT_FAILURE);
     }
+#ifdef USE_SCANBUTTOND
+    // install the SIGHUP handler also for SIGALARM
+    // SIGALARM is used if there is a open failure of the
+    // scanbuutond backends, possible cause is a device scanning from other
+    // prosesses like cupsd
+    if (sigaction(SIGALRM, &sa, NULL) < 0) {
+	slog(SLOG_ERROR, "Can't install signalhandler for SIGALARM: %s", strerror(errno));
+	exit(EXIT_FAILURE);
+    }
+#endif
 
     // SIGUSR1 is used to stop all polling threads
     memset(&sa, 0, sizeof(struct sigaction));
