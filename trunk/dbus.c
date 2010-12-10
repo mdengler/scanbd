@@ -43,13 +43,22 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
 
     if (argv != NULL) {
 	DBusMessageIter args;
+	DBusMessageIter sub;
 	dbus_message_iter_init_append(signal, &args);
+	if (dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY,
+					     DBUS_TYPE_STRING_AS_STRING,
+					     &sub) != TRUE) {
+	    slog(SLOG_ERROR, "Can't initialize dbus container");
+	}
 	while(*argv != NULL) {
 	    slog(SLOG_DEBUG, "append string %s to signal %s", *argv, signal_name);
-	    if (dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, argv) != TRUE) {
+	    if (dbus_message_iter_append_basic(&sub, DBUS_TYPE_STRING, argv) != TRUE) {
 		slog(SLOG_ERROR, "Can't append signal argument");
 	    }
 	    argv++;
+	}
+	if (dbus_message_iter_close_container(&args, &sub) != TRUE) {
+	    slog(SLOG_ERROR, "Can't close dbus container");
 	}
     }
 
