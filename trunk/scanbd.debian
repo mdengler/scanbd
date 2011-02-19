@@ -17,7 +17,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="SANE scanner button daemon"
 NAME=scanbd
 DAEMON=/usr/sbin/$NAME
-DAEMON_ARGS="-c i/usr/local/etc/scanbd/scanbd.conf"
+DAEMON_ARGS="-c /usr/local/etc/scanbd/scanbd.conf"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
