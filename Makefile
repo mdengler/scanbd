@@ -36,25 +36,26 @@ endif
 
 CPPFLAGS += -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
 CFLAGS   += -Wall -Wextra -std=c99 -g
-LDFLAGS  += -lconfuse -lpthread -ldbus-1
+LDLIBS  += -lconfuse -lpthread -ldbus-1
 
 ifdef USE_SANE
 
 CPPFLAGS += -DUSE_SANE -UUSE_SCANBUTTOND
-LDFLAGS += -lsane
+LDLIBS += -lsane
 
 else # USE_SANE
 
 CFG_DIR=$(SCANBD_DIR)/scanbuttond/backends
 export CFG_DIR
 CPPFLAGS += -UUSE_SANE -DUSE_SCANBUTTOND -I./scanbuttond/include -DCFG_DIR=\"$(CFG_DIR)\"
-LDFLAGS += -rdynamic -lusb -ldl
+LDFLAGS += -rdynamic
+LDLIBS += -lusb -ldl
 
 endif # USE_SANE
 
 ifdef USE_HAL
 CPPFLAGS += -DUSE_HAL
-LDFLAGS  += -lhal
+LDLIBS  += -lhal
 endif # USE_HAL
 
 .PHONY: scanbuttond all
@@ -72,10 +73,10 @@ all: scanbuttond scanbd test
 testonly: scanbuttond test
 
 scanbd: scanbd.o slog.o daemonize.o dbus.o scanbuttond_wrapper.o scanbuttond_loader.o
-	$(LINK.c) $^ scanbuttond/interface/libusbi.o -o $@
+	$(LINK.c) $^ scanbuttond/interface/libusbi.o $(LDLIBS) -o $@
 
 test: test.o scanbuttond_loader.o slog.o scanbuttond_wrapper.o dbus.o
-	$(LINK.c) $^ scanbuttond/interface/libusbi.o -o $@
+	$(LINK.c) $^ scanbuttond/interface/libusbi.o $(LDLIBS) -o $@
 
 endif # USE_SANE
 
