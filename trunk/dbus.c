@@ -33,6 +33,11 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
 
     DBusMessage* signal = NULL;
 
+    if (!conn) {
+	slog(SLOG_INFO, "No dbus connection");
+	return;
+    }
+
     assert(signal_name != NULL);
     if ((signal = dbus_message_new_signal(SCANBD_DBUS_OBJECTPATH,
 					  SCANBD_DBUS_INTERFACE,
@@ -77,6 +82,11 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
 
 void dbus_send_signal(const char* signal_name, const char* arg) {
     DBusMessage* signal = NULL;
+
+    if (!conn) {
+	slog(SLOG_INFO, "No dbus connection");
+	return;
+    }
 
     assert(signal_name != NULL);
     if ((signal = dbus_message_new_signal(SCANBD_DBUS_OBJECTPATH,
@@ -471,7 +481,8 @@ bool dbus_init(void) {
 
     if (conn == NULL) {
 	conn = dbus_bus_get(DBUS_BUS_SYSTEM, &dbus_error);
-	if (dbus_error_is_set(&dbus_error)) { 
+	if (dbus_error_is_set(&dbus_error)) {
+	    conn = NULL;
 	    slog(SLOG_ERROR, "DBus connection error: %s", dbus_error.message);
 	    dbus_error_free(&dbus_error);
 	    return false;
@@ -480,6 +491,11 @@ bool dbus_init(void) {
     else {
 	slog(SLOG_WARN, "dbus connection already established");
     }
+    if (!conn) {
+	slog(SLOG_INFO, "No dbus connection");
+	return false;
+    }
+
     assert(conn);
 
 #ifdef USE_HAL
@@ -528,6 +544,11 @@ void dbus_start_dbus_thread(void) {
     }
     assert(conn);
     
+    if (!conn) {
+	slog(SLOG_INFO, "No dbus connection");
+	return;
+    }
+
     DBusError dbus_error;
     
     dbus_error_init(&dbus_error);
@@ -586,6 +607,11 @@ void dbus_call_method(const char* method, const char* value) {
 	}
     }
     assert(conn);
+
+    if (!conn) {
+	slog(SLOG_INFO, "No dbus connection");
+	return;
+    }
 
     DBusMessage* msg = NULL;
     if ((msg = dbus_message_new_method_call(SCANBD_DBUS_ADDRESS,
@@ -650,6 +676,11 @@ void dbus_call_trigger(unsigned int device, unsigned int action) {
 	}
     }
     assert(conn);
+
+    if (!conn) {
+	slog(SLOG_INFO, "No dbus connection");
+	return;
+    }
 
     DBusMessage* msg = NULL;
     if ((msg = dbus_message_new_method_call(SCANBD_DBUS_ADDRESS,
