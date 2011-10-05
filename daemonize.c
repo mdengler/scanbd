@@ -28,44 +28,44 @@ void daemonize(void) {
     pid_t pid;
 
     if ((pid = fork()) < 0) {
-	slog(SLOG_ERROR, "fork: %s", strerror(errno));
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "fork: %s", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     else if (pid > 0) { // Parent
-	exit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
     // Child
     if (setsid() < 0) {
-	slog(SLOG_ERROR, "setsid: %s", strerror(errno));
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "setsid: %s", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     if ((pid = fork()) < 0) {
-	slog(SLOG_ERROR, "fork: %s", strerror(errno));
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "fork: %s", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     else if (pid > 0) { // Parent
-	exit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
     // Child-Child
     int ofd;
     if ((ofd = open("/dev/null", O_RDWR)) < 0) {
-	slog(SLOG_ERROR, "open /dev/null: %s", strerror(errno));
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "open /dev/null: %s", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     if (dup2(ofd, STDIN_FILENO) < 0) {
-	slog(SLOG_ERROR, "dup2: %s", strerror(errno));
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "dup2: %s", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     if (dup2(ofd, STDOUT_FILENO) < 0) {
-	slog(SLOG_ERROR, "dup2: %s", strerror(errno));
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "dup2: %s", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     if (dup2(ofd, STDERR_FILENO) < 0) {
-	slog(SLOG_ERROR, "dup2: %s", strerror(errno));
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "dup2: %s", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     if (chdir("/") < 0) {
-	slog(SLOG_ERROR, "chdir: %s", strerror(errno));
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "chdir: %s", strerror(errno));
+        exit(EXIT_FAILURE);
     }
 }
