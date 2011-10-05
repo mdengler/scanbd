@@ -34,7 +34,7 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
     DBusMessage* signal = NULL;
 
     if (!conn) {
-	slog(SLOG_INFO, "No dbus connection");
+	slog(SLOG_DEBUG, "No dbus connection");
 	return;
     }
 
@@ -84,7 +84,7 @@ void dbus_send_signal(const char* signal_name, const char* arg) {
     DBusMessage* signal = NULL;
 
     if (!conn) {
-	slog(SLOG_INFO, "No dbus connection");
+	slog(SLOG_DEBUG, "No dbus connection");
 	return;
     }
 
@@ -492,7 +492,7 @@ bool dbus_init(void) {
 	slog(SLOG_WARN, "dbus connection already established");
     }
     if (!conn) {
-	slog(SLOG_INFO, "No dbus connection");
+	slog(SLOG_DEBUG, "No dbus connection");
 	return false;
     }
 
@@ -545,7 +545,7 @@ void dbus_start_dbus_thread(void) {
     assert(conn);
     
     if (!conn) {
-	slog(SLOG_INFO, "No dbus connection");
+	slog(SLOG_DEBUG, "No dbus connection");
 	return;
     }
 
@@ -609,7 +609,7 @@ void dbus_call_method(const char* method, const char* value) {
     assert(conn);
 
     if (!conn) {
-	slog(SLOG_INFO, "No dbus connection");
+	slog(SLOG_DEBUG, "No dbus connection");
 	return;
     }
 
@@ -678,7 +678,7 @@ void dbus_call_trigger(unsigned int device, unsigned int action) {
     assert(conn);
 
     if (!conn) {
-	slog(SLOG_INFO, "No dbus connection");
+	slog(SLOG_DEBUG, "No dbus connection");
 	return;
     }
 
