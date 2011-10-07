@@ -33,6 +33,13 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
 
     DBusMessage* signal = NULL;
 
+    if (conn == NULL) {
+        if (!dbus_init()) {
+            return;
+        }
+    }
+    assert(conn);
+
     if (!conn) {
         slog(SLOG_DEBUG, "No dbus connection");
         return;
@@ -82,6 +89,13 @@ void dbus_send_signal_argv(const char* signal_name, char** argv) {
 
 void dbus_send_signal(const char* signal_name, const char* arg) {
     DBusMessage* signal = NULL;
+
+    if (conn == NULL) {
+        if (!dbus_init()) {
+            return;
+        }
+    }
+    assert(conn);
 
     if (!conn) {
         slog(SLOG_DEBUG, "No dbus connection");
