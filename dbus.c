@@ -250,22 +250,52 @@ static void dbus_signal_device_added(void) {
 #ifndef USE_HAL
     slog(SLOG_DEBUG, "dbus_signal_device_added");
     // look for new scanner
+#ifdef USE_SANE
     stop_sane_threads();
+#else
+    stop_scbtn_threads();
+#endif // USE_SANE
     slog(SLOG_DEBUG, "sane_exit");
+#ifdef USE_SANE
     sane_exit();
+#else
+    scbtn_shutdown();
+#endif // USE_SANE
+
 #ifdef SANE_REINIT_TIMEOUT
     sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
     // really neccessary
 #endif
+
+#ifdef USE_SANE
     slog(SLOG_DEBUG, "sane_init");
     sane_init(NULL, NULL);
     get_sane_devices();
     start_sane_threads();
-#endif
+#else
+    scanbtnd_set_libdir("./scanbuttond/backends");
+    if (scanbtnd_loader_init() != 0) {
+	slog(SLOG_INFO, "Could not initialize module loader!\n");
+	exit(EXIT_FAILURE);
+    }
+    backend = scanbtnd_load_backend("meta");
+    if (!backend) {
+	slog(SLOG_INFO, "Unable to load backend library\n");
+	scanbtnd_loader_exit();
+	exit(EXIT_FAILURE);
+    }
+    if (backend->scanbtnd_init() != 0) {
+	slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+	exit(EXIT_FAILURE);
+    }
+    get_scbtn_devices();
+    start_scbtn_threads();
+#endif // USE_SANE
+#endif // USE_HAL
 }
 
 static void dbus_signal_device_removed(void) {
-#ifdef USE_HAL
+#ifndef USE_HAL
     slog(SLOG_DEBUG, "dbus_signal_device_removed");
     // look for removed scanner
 #ifdef USE_SANE
