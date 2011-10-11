@@ -74,4 +74,6 @@ extern void dbus_call_trigger(unsigned int, unsigned int);
 extern void dbus_start_dbus_thread(void);
 extern void dbus_stop_dbus_thread(void);
 
+extern void dbus_signal_device_removed(void);
+extern void dbus_signal_device_added(void);
 #endif

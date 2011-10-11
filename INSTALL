@@ -49,7 +49,8 @@ So all applications must be enabled to use network-scanning (even if the scanner
 
 1) build
 
-If you don't want scanbd to use HAL, comment the line in the Makefile (USE_HAL=yes).
+scanbd now uses libudev by default instead of HAL.
+If you want scanbd to use HAL, comment the line in the Makefile (USE_LIBUDEV=yes).
 If you want to use the sane-backends, set USE_SANE=yes in the Makefile. Otherwise the
 scanbuttond backends are used.
 
@@ -168,3 +169,12 @@ Also edit/check scanbd.conf to set the effective group = lp !
 - if you use USE_SCANBUTTOND: the usb-device can't be opened if another applications (say cupsd) does the
   same. In this case scanbd stops polling the device for a predefined amount of time and restarts polling
   after that time again.
+
+- dynamic device recognition:
+  HAL(hald) is deprecated: on recent distributions halt isn't used or isn't started by default anymore.
+  udisks online sends out storage related dbus events (no DeviceAdded events for scanner, etc., that's why
+  it is called udisks ;-)). So, if you have udisks-daemon and can't start hald, there is currently no
+  possibilty to automatically reconfigure if non-storage devices are added/removed
+
+10) TODO
+- refactor dbus.c, udev.c
