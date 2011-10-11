@@ -116,4 +116,5 @@ install: scanbd
 	cp scanbuttond/backends/*.so "$(SCANBD_DIR)/scanbuttond/backends"
 	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"
 	cp scanbd_dbus.conf /etc/dbus-1/system.d/
+	cp scanbuttond/backends/meta.conf /usr/local/etc/scanbd/scanbuttond/backends/meta.conf
 	echo "Edit /etc/inetd.conf"
