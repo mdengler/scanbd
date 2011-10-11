@@ -24,7 +24,11 @@ PREFIX = /usr/local
 SCANBD_DIR = $(PREFIX)/etc/scanbd
 BIN_DIR = $(PREFIX)/bin
 
+USE_LIBUDEV=yes
+
+ifndef USE_LIBUDEV
 USE_HAL=yes
+endif
 
 ifndef USE_SCANBUTTOND
 USE_SANE=yes # otherwise USE_SCANBUTTOND
@@ -39,7 +43,6 @@ CFLAGS   += -Wall -Wextra -std=c99 -g
 LDLIBS  += -lconfuse -lpthread -ldbus-1
 
 ifdef USE_SANE
-
 CPPFLAGS += -DUSE_SANE -UUSE_SCANBUTTOND
 LDLIBS += -lsane
 
@@ -58,13 +61,18 @@ CPPFLAGS += -DUSE_HAL
 LDLIBS  += -lhal
 endif # USE_HAL
 
+ifdef USE_LIBUDEV
+CPPFLAGS += -DUSE_LIBUDEV
+LDLIBS += -ludev
+endif # USE_LIBUDEV
+
 .PHONY: scanbuttond all
 
 ifdef USE_SANE
 
 all: scanbd
 
-scanbd: scanbd.o slog.o sane.o daemonize.o dbus.o
+scanbd: scanbd.o slog.o sane.o daemonize.o dbus.o udev.o
 
 else # USE_SANE
 
@@ -72,7 +80,7 @@ all: scanbuttond scanbd test
 
 testonly: scanbuttond test
 
-scanbd: scanbd.o slog.o daemonize.o dbus.o scanbuttond_wrapper.o scanbuttond_loader.o
+scanbd: scanbd.o slog.o daemonize.o dbus.o scanbuttond_wrapper.o scanbuttond_loader.o udev.o
 	$(LINK.c) $^ scanbuttond/interface/libusbi.o $(LDLIBS) -o $@
 
 test: test.o scanbuttond_loader.o slog.o scanbuttond_wrapper.o dbus.o
@@ -94,6 +102,8 @@ daemonize.o: daemonize.c common.h
 
 sane.o: sane.c scanbd.h common.h
 
+udev.o: udev.c udev.h scanbd.h
+
 scanbuttond:
 	$(MAKE) -C scanbuttond all
 
@@ -113,8 +123,8 @@ install: scanbd
 	cp scanbd $(BIN_DIR)
 	echo "Copy scanbuttond backends to $(SCANBD_DIR)/scanbuttond/backends"
 	mkdir -p "$(SCANBD_DIR)/scanbuttond/backends"
-	cp scanbuttond/backends/*.so "$(SCANBD_DIR)/scanbuttond/backends"
+	-cp scanbuttond/backends/*.so "$(SCANBD_DIR)/scanbuttond/backends"
 	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"
 	cp scanbd_dbus.conf /etc/dbus-1/system.d/
-	cp scanbuttond/backends/meta.conf /usr/local/etc/scanbd/scanbuttond/backends/meta.conf
+	-cp scanbuttond/backends/meta.conf /usr/local/etc/scanbd/scanbuttond/backends/meta.conf
 	echo "Edit /etc/inetd.conf"

@@ -44,6 +44,7 @@
 
 #include "slog.h"
 #include "scanbd_dbus.h"
+#include "udev.h"
 
 #define SANE_REINIT_TIMEOUT 3 // TODO: don't know if this is really neccessary
 

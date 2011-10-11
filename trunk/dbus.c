@@ -27,6 +27,13 @@
 static DBusConnection* conn = NULL;
 static pthread_t dbus_tid = 0;
 
+// this is non-portable (should have an initializer function here)
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+#error "PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP not available"
+#endif
+
+static pthread_mutex_t dbus_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+
 void dbus_send_signal_argv(const char* signal_name, char** argv) {
     // TODO: we need a better dbus mainloop integrations, so that we
     // can wakeup the main thread to sendout the messages we generate here
@@ -246,7 +253,11 @@ static void hal_device_removed(LibHalContext* ctx, const char *udi) {
 }
 #endif
 
-static void dbus_signal_device_added(void) {
+// this function is used from dbus_thread and udev_thread
+void dbus_signal_device_added(void) {
+    if (pthread_mutex_lock(&dbus_mutex)) {
+        slog(SLOG_ERROR, "Can't lock mutex");
+    }
 #ifndef USE_HAL
     slog(SLOG_DEBUG, "dbus_signal_device_added");
     // look for new scanner
@@ -275,26 +286,32 @@ static void dbus_signal_device_added(void) {
 #else
     scanbtnd_set_libdir("./scanbuttond/backends");
     if (scanbtnd_loader_init() != 0) {
-	slog(SLOG_INFO, "Could not initialize module loader!\n");
-	exit(EXIT_FAILURE);
+        slog(SLOG_INFO, "Could not initialize module loader!\n");
+        exit(EXIT_FAILURE);
     }
     backend = scanbtnd_load_backend("meta");
     if (!backend) {
-	slog(SLOG_INFO, "Unable to load backend library\n");
-	scanbtnd_loader_exit();
-	exit(EXIT_FAILURE);
+        slog(SLOG_INFO, "Unable to load backend library\n");
+        scanbtnd_loader_exit();
+        exit(EXIT_FAILURE);
     }
     if (backend->scanbtnd_init() != 0) {
-	slog(SLOG_ERROR, "Error initializing backend. Terminating.");
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+        exit(EXIT_FAILURE);
     }
     get_scbtn_devices();
     start_scbtn_threads();
 #endif // USE_SANE
 #endif // USE_HAL
+    if (pthread_mutex_unlock(&dbus_mutex)) {
+        slog(SLOG_ERROR, "Can't unlock mutex");
+    }
 }
 
-static void dbus_signal_device_removed(void) {
+void dbus_signal_device_removed(void) {
+    if (pthread_mutex_lock(&dbus_mutex)) {
+        slog(SLOG_ERROR, "Can't lock mutex");
+    }
 #ifndef USE_HAL
     slog(SLOG_DEBUG, "dbus_signal_device_removed");
     // look for removed scanner
@@ -339,6 +356,9 @@ static void dbus_signal_device_removed(void) {
     }
 #endif
 #endif
+    if (pthread_mutex_unlock(&dbus_mutex)) {
+        slog(SLOG_ERROR, "Can't unlock mutex");
+    }
 }
 
 // is called when saned exited
@@ -489,7 +509,7 @@ void dbus_thread_cleanup(void* arg) {
     (void)arg;
 }
 
-void* dbus_thread(void* arg) {
+static void* dbus_thread(void* arg) {
     (void)arg;
     // we only expect the main thread to handle signals
     sigset_t mask;

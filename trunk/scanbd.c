@@ -698,6 +698,10 @@ int main(int argc, char** argv) {
         // start dbus thread
         dbus_start_dbus_thread();
 
+#ifdef USE_LIBUDEV
+        udev_start_udev_thread();
+#endif
+
         // well, sit here and wait ...
         // this thread executes the signal handlers
         while(true) {
