@@ -26,13 +26,15 @@ CFLAGS   += -Wall -Wextra -std=c99 -g
 %.so: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared -o $@ $<
 
-all: snapscan.so hp3500.so meta.so
+all: snapscan.so hp3500.so meta.so niash.so
 
 snapscan.so: snapscan.c snapscan.h
 
 hp3500.so: hp3500.c hp3500.h
 
 meta.so: meta.c meta.h
+
+niash.so: niash.c niash.h
 
 clean:
 	$(RM) *.o *~ *.so
