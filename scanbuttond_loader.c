@@ -55,8 +55,8 @@ backend_t* scanbtnd_load_backend(const char* filename){
     slog(SLOG_INFO, "Loading %s", dll_path);
 
     if (!(dll_handle = dlopen(dll_path, RTLD_NOW|RTLD_LOCAL))) {
-	slog(SLOG_ERROR, "Can't load %s: %s", dll_path, dlerror());
-	return NULL;
+        slog(SLOG_ERROR, "Can't load %s: %s", dll_path, dlerror());
+        return NULL;
     }
     dlerror();  // Clear any existing error
 
@@ -67,63 +67,63 @@ backend_t* scanbtnd_load_backend(const char* filename){
 
     backend->scanbtnd_get_backend_name = dlsym(dll_handle, "scanbtnd_get_backend_name");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     backend->scanbtnd_init = dlsym(dll_handle, "scanbtnd_init");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     backend->scanbtnd_rescan = dlsym(dll_handle, "scanbtnd_rescan");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     backend->scanbtnd_get_supported_devices = dlsym(dll_handle, "scanbtnd_get_supported_devices");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     backend->scanbtnd_open = dlsym(dll_handle, "scanbtnd_open");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     backend->scanbtnd_close = dlsym(dll_handle, "scanbtnd_close");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     backend->scanbtnd_get_button = dlsym(dll_handle, "scanbtnd_get_button");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     backend->scanbtnd_get_sane_device_descriptor = dlsym(dll_handle, "scanbtnd_get_sane_device_descriptor");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     backend->scanbtnd_exit = dlsym(dll_handle, "scanbtnd_exit");
     if ((error = dlerror()) != NULL) {
-	slog(SLOG_ERROR, "Can't find symbol: %s", error);
-	goto cleanup;
+        slog(SLOG_ERROR, "Can't find symbol: %s", error);
+        goto cleanup;
     }
     return backend;
 
-    cleanup:
-	assert(dll_handle);
-	dlclose(dll_handle);
-	free(backend);
-	return NULL;
+cleanup:
+    assert(dll_handle);
+    dlclose(dll_handle);
+    free(backend);
+    return NULL;
 }
 
 void scanbtnd_unload_backend(backend_t* backend){
     if (backend->handle != NULL) {
-	dlclose(backend->handle);
-	backend->handle = NULL;
-	free(backend);
+        dlclose(backend->handle);
+        backend->handle = NULL;
+        free(backend);
     }
 }
 

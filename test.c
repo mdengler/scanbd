@@ -58,10 +58,10 @@ void list_devices(scanner_t* devices)
 {
     scanner_t* dev = devices;
     while (dev != NULL) {
-	slog(SLOG_INFO, "found scanner: vendor=\"%s\", product=\"%s\", connection=\"%s\", sane_name=\"%s\"",
-	       dev->vendor, dev->product, scanbtnd_get_connection_name(dev->connection),
-	       backend->scanbtnd_get_sane_device_descriptor(dev));
-	dev = dev->next;
+        slog(SLOG_INFO, "found scanner: vendor=\"%s\", product=\"%s\", connection=\"%s\", sane_name=\"%s\"",
+             dev->vendor, dev->product, scanbtnd_get_connection_name(dev->connection),
+             backend->scanbtnd_get_sane_device_descriptor(dev));
+        dev = dev->next;
     }
 }
 
@@ -80,27 +80,27 @@ int main()
     scanbtnd_set_libdir("./scanbuttond/backends");
 
     if (scanbtnd_loader_init() != 0) {
-	slog(SLOG_INFO, "Could not initialize module loader!\n");
-	exit(EXIT_FAILURE);
+        slog(SLOG_INFO, "Could not initialize module loader!\n");
+        exit(EXIT_FAILURE);
     }
 
     backend = scanbtnd_load_backend("meta");
     if (!backend) {
-	slog(SLOG_INFO, "Unable to load backend library\n");
-	scanbtnd_loader_exit();
-	exit(EXIT_FAILURE);
+        slog(SLOG_INFO, "Unable to load backend library\n");
+        scanbtnd_loader_exit();
+        exit(EXIT_FAILURE);
     }
 
     if (backend->scanbtnd_init() != 0) {
-	slog(SLOG_ERROR, "Error initializing backend. Terminating.");
-	exit(EXIT_FAILURE);
+        slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+        exit(EXIT_FAILURE);
     }
 
     scanners = backend->scanbtnd_get_supported_devices();
 
     if (scanners == NULL) {
-	slog(SLOG_WARN, "no known scanner found yet, " \
-	       "waiting for device to be attached");
+        slog(SLOG_WARN, "no known scanner found yet, " \
+             "waiting for device to be attached");
     }
 
     list_devices(scanners);
@@ -115,52 +115,52 @@ int main()
 
     // main loop
     while (killed == 0) {
-	if (scanners == NULL) {
-	    slog(SLOG_DEBUG, "rescanning devices...");
-	    backend->scanbtnd_rescan();
-	    scanners = backend->scanbtnd_get_supported_devices();
-	    if (scanners == NULL) {
-		slog(SLOG_DEBUG, "no supported devices found. rescanning in a few seconds...");
-		usleep(retry_delay);
-		continue;
-	    }
-	    scanners = backend->scanbtnd_get_supported_devices();
-	    continue;
-	}
+        if (scanners == NULL) {
+            slog(SLOG_DEBUG, "rescanning devices...");
+            backend->scanbtnd_rescan();
+            scanners = backend->scanbtnd_get_supported_devices();
+            if (scanners == NULL) {
+                slog(SLOG_DEBUG, "no supported devices found. rescanning in a few seconds...");
+                usleep(retry_delay);
+                continue;
+            }
+            scanners = backend->scanbtnd_get_supported_devices();
+            continue;
+        }
 
-	scanner = scanners;
-	while (scanner != NULL) {
-	    result = backend->scanbtnd_open(scanner);
-	    if (result != 0) {
-		slog(SLOG_WARN, "scanbtnd_open failed, error code: %d", result);
-		if (result == -ENODEV) {
-		    // device has been disconnected, force re-scan
-		    slog(SLOG_INFO, "scanbtnd_open returned -ENODEV, device rescan will be performed");
-		    scanners = NULL;
-		    usleep(retry_delay);
-		    break;
-		}
-		usleep(retry_delay);
-		break;
-	    }
+        scanner = scanners;
+        while (scanner != NULL) {
+            result = backend->scanbtnd_open(scanner);
+            if (result != 0) {
+                slog(SLOG_WARN, "scanbtnd_open failed, error code: %d", result);
+                if (result == -ENODEV) {
+                    // device has been disconnected, force re-scan
+                    slog(SLOG_INFO, "scanbtnd_open returned -ENODEV, device rescan will be performed");
+                    scanners = NULL;
+                    usleep(retry_delay);
+                    break;
+                }
+                usleep(retry_delay);
+                break;
+            }
 
-	    slog(SLOG_INFO, "get");
-	    button = backend->scanbtnd_get_button(scanner);
-	    slog(SLOG_INFO, "value: %d", button);
-	    backend->scanbtnd_close(scanner);
+            slog(SLOG_INFO, "get");
+            button = backend->scanbtnd_get_button(scanner);
+            slog(SLOG_INFO, "value: %d", button);
+            backend->scanbtnd_close(scanner);
 
-	    if ((button > 0) && (button != scanner->lastbutton)) {
-		slog(SLOG_INFO, "button %d has been pressed.", button);
-		scanner->lastbutton = button;
-	    }
-	    if ((button == 0) && (scanner->lastbutton > 0)) {
-		slog(SLOG_INFO, "button %d has been released.", scanner->lastbutton);
-		scanner->lastbutton = button;
-	    }
-	    scanner = scanner->next;
-	}
+            if ((button > 0) && (button != scanner->lastbutton)) {
+                slog(SLOG_INFO, "button %d has been pressed.", button);
+                scanner->lastbutton = button;
+            }
+            if ((button == 0) && (scanner->lastbutton > 0)) {
+                slog(SLOG_INFO, "button %d has been released.", scanner->lastbutton);
+                scanner->lastbutton = button;
+            }
+            scanner = scanner->next;
+        }
 
-	usleep(poll_delay);
+        usleep(poll_delay);
 
     }
 

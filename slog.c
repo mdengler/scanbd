@@ -42,51 +42,51 @@ slog(unsigned int level, const char *format, ...) {
     char* 	string = NULL;
 
     if (isInitialized == 0) {
-	slog_init("");
-	isInitialized = 1;
+        slog_init("");
+        isInitialized = 1;
     }
 
     if (!(level <= debug_level))
-	return;
+        return;
     
     va_start(ap, format);
     for (p = (char *) format; (*p != '\0') && (strlen(buffer) < LINE_MAX); p++) {
-	if (*p != '%') {
-	    sprintf(buffer, "%s%c", buffer, *p);
-	    continue;
-	}
-	switch (*++p) {
-	case 'c':
-	    sprintf(buffer, "%s%c", buffer, (char)va_arg(ap, int));
-	    break;
-	case 'd':
-	    sprintf(buffer, "%s%d", buffer, va_arg(ap, int));
-	    break;
-	case 'f':
-	    sprintf(buffer, "%s%f", buffer, va_arg(ap, double));
-	    break;
-	case 's':
-	    string = va_arg(ap, char *);
-	    if ((strlen(buffer) + strlen(string)) < LINE_MAX)
-		sprintf(buffer, "%s%s", buffer, string);
-	    break;
-	case 'x':
-	    sprintf(buffer, "%s%x", buffer, va_arg(ap, int));
-	    break;
-	case '%':
-	    sprintf(buffer, "%s%%", buffer);
-	    break;
-	default:
-	    sprintf(buffer, "%s%c", buffer, *p);
-	}
+        if (*p != '%') {
+            sprintf(buffer, "%s%c", buffer, *p);
+            continue;
+        }
+        switch (*++p) {
+        case 'c':
+            sprintf(buffer, "%s%c", buffer, (char)va_arg(ap, int));
+            break;
+        case 'd':
+            sprintf(buffer, "%s%d", buffer, va_arg(ap, int));
+            break;
+        case 'f':
+            sprintf(buffer, "%s%f", buffer, va_arg(ap, double));
+            break;
+        case 's':
+            string = va_arg(ap, char *);
+            if ((strlen(buffer) + strlen(string)) < LINE_MAX)
+                sprintf(buffer, "%s%s", buffer, string);
+            break;
+        case 'x':
+            sprintf(buffer, "%s%x", buffer, va_arg(ap, int));
+            break;
+        case '%':
+            sprintf(buffer, "%s%%", buffer);
+            break;
+        default:
+            sprintf(buffer, "%s%c", buffer, *p);
+        }
     }
     va_end(ap);
 
     if (debug) {
-	printf("%s: %s\n", lpre, buffer);
-	syslog(LOG_DAEMON | LOG_DEBUG, "%s: %s\n", lpre, buffer);
+        printf("%s: %s\n", lpre, buffer);
+        syslog(LOG_DAEMON | LOG_DEBUG, "%s: %s\n", lpre, buffer);
     }
     else {
-	syslog(LOG_DAEMON | LOG_DEBUG, "%s: %s\n", lpre, buffer);
+        syslog(LOG_DAEMON | LOG_DEBUG, "%s: %s\n", lpre, buffer);
     }
 }
