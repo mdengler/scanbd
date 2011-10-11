@@ -49,7 +49,7 @@
 #define SANE_REINIT_TIMEOUT 3 // TODO: don't know if this is really neccessary
 
 #define SCANBUTTOND_ALARM_TIMEOUT 5 // reconfigure after this amount of seconds if
-				    // device was busy
+// device was busy
 
 #define C_FROM_VALUE "from-value"
 #define C_FROM_VALUE_DEF_INT 0

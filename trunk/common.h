@@ -65,14 +65,14 @@
 #endif
 
 #if (_POSIX_MAPPED_FILES - 0) >= 0 || (_POSIX_SHARED_MEMORY_OBJECTS - 0) >= 0 || \
-(_POSIX_MEMLOCK - 0) >= 0 || (_POSIX_MEMORY_PROTECTION - 0) >= 0 || \
-(_POSIX_TYPED_MEMORY_OBJECTS - 0) >= 0 || (_POSIX_SYNCHRONIZED_IO - 0) >= 0 || \
-(_POSIX_ADVISORY_INFO - 0) >= 0 
+    (_POSIX_MEMLOCK - 0) >= 0 || (_POSIX_MEMORY_PROTECTION - 0) >= 0 || \
+    (_POSIX_TYPED_MEMORY_OBJECTS - 0) >= 0 || (_POSIX_SYNCHRONIZED_IO - 0) >= 0 || \
+    (_POSIX_ADVISORY_INFO - 0) >= 0
 #include <sys/mman.h>
 #endif
 
 #if (_POSIX_MAPPED_FILES - 0) >= 0 || (_POSIX_SHARED_MEMORY_OBJECTS - 0) >= 0 || \
-(_POSIX_TYPED_MEMORY_OBJECTS - 0) >= 0  
+    (_POSIX_TYPED_MEMORY_OBJECTS - 0) >= 0
 #define _MC3 /* see POSIX Standard margin notes */
 #endif
 
