@@ -63,7 +63,8 @@ USE_SANE=yes make -e clean all
 copy the executable scanbd and config-files scanbd.conf, etc. to useful places
 (or use "make install" to copy to /usr/local/etc/scanbd).
 If you use the scanbuttond-backends copy the shared-objects from scanbuttond/backends directory
-to /usr/local/etc/scanbd/scanbuttond/backends.
+to /usr/local/etc/scanbd/scanbuttond/backends (or use "make install").
+
 
 2) scanbd_dbus.conf
 

@@ -39,7 +39,7 @@ endif
 %.so: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared -o $@ $<
 
-all: snapscan.so hp3500.so meta.so niash.so
+all: mustek.o plustek.o plustek_umax.o snapscan.so hp3500.so meta.so niash.so artec_eplus48u.o epson.o genesys.o gt68xx.o hp3900.o hp5590.o
 
 snapscan.so: snapscan.c snapscan.h
 
