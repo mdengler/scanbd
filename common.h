@@ -30,6 +30,11 @@
 #define _XOPEN_SOURCE	700
 #endif
 
+#ifdef FreeBSD
+// otherwise usleep() isn't declared
+#define __BSD_VISIBLE 1
+#endif
+
 #if defined(__STDC__) && (__STDC_VERSION__ >= 199901L)
 #include <stdbool.h>
 #endif
@@ -82,7 +87,11 @@
 
 #ifdef _XOPEN_UNIX
 #include <strings.h>
+#ifndef FreeBSD
 #include <utmpx.h>
+#else
+#include <utmp.h>
+#endif
 #include <sys/resource.h>
 #include <sys/uio.h>
 #include <sys/time.h>

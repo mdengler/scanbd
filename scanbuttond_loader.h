@@ -45,7 +45,6 @@ int scanbtnd_loader_init(void);
 void scanbtnd_loader_exit(void);
 backend_t* scanbtnd_load_backend(const char* filename);
 void scanbtnd_unload_backend(backend_t* backend);
-
 void scanbtnd_set_libdir(const char* dir);
 
 #endif

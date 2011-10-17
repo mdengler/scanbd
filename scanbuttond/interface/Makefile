@@ -20,8 +20,21 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+OSTYPE = $(shell uname)
+
 CFLAGS   += -Wall -Wextra -std=c99 -g
+
+ifeq ($(OSTYPE),NetBSD)
+CPPFLAGS += -DNetBSD -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+endif
+
+ifeq ($(OSTYPE),FreeBSD)
+CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN 
+endif 
+
+ifeq ($(OSTYPE),Linux)
+CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN 
+endif 
 
 all: libusbi.o
 
