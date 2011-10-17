@@ -148,6 +148,9 @@ extern struct scanbdOptions scanbd_options;
 extern cfg_t* cfg;
 
 // functions
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+extern void sane_init_mutex();
+#endif
 extern void get_sane_devices(void);
 extern void sane_trigger_action(int, int);
 extern void stop_sane_threads(void);

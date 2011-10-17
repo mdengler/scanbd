@@ -289,6 +289,15 @@ int main(int argc, char** argv) {
     // init the logging feature
     slog_init(argv[0]);
 
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+#ifdef USE_SANE
+    sane_init_mutex();
+#endif
+#ifdef USE_SCANBUTTOND
+    scbtn_init_mutex();
+#endif
+#endif
+
     // install all the signalhandlers early
     // SIGHUP rereads the config as usual
     struct sigaction sa;

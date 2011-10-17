@@ -25,13 +25,14 @@
 #include "scanbuttond_wrapper.h"
 #include "scanbuttond/include/scanbuttond/scanbuttond.h"
 
-// this is non-portable (should have an initializer function here)
-#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
-#error "PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP not available"
+// all programm-global scbtn functions use this mutex to avoid races
+#ifdef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+// this is non-portable
+pthread_mutex_t scbtn_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+#else
+pthread_mutex_t scbtn_mutex;
 #endif
 
-// all programm-global scbtn functions use this mutex to avoid races
-pthread_mutex_t scbtn_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 pthread_cond_t  scbtn_cv    = PTHREAD_COND_INITIALIZER;
 
 // the following locking strategie must be obeyed:
@@ -39,6 +40,26 @@ pthread_cond_t  scbtn_cv    = PTHREAD_COND_INITIALIZER;
 // 2) lock the device specific mutex
 // in this order to avoid deadlocks
 // holding more than these two locks is not intended
+
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+void scbtn_init_mutex()
+{
+    slog(SLOG_INFO, "scbtn_init_mutex");
+    pthread_mutexattr_t mutexattr;
+    if (pthread_mutexattr_init(&mutexattr) < 0) {
+        slog(SLOG_ERROR, "Can't initialize mutex attr");
+        exit(EXIT_FAILURE);
+    }
+    if (pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE) < 0) {
+        slog(SLOG_ERROR, "Can't set mutex attr");
+        exit(EXIT_FAILURE);
+    }
+    if (pthread_mutex_init(&scbtn_mutex, &mutexattr) < 0) {
+        slog(SLOG_ERROR, "Can't init mutex");
+        exit(EXIT_FAILURE);
+    }
+}
+#endif
 
 struct scbtn_opt_value {
     unsigned long num_value; // before-value or after-value or actual-value (BOOL|INT|FIXED)

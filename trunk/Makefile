@@ -20,11 +20,22 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+OSTYPE = $(shell uname)
+
 PREFIX = /usr/local
 SCANBD_DIR = $(PREFIX)/etc/scanbd
 BIN_DIR = $(PREFIX)/bin
+ifeq ($(OSTYPE),FreeBSD)
+DBUS_PREFIX = /usr/local
+else
+DBUS_PREFIX = 
+endif
 
+ifeq ($(OSTYPE),Linux)
 USE_LIBUDEV=yes
+else 
+USE_LIBUDEV=
+endif
 
 ifndef USE_LIBUDEV
 USE_HAL=yes
@@ -38,22 +49,36 @@ ifdef NDEBUG
 CPPFLAGS += -DNDEBUG
 endif
 
-CPPFLAGS += -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
+ifeq ($(OSTYPE),Linux)
 CFLAGS   += -Wall -Wextra -std=c99 -g
+CPPFLAGS += -DLinux -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
 LDLIBS  += -lconfuse -lpthread -ldbus-1
+endif
+
+ifeq ($(OSTYPE),FreeBSD)
+CFLAGS   += -Wall -Wextra -std=c99 -g
+CPPFLAGS += -DFreeBSD -I/usr/local/include -I/usr/local/include/dbus-1.0 -I/usr/local/include/dbus-1.0/include
+LDLIBS  += -L/usr/local/lib -lconfuse -lpthread -ldbus-1
+endif
+
+ifeq ($(OSTYPE),NetBSD)
+CFLAGS   += -Wall -Wextra -std=c99 -g
+CPPFLAGS += -DNetBSD -I/usr/pkg/include -I/usr/pkg/include/dbus-1.0 -I/usr/pkg/lib/dbus-1.0/include
+LDLIBS  += -L/usr/pkg/lib -lconfuse -lpthread -ldbus-1
+endif
 
 ifdef USE_SANE
 CPPFLAGS += -DUSE_SANE -UUSE_SCANBUTTOND
 LDLIBS += -lsane
-
 else # USE_SANE
-
 CFG_DIR=$(SCANBD_DIR)/scanbuttond/backends
 export CFG_DIR
 CPPFLAGS += -UUSE_SANE -DUSE_SCANBUTTOND -I./scanbuttond/include -DCFG_DIR=\"$(CFG_DIR)\"
 LDFLAGS += -rdynamic
-LDLIBS += -lusb -ldl
-
+LDLIBS += -lusb
+ifeq ($(OSTYPE),Linux)
+LDLIBS += -ldl
+endif
 endif # USE_SANE
 
 ifdef USE_HAL
@@ -124,7 +149,7 @@ install: scanbd
 	echo "Copy scanbuttond backends to $(SCANBD_DIR)/scanbuttond/backends"
 	mkdir -p "$(SCANBD_DIR)/scanbuttond/backends"
 	-cp scanbuttond/backends/*.so "$(SCANBD_DIR)/scanbuttond/backends"
-	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"
-	cp scanbd_dbus.conf /etc/dbus-1/system.d/
-	-cp scanbuttond/backends/meta.conf /usr/local/etc/scanbd/scanbuttond/backends/meta.conf
+	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"	
+	cp scanbd_dbus.conf "$(DBUS_PREFIX)/etc/dbus-1/system.d"
+	-cp scanbuttond/backends/meta.conf "$(SCANBD_DIR)/scanbuttond/backends"
 	echo "Edit /etc/inetd.conf"

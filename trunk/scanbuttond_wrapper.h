@@ -23,20 +23,22 @@
 #ifndef SCANBUTTOND_WRAPPER_H
 #define SCANBUTTOND_WRAPPER_H
 
+#include "common.h"
+
 #ifndef USE_SANE
 #include "scanbuttond_loader.h"
 
 extern backend_t* backend; // in scanbd.c
 
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+void scbtn_init_mutex();
+#endif
+
 void get_scbtn_devices(void);
-
 const char* scanbtnd_button_name(const backend_t* backend, unsigned int button);
-
 void start_scbtn_threads(void);
 void stop_scbtn_threads(void);
-
 void scbtn_trigger_action(int number_of_dev, int action);
-
 void scbtn_shutdown(void);
 
 #endif

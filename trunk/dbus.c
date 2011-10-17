@@ -27,12 +27,13 @@
 static DBusConnection* conn = NULL;
 static pthread_t dbus_tid = 0;
 
-// this is non-portable (should have an initializer function here)
-#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
-#error "PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP not available"
+#ifdef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+// this is non-portable
+static pthread_mutex_t dbus_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+#else
+static pthread_mutex_t dbus_mutex;
 #endif
 
-static pthread_mutex_t dbus_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 
 void dbus_send_signal_argv(const char* signal_name, char** argv) {
     // TODO: we need a better dbus mainloop integrations, so that we
@@ -535,6 +536,23 @@ static void* dbus_thread(void* arg) {
 
 bool dbus_init(void) {
     slog(SLOG_DEBUG, "dbus_init");
+
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+    slog(SLOG_INFO, "dbus init mutex");
+    pthread_mutexattr_t mutexattr;
+    if (pthread_mutexattr_init(&mutexattr) < 0) {
+        slog(SLOG_ERROR, "Can't initialize mutex attr");
+        exit(EXIT_FAILURE);
+    }
+    if (pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE) < 0) {
+        slog(SLOG_ERROR, "Can't set mutex attr");
+        exit(EXIT_FAILURE);
+    }
+    if (pthread_mutex_init(&dbus_mutex, &mutexattr) < 0) {
+        slog(SLOG_ERROR, "Can't init mutex");
+        exit(EXIT_FAILURE);
+    }
+#endif
 
     if (!dbus_threads_init_default()) {
         slog(SLOG_ERROR, "DBus thread initialization failure");

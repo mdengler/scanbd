@@ -23,20 +23,41 @@
 #include "scanbd.h"
 #include "scanbd_dbus.h"
 
-// this is non-portable (should have an initializer function here)
-#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
-#error "PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP not available"
+// all programm-global sane functions use this mutex to avoid races
+#ifdef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+// this is non-portable
+static pthread_mutex_t sane_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+#else
+static pthread_mutex_t sane_mutex;
 #endif
 
-// all programm-global sane functions use this mutex to avoid races
-pthread_mutex_t sane_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-pthread_cond_t  sane_cv    = PTHREAD_COND_INITIALIZER;
+static pthread_cond_t  sane_cv    = PTHREAD_COND_INITIALIZER;
 
 // the following locking strategie must be obeyed:
 // 1) lock the sane_mutex
 // 2) lock the device specific mutex
 // in this order to avoid deadlocks
 // holding more than these two locks is not intended
+
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+void sane_init_mutex()
+{
+    slog(SLOG_INFO, "sane_init_mutex");
+    pthread_mutexattr_t mutexattr;
+    if (pthread_mutexattr_init(&mutexattr) < 0) {
+        slog(SLOG_ERROR, "Can't initialize mutex attr");
+        exit(EXIT_FAILURE);
+    }
+    if (pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE) < 0) {
+        slog(SLOG_ERROR, "Can't set mutex attr");
+        exit(EXIT_FAILURE);
+    }
+    if (pthread_mutex_init(&sane_mutex, &mutexattr) < 0) {
+        slog(SLOG_ERROR, "Can't init mutex");
+        exit(EXIT_FAILURE);
+    }
+}
+#endif
 
 struct sane_opt_value {    
     unsigned long num_value; // before-value or after-value or actual-value (BOOL|INT|FIXED)
