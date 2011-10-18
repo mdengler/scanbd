@@ -104,6 +104,10 @@
 #endif
 #endif
 
+#if __cplusplus > 199711L || __GXX_EXPERIMENTAL_CXX0X__
+#define CXX11
+#endif
+
 #define PIPE_READ 0
 #define PIPE_WRITE 1
 
