@@ -504,10 +504,13 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
                 }
             }
             // 0 <= n < st->num_of_options_with_scripts:
-            // we found it
+            // we found it (override now)
             // n == st->num_of_options_with_scripts:
             // not found => new
 
+            if (n == st->num_of_options) {
+                continue; // no space left in array
+            }
             st->opts[n].number = opt;
             st->opts[n].action_name = title;
             st->opts[n].script = script;
