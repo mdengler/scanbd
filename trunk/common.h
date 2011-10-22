@@ -35,6 +35,12 @@
 #define __BSD_VISIBLE 1
 #endif
 
+#ifdef OpenBSD
+#ifndef _POSIX_THREADS
+#define _POSIX_THREADS 1
+#endif
+#endif
+
 #if defined(__STDC__) && (__STDC_VERSION__ >= 199901L)
 #include <stdbool.h>
 #endif
@@ -67,6 +73,8 @@
 
 #if defined(_POSIX_THREADS) && ((_POSIX_THREADS - 0) >= 0)
 #include <pthread.h>
+#else
+#warning "No pthreads support"
 #endif
 
 #if (_POSIX_MAPPED_FILES - 0) >= 0 || (_POSIX_SHARED_MEMORY_OBJECTS - 0) >= 0 || \

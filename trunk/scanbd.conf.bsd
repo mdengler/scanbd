@@ -1,0 +1,273 @@
+/*
+ * $Id: scanbd.conf 54 2011-10-11 20:01:19Z wimalopaan $
+ *
+ *  scanbd - KMUX scanner button daemon
+ *
+ *  Copyright (C) 2008  Wilhelm Meier (wilhelm.meier@fh-kl.de)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+
+# global settings
+global {
+	# turn on debugging
+	
+	# log to console
+	debug   = true 
+
+	# debug logging
+	# 1=error, 2=warn, 3=info, 4-7=debug
+	debug-level = 7
+	
+	# drop priviliges to this
+	# Linux
+        # user    = saned # root
+        # *BSD
+	user    = root
+        # Linux
+	# group   = lp # root
+        # *BSD
+        group   = daemon # root
+
+	# the saned executable for manager-mode
+	saned   = "/usr/sbin/saned"
+	saned_opt  = {} # string-list
+	saned_env  = { "SANE_CONFIG_DIR=/usr/local/etc/scanbd" } # list of environment vars for saned
+
+	scanbuttond_backends_dir = "/usr/local/etc/scanbd/scanbuttond/backends"
+
+	# poll timeout in [ms]
+	# (for polling the devices)
+	timeout = 500 
+	
+	pidfile = "/var/run/scanbd.pid"
+	
+	# env-vars for the scripts
+	environment {
+		# pass the device label as below in this env-var
+		device = "SCANBD_DEVICE"
+		# pass the action label as below in this env-var
+		action = "SCANBD_ACTION"
+ 	}
+
+	# function definitions
+	# values of the options are simply passed via env-vars
+
+	function function_knob {
+		filter = "^message.*"
+		desc   = "The value of the function knob / wheel / selector"
+		env    = "SCANBD_FUNCTION" 
+	}
+	function function_mode {
+		filter = "^mode.*"
+		desc   = "Color mode"
+		env    = "SCANBD_FUNCTION_MODE" 
+	}
+
+	multiple_actions = true # allow multiple actions per option (up to the total amount of options)
+
+	# action definitions
+	# if the filter matches and the value changes 
+	# from from-value to to-value,
+	# <script> is executed
+	# <script> is the full pathname (do not include any parameters)
+	# if parameters are needed, write a script
+	
+	# since we can have only a most one action for each option, the action-script 
+	# can use the function definition (see above) to distinguish different tasks 
+	# (e.g. use the env-var SCANBD_FUNCTION defined above)
+	
+	action scan {
+		filter = "^scan.*"
+		numerical-trigger {
+			from-value = 1
+			to-value   = 0
+		}
+		desc   = "Scan to file"
+		# script must be an absolute pathname to the action script without arguments
+		script = "/usr/local/etc/scanbd/scanadf.script"
+	}
+	action email {
+		filter = "^email$"
+		string-trigger {
+			from-value  = ""        
+			to-value    = "^email.*"
+		}
+		desc   = "Scan to email"
+		# script must be an absolute pathname to the action script without arguments
+		script = "/usr/local/etc/scanbd/test.script"
+	}
+	action copy {
+		filter = "^copy$"
+		string-trigger {
+			from-value  = ""
+			to-value    = "^copy.*"
+		}
+		desc   = "Copy to printer"
+		# script must be an absolute pathname to the action script without arguments
+		script = "/usr/local/etc/scanbd/test.script"
+	}
+	action preview {
+		filter = "^preview$"
+		numerical-trigger {
+			from-value = 1
+			to-value   = 0
+		}
+		desc   = "Preview"
+		# script must be an absolute pathname to the action script without arguments
+		script = "/usr/local/etc/scanbd/example.script"
+	}
+       	action globaltest {
+       	             filter = "^message.*"
+	      	     desc   = "Test (print all env vars)"
+		     # script must be an absolute pathname to the action script without arguments
+	      	     script = "/usr/local/etc/scanbd/test.script"
+        }
+}
+
+# devices 
+# each device can have actions and functions
+
+device fujitsu {
+       # the device matching string
+       filter = "^fujitsu.*" # regex
+
+       # the device description
+       desc = "Fujitsu: Test"
+
+       function function_knob {
+       		filter = "^function.*"
+		desc   = "The value of the function knob / wheel / selector"
+		env    = "SCANBD_FUNCTION" 
+       }
+
+       action paperload {
+		    filter = "^page-loaded.*"
+		    desc   = "page loaded"
+		    numerical-trigger {
+			    from-value = 0
+			    to-value   = 1
+		    }
+		    # script must be an absolute pathname to the action script without arguments
+		    script = ""
+       }
+
+       action paperunload {
+		    filter = "^page-loaded.*"
+		    desc   = "page unloaded"
+		    numerical-trigger {
+			    from-value = 1
+			    to-value   = 0
+		    }
+		    # script must be an absolute pathname to the action script without arguments
+		    script = ""
+      }
+
+       action coveropen {
+		    filter = "^cover-open.*"
+		    desc   = "cover open"
+		    numerical-trigger {
+			    from-value = 0
+			    to-value   = 1
+		    }
+		    # script must be an absolute pathname to the action script without arguments
+		    script = ""
+       }
+
+       action powersave {
+		    filter = "^power-save.*"
+		    desc   = "power save"
+		    numerical-trigger {
+			    from-value = 0
+			    to-value   = 1
+		    }
+		    # script must be an absolute pathname to the action script without arguments
+		    script = ""
+       }
+}
+
+device snapscan {
+       # the device matching string
+       filter = "(.*snapscan.*|.*Perfection.*)" # regex
+
+       # the device description
+       desc = "Epson"
+
+       action test {
+       	      filter = "^message.*"
+	      desc   = "Test"
+
+	      # script must be an absolute pathname to the action script without arguments
+	      script = "/usr/local/etc/scanbd/example.script"
+       }
+
+       action web {
+              filter = "^web.*"
+              desc   = "Web"
+
+              # script must be an absolute pathname to the action script without arguments
+              script = "/usr/local/etc/scanbd/example.script"
+       }
+
+       action send {
+              filter = "^send.*"
+              desc   = "Send"
+
+              # script must be an absolute pathname to the action script without arguments
+              script = "/usr/local/etc/scanbd/example.script"
+       }
+}
+
+device hp {
+       # the device matching string
+       filter = "^hpaio.*" # regex
+
+       # the device description
+       desc = "HP"
+
+       action test {
+	      filter = ".*scan.*"
+	      desc   = "Test"
+
+	      # script must be an absolute pathname to the action script without arguments
+	      script = "/usr/local/etc/scanbd/example.script"
+       }
+}
+
+device avision {
+       # the device matching string
+       filter = "^avision.*"
+
+       # the device description
+       desc = "Avision Scanner"
+
+       # device specific actions (as above)
+       # (if this matches a previous defined action, it overrides) 
+       
+       action duplex-test {
+       	      filter = "^message.*"
+	      desc   = "Avision: Duplex Test"
+
+	      # script must be an absolute pathname to the action script without arguments
+	      script = "/usr/local/etc/scanbd/test.script"
+
+	      string-trigger {
+	      		     from-value  = ""
+			     to-value    = "^.:duplex"
+	      }
+       }
+}
+

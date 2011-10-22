@@ -29,11 +29,15 @@ CPPFLAGS += -DNetBSD -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SL
 endif
 
 ifeq ($(OSTYPE),FreeBSD)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN 
+CPPFLAGS += -DFreeBSD -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
 endif 
 
+ifeq ($(OSTYPE),OpenBSD)
+CPPFLAGS += -DOpenBSD -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+endif
+
 ifeq ($(OSTYPE),Linux)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN 
+CPPFLAGS += -DLinux -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
 endif 
 
 all: libusbi.o

@@ -67,6 +67,13 @@ CPPFLAGS += -DNetBSD -I/usr/pkg/include -I/usr/pkg/include/dbus-1.0 -I/usr/pkg/l
 LDLIBS  += -L/usr/pkg/lib -lconfuse -lpthread -ldbus-1
 endif
 
+ifeq ($(OSTYPE),OpenBSD)
+USE_HAL=
+CFLAGS   += -Wall -Wextra -std=c99 -g
+CPPFLAGS += -DOpenBSD -I/usr/local/include -I/usr/local/include/dbus-1.0 -I/usr/local/lib/dbus-1.0/include
+LDLIBS  += -L/usr/local/lib -lconfuse -lpthread -ldbus-1
+endif
+
 ifdef USE_SANE
 CPPFLAGS += -DUSE_SANE -UUSE_SCANBUTTOND
 LDLIBS += -lsane
