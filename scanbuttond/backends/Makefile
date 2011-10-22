@@ -29,12 +29,16 @@ CPPFLAGS += -DNetBSD -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SL
 endif
 
 ifeq ($(OSTYPE),Linux)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -DLinux -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
 endif 
 
 ifeq ($(OSTYPE),FreeBSD)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -DFreeBSD -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
 endif 
+
+ifeq ($(OSTYPE),OpenBSD)
+CPPFLAGS += -DOpenBSD -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+endif
 
 %.so: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared -o $@ $<

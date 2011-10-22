@@ -203,7 +203,7 @@ int scanbtnd_get_button(scanner_t* scanner)
 {
    unsigned char bytes[2];
    int num_bytes;
-   int button = 0;
+//   int button = 0;
 
    // current_button_map should be select according to the current scanner
    // there is no space left inside scanner_t to store some additional data (for example a pointer)
