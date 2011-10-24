@@ -95,6 +95,8 @@ edit the config file (in /usr/local/etc/scanbd)
 5) scripts
 
 make some useful scripts (see the examples test.script, example.script or scanadf.script)
+(scanbd compiles and runs well on FreeBSD/NetBDS/OpenBSD, but on these plattforms /bin/bash is usually not
+avaliable. So be sure to adapt the scripts!)
 
 6) sane config
 
@@ -103,7 +105,7 @@ to only contain the net-backend. Give the net-backend a suitable configuration a
 scanners (and scanbd) are (this could be also localhost).
 
 If scanbd is running on a desktop machine, saned needs another config which only includes local scanners. Therefore
-the env-var SANE_CONFIG_DIR is used in the debian-script and the upstart job. Put the directory of this dll.conf
+the env-var SANE_CONFIG_DIR is used in the debian-script and the upstart job of scanbd. Put the directory of this dll.conf
 into this env-var (e.g. /usr/local/etc/scanbd) and remove the net-backend from this config-file.
 
 6) start the scanbd 
@@ -172,10 +174,12 @@ Also edit/check scanbd.conf to set the effective group = lp !
   after that time again.
 
 - dynamic device recognition:
-  HAL(hald) is deprecated: on recent distributions halt isn't used or isn't started by default anymore.
+  HAL(hald) is deprecated: on recent distributions hald isn't used or isn't started by default anymore.
   udisks online sends out storage related dbus events (no DeviceAdded events for scanner, etc., that's why
-  it is called udisks ;-)). So, if you have udisks-daemon and can't start hald, there is currently no
-  possibilty to automatically reconfigure if non-storage devices are added/removed
+  it is called udisks ;-)). So, if you have udisks-daemon and can't start hald, be sure to compile scanbd 
+  with USE_LIBUDEV=yes. If you don't have hal and libudev e.g. OpenBSD, dynamic recognition of scanners
+  isn't possible.
 
 10) TODO
 - refactor dbus.c, udev.c
+- make a clean rewrite using boost/Qt
