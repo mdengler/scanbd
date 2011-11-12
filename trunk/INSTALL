@@ -65,11 +65,10 @@ copy the executable scanbd and config-files scanbd.conf, etc. to useful places
 If you use the scanbuttond-backends copy the shared-objects from scanbuttond/backends directory
 to /usr/local/etc/scanbd/scanbuttond/backends (or use "make install").
 
-
 2) scanbd_dbus.conf
 
 copy this file into the dbus system-bus configuration directory,
-then restart dbus and hald
+then restart dbus and hald.
 
 3) inetd.conf
 
@@ -117,6 +116,15 @@ export SANE_CONFIG_DIR=/usr/local/etc/scanbd
 
 or use the debian script (scanbd.script) or the upstart service (scanbdservice.conf)
 
+If you are unfamiliar wirh scanbd it would be best to first try starting scanbd in the foreground
+in debug mode:
+
+/usr/local/scanbd -df -c /usr/local/etc/scanbd/scanbd.conf
+
+Then you can watch scanbd recognizing all scanners and polling the options / buttons. If you press the buttons
+or modify the function knob or insert/remove sheets of paper some of the options / buttons must change their value.
+Theses value changes can be used defining actions in scanbd.conf.
+
 7) some words on access rights
 
 if the saned-user can't access the scanners, e.g. if 
@@ -124,7 +132,7 @@ if the saned-user can't access the scanners, e.g. if
 SANE_CONFIG_DIR=/usr/local/etc/scanbd scanimage -L
 
 doesn't get any results, but if you run the same command as root with success, you have wrong access rights to the 
-scanner devices. If you have have a scan-only device (not an all-in-one type), use the file 99-saned.rules file
+scanner devices. If you have a scan-only device (not an all-in-one type), use the file 99-saned.rules
 and copy this file to /lib/udev/rules.d and then issue a rescan:
 
 udevadm trigger
@@ -138,8 +146,8 @@ Also edit/check scanbd.conf to set the effective group = lp !
 
 8) Additional hints:
 
-- if there are problems recognizing new / removed devices, it is possible to send scanbd a SIGHUP to reconfigure
-  and look for new devices. This can be done via udev-rules.
+- if there are problems recognizing new / removed devices, it is possible to send scanbd the SIGHUP signal to
+  reconfigure and look for new devices. This can be done also via udev-rules.
 
 - be sure to include only the necessary drivers in /etc/saned.d/dll.conf, since scanadf will hang (timeout)
 
@@ -147,7 +155,8 @@ Also edit/check scanbd.conf to set the effective group = lp !
 
   scanbd -m -t <device_number> -a <name_of_action>
 
-  e.g. for the first scanner found trigger the action "scan"
+  e.g. for the first scanner found trigger the action "scan" (action name as in config file scanbd.conf)
+
   scanbd -m -t 0 -a scan
 
 - problematic desktop scan applications
@@ -183,3 +192,4 @@ Also edit/check scanbd.conf to set the effective group = lp !
 10) TODO
 - refactor dbus.c, udev.c
 - make a clean rewrite using boost/Qt
+- make a UI to list options/buttons, watch value changes an setup actions
