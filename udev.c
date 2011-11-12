@@ -22,7 +22,6 @@
 
 #include "udev.h"
 
-
 #ifdef USE_LIBUDEV
 
 static pthread_t udev_tid = 0;

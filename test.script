@@ -21,8 +21,11 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+# look in scanbd.conf for environment variables
+
 logger -t "scanbd: $0" "Begin of $SCANBD_ACTION for device $SCANBD_DEVICE"
 
+# printout all env-variables
 /usr/bin/printenv > /tmp/scanbd.script.env
 
 logger -t "scanbd: $0" "End   of $SCANBD_ACTION for device $SCANBD_DEVICE"
