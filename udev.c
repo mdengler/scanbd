@@ -22,7 +22,7 @@
 
 #include "udev.h"
 
-#define USE_LIBUDEV
+//#define USE_LIBUDEV
 
 #ifdef USE_LIBUDEV
 
