@@ -22,6 +22,8 @@
 
 #include "udev.h"
 
+#define USE_LIBUDEV
+
 #ifdef USE_LIBUDEV
 
 static pthread_t udev_tid = 0;
@@ -53,10 +55,35 @@ static void* udev_thread(void* arg)
         return NULL;
     }
 
+    // check to see if the udev file-descriptor is blocking. This is necessary
+    // for a blocking udev_monitor_receive_device() later on!
+    // The behaviour of libudev changed in this resprect some times ago.
+
+    int fd = -1;
+    if ((fd = udev_monitor_get_fd(mon)) < 0) {
+        slog(SLOG_DEBUG, "Can't get monitor fd");
+        return NULL;
+    }
+
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags < 0) {
+        slog(SLOG_DEBUG, "Can't get flags of udev fd");
+        return NULL;
+    }
+    if (flags & O_NONBLOCK) {
+        slog(SLOG_INFO, "udev fd is non-blocking");
+        flags &= ~O_NONBLOCK;
+        if (fcntl(fd, F_SETFL, flags) < 0) {
+            slog(SLOG_DEBUG, "Can't set udev fd to blocking mode");
+            return NULL;
+        }
+    }
+
     while(true) {
         struct udev_device* device = udev_monitor_receive_device(mon);
         if (!device) {
-            slog(SLOG_WARN, "no device from udev");
+            slog(SLOG_WARN, "no device from udev, sleeping 1000ms");
+            usleep(1000 * 1000);
         }
         else {
             assert(device);

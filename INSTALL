@@ -65,6 +65,12 @@ copy the executable scanbd and config-files scanbd.conf, etc. to useful places
 If you use the scanbuttond-backends copy the shared-objects from scanbuttond/backends directory
 to /usr/local/etc/scanbd/scanbuttond/backends (or use "make install").
 
+Needed packages on debian-based systems:
+libconfuse-dev libsane-dev libudev-dev
+
+To use HAL instead of libudev you need too:
+libhal-dev
+
 2) scanbd_dbus.conf
 
 copy this file into the dbus system-bus configuration directory,
