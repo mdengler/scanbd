@@ -41,6 +41,7 @@ struct backend {
     backend_t* next;
 };
 
+int scanbtnd_init();
 int scanbtnd_loader_init(void);
 void scanbtnd_loader_exit(void);
 backend_t* scanbtnd_load_backend(const char* filename);

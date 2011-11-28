@@ -170,24 +170,11 @@ static void hal_device_added(LibHalContext* ctx, const char *udi) {
         get_sane_devices();
         start_sane_threads();
 #else
-        scanbtnd_set_libdir("./scanbuttond/backends");
-
-        if (scanbtnd_loader_init() != 0) {
-            slog(SLOG_INFO, "Could not initialize module loader!\n");
+        if (scanbtnd_init() < 0) {
+            slog(SLOG_INFO, "Could not initialize scanbuttond modules!\n");
             exit(EXIT_FAILURE);
         }
-
-        backend = scanbtnd_load_backend("meta");
-        if (!backend) {
-            slog(SLOG_INFO, "Unable to load backend library\n");
-            scanbtnd_loader_exit();
-            exit(EXIT_FAILURE);
-        }
-
-        if (backend->scanbtnd_init() != 0) {
-            slog(SLOG_ERROR, "Error initializing backend. Terminating.");
-            exit(EXIT_FAILURE);
-        }
+        assert(backend);
 
         get_scbtn_devices();
         start_scbtn_threads();
@@ -232,22 +219,12 @@ static void hal_device_removed(LibHalContext* ctx, const char *udi) {
     get_sane_devices();
     start_sane_threads();
 #else
-    scanbtnd_set_libdir("./scanbuttond/backends");
-    if (scanbtnd_loader_init() != 0) {
-        slog(SLOG_INFO, "Could not initialize module loader!\n");
-        exit(EXIT_FAILURE);
-    }
-    backend = scanbtnd_load_backend("meta");
-    if (!backend) {
-        slog(SLOG_INFO, "Unable to load backend library\n");
-        scanbtnd_loader_exit();
+    if (scanbtnd_init() < 0) {
+        slog(SLOG_INFO, "Could not initialize scanbuttond modules!\n");
         exit(EXIT_FAILURE);
     }
     assert(backend);
-    if (backend->scanbtnd_init() != 0) {
-        slog(SLOG_ERROR, "Error initializing backend. Terminating.");
-        exit(EXIT_FAILURE);
-    }
+
     get_scbtn_devices();
     start_scbtn_threads();
 #endif
@@ -285,21 +262,12 @@ void dbus_signal_device_added(void) {
     get_sane_devices();
     start_sane_threads();
 #else
-    scanbtnd_set_libdir("./scanbuttond/backends");
-    if (scanbtnd_loader_init() != 0) {
-        slog(SLOG_INFO, "Could not initialize module loader!\n");
+    if (scanbtnd_init() < 0) {
+        slog(SLOG_INFO, "Could not initialize scanbuttond modules!\n");
         exit(EXIT_FAILURE);
     }
-    backend = scanbtnd_load_backend("meta");
-    if (!backend) {
-        slog(SLOG_INFO, "Unable to load backend library\n");
-        scanbtnd_loader_exit();
-        exit(EXIT_FAILURE);
-    }
-    if (backend->scanbtnd_init() != 0) {
-        slog(SLOG_ERROR, "Error initializing backend. Terminating.");
-        exit(EXIT_FAILURE);
-    }
+    assert(backend);
+
     get_scbtn_devices();
     start_scbtn_threads();
 #endif // USE_SANE
@@ -339,22 +307,12 @@ void dbus_signal_device_removed(void) {
     get_sane_devices();
     start_sane_threads();
 #else
-    scanbtnd_set_libdir("./scanbuttond/backends");
-    if (scanbtnd_loader_init() != 0) {
-        slog(SLOG_INFO, "Could not initialize module loader!\n");
-        exit(EXIT_FAILURE);
-    }
-    backend = scanbtnd_load_backend("meta");
-    if (!backend) {
-        slog(SLOG_INFO, "Unable to load backend library\n");
-        scanbtnd_loader_exit();
+    if (scanbtnd_init() < 0) {
+        slog(SLOG_INFO, "Could not initialize scanbuttond modules!\n");
         exit(EXIT_FAILURE);
     }
     assert(backend);
-    if (backend->scanbtnd_init() != 0) {
-        slog(SLOG_ERROR, "Error initializing backend. Terminating.");
-        exit(EXIT_FAILURE);
-    }
+
 #endif
 #endif
     if (pthread_mutex_unlock(&dbus_mutex)) {
@@ -619,6 +577,7 @@ bool dbus_init(void) {
 }
 
 void dbus_start_dbus_thread(void) {
+    slog(SLOG_DEBUG, "start dbus thread");
     if (conn == NULL) {
         if (!dbus_init()) {
             return;
@@ -664,6 +623,7 @@ void dbus_start_dbus_thread(void) {
 }
 
 void dbus_stop_dbus_thread(void) {
+    slog(SLOG_DEBUG, "stop dbus thread");
     if (dbus_tid == 0) {
         return;
     }
@@ -675,6 +635,7 @@ void dbus_stop_dbus_thread(void) {
             slog(SLOG_WARN, "unknown error from pthread_cancel: %s", strerror(errno));
         }
     }
+    slog(SLOG_DEBUG, "join dbus thread");
     if (pthread_join(dbus_tid, NULL) < 0) {
         slog(SLOG_ERROR, "pthread_join: %s", strerror(errno));
     }
