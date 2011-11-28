@@ -85,6 +85,7 @@ static int libusb_search_in_endpoint(struct usb_device* device)
 
 		endpoint = &interface->endpoint[num];
 		address = endpoint->bEndpointAddress & USB_ENDPOINT_ADDRESS_MASK;
+        (void) address;
 		direction = endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK;
 		transfer_type = endpoint->bmAttributes & USB_ENDPOINT_TYPE_MASK;
 
@@ -116,6 +117,8 @@ static int libusb_search_out_endpoint(struct usb_device* device)
 
 		endpoint = &interface->endpoint[num];
 		address = endpoint->bEndpointAddress & USB_ENDPOINT_ADDRESS_MASK;
+        (void) address;
+
 		direction = endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK;
 		transfer_type = endpoint->bmAttributes & USB_ENDPOINT_TYPE_MASK;
 

@@ -22,12 +22,37 @@
 
 #include "scanbd.h"
 #include "scanbuttond_loader.h"
+#include "scanbuttond_wrapper.h"
+
 #include <dlfcn.h>
 
 // this file is basicly the same as loader.c from the scanbuttond-project,
 // but modified to meet the needs of scanbd
 
-static char lib_dir[PATH_MAX] = CFG_DIR;
+static char lib_dir[PATH_MAX] = C_SCANBUTTONS_BACKENDS_DIR_DEF;
+
+int scanbtnd_init() {
+    const char* backends_dir = NULL;
+    backends_dir = cfg_getstr(cfg_getsec(cfg, C_GLOBAL), C_SCANBUTTONS_BACKENDS_DIR);
+    assert(backends_dir);
+    scanbtnd_set_libdir(backends_dir);
+
+    if (scanbtnd_loader_init() != 0) {
+        slog(SLOG_INFO, "Could not initialize module loader!\n");
+        return -1;
+    }
+    backend = scanbtnd_load_backend("meta");
+    if (!backend) {
+        slog(SLOG_INFO, "Unable to load backend library\n");
+        scanbtnd_loader_exit();
+        return -1;
+    }
+    if (backend->scanbtnd_init() != 0) {
+        slog(SLOG_ERROR, "Error initializing backend. Terminating.");
+        return -1;
+    }
+    return 0;
+}
 
 void scanbtnd_set_libdir(const char* dir){
     strncpy(lib_dir, dir, PATH_MAX);
