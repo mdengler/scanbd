@@ -19,6 +19,7 @@
 #ifndef __LIBUSBI_H_INCLUDED
 #define __LIBUSBI_H_INCLUDED
 
+#include <sys/types.h>
 #include <usb.h>
 #include "scanbuttond/scanbuttond.h"
 
