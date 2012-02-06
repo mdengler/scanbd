@@ -21,6 +21,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+
+#include <sys/types.h>
+#ifdef Linux
+#include <linux/limits.h>
+#endif
+
 #include <usb.h>
 #include <syslog.h>
 #include "scanbuttond/libusbi.h"
