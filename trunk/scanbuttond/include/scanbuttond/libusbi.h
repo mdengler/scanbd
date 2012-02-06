@@ -20,6 +20,11 @@
 #define __LIBUSBI_H_INCLUDED
 
 #include <sys/types.h>
+
+#ifdef Linux
+#include <linux/limits.h>
+#endif
+
 #include <usb.h>
 #include "scanbuttond/scanbuttond.h"
 
