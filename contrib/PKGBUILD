@@ -1,0 +1,28 @@
+# $Id: PKGBUILD 101197 2010-11-28 15:10:38Z tpowa $
+# Maintainer: Tobias Powalowski <tpowa@archlinux.org>
+# Contributor: arjan <arjan@archlinux.org>
+
+pkgname=libusb-compat
+srcname=libusb
+pkgver=0.1.12
+pkgrel=1
+pkgdesc="Library to enable user space application programs to communicate with USB devices"
+arch=('i686' 'x86_64')
+depends=('sh')
+url="http://libusb.sourceforge.net/"
+license=('LGPL')
+source=(ftp://ftp.slackware.at/slackware-11.0/source/l/libusb/libusb-0.1.12.tar.gz)
+options=('!libtool')
+
+md5sums=('caf182cbc7565dac0fd72155919672e6')
+
+build() {
+  cd ${srcdir}/${srcname}-${pkgver}
+  ./configure --prefix=/usr 
+  make
+}
+
+package() {
+  cd ${srcdir}/${srcname}-${pkgver}
+  make DESTDIR=${pkgdir} install
+}
