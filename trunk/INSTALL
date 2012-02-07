@@ -66,10 +66,22 @@ If you use the scanbuttond-backends copy the shared-objects from scanbuttond/bac
 to /usr/local/etc/scanbd/scanbuttond/backends (or use "make install").
 
 Needed packages on debian-based systems:
-libconfuse-dev libsane-dev libudev-dev
+libconfuse-dev libsane-dev libudev-dev libusb-dev
 
 To use HAL instead of libudev you need too:
 libhal-dev
+
+Hint to ArchLinux users using old scanbuttond drivers:
+The libusb / libusb-compat seems to be broken for at least using it with the old scanbuttond drivers.
+Please find under contrib a PKGBUILD to build an old version of libusb-compat at your own risk (other applications
+may fail now). Do the following:
+
+cd contrib
+makepkg
+makepkg -i
+
+and (re)build scanbd:
+USE_SCANBUTTOND=yes make -e clean all
 
 2) scanbd_dbus.conf
 
