@@ -570,7 +570,12 @@ int main(int argc, char** argv) {
         slog(SLOG_INFO, "dropping privs to uid %s", euser);
         struct passwd* pwd = NULL;
         if ((pwd = getpwnam(euser)) == NULL) {
-            slog(SLOG_ERROR, "No user %s: %s", euser, strerror(errno));
+	    if (errno != 0) {
+		slog(SLOG_ERROR, "No user %s: %s", euser, strerror(errno));
+	    }
+	    else {
+		slog(SLOG_ERROR, "No user %s", euser);
+	    }
             exit(EXIT_FAILURE);
         }
         assert(pwd);
@@ -578,7 +583,12 @@ int main(int argc, char** argv) {
         slog(SLOG_INFO, "dropping privs to uid %s", egroup);
         struct group* grp = NULL;
         if ((grp = getgrnam(egroup)) == NULL) {
-            slog(SLOG_ERROR, "No group %s: %s", egroup, strerror(errno));
+	    if (errno != 0) {
+		slog(SLOG_ERROR, "No group %s: %s", egroup, strerror(errno));
+	    }
+	    else {
+		slog(SLOG_ERROR, "No group %s", egroup);
+	    }
             exit(EXIT_FAILURE);
         }
         assert(grp);
