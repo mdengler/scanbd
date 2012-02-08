@@ -50,8 +50,9 @@ CPPFLAGS += -DNDEBUG
 endif
 
 ifeq ($(OSTYPE),Linux)
+DBUS_INCLUDE=$(shell pkg-config dbus-1 --cflags)
 CFLAGS   += -Wall -Wextra -std=c99 -g
-CPPFLAGS += -DLinux -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
+CPPFLAGS += -DLinux -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include $(DBUS_INCLUDE)
 LDLIBS  += -lconfuse -lpthread -ldbus-1
 endif
 
