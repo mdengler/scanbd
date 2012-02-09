@@ -580,7 +580,7 @@ int main(int argc, char** argv) {
         }
         assert(pwd);
 
-        slog(SLOG_INFO, "dropping privs to uid %s", egroup);
+	slog(SLOG_INFO, "dropping privs to gid %s", egroup);
         struct group* grp = NULL;
         if ((grp = getgrnam(egroup)) == NULL) {
 	    if (errno != 0) {

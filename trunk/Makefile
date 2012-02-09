@@ -20,7 +20,14 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-OSTYPE = $(shell uname)
+OSTYPE := $(shell uname)
+PKGCFG := $(shell which pkg-config)
+
+ifneq ($(findstring pkg-config, $(PKGCFG)),)
+DBUS_INCLUDE=$(shell pkg-config dbus-1 --cflags)
+else
+DBUS_INCLUDE=
+endif
 
 PREFIX = /usr/local
 SCANBD_DIR = $(PREFIX)/etc/scanbd
@@ -50,7 +57,7 @@ CPPFLAGS += -DNDEBUG
 endif
 
 ifeq ($(OSTYPE),Linux)
-DBUS_INCLUDE=$(shell pkg-config dbus-1 --cflags)
+#DBUS_INCLUDE=$(shell pkg-config dbus-1 --cflags)
 CFLAGS   += -Wall -Wextra -std=c99 -g
 CPPFLAGS += -DLinux -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include $(DBUS_INCLUDE)
 LDLIBS  += -lconfuse -lpthread -ldbus-1
@@ -58,20 +65,20 @@ endif
 
 ifeq ($(OSTYPE),FreeBSD)
 CFLAGS   += -Wall -Wextra -std=c99 -g
-CPPFLAGS += -DFreeBSD -I/usr/local/include -I/usr/local/include/dbus-1.0 -I/usr/local/include/dbus-1.0/include
+CPPFLAGS += -DFreeBSD -I/usr/local/include -I/usr/local/include/dbus-1.0 -I/usr/local/include/dbus-1.0/include $(DBUS_INCLUDE)
 LDLIBS  += -L/usr/local/lib -lconfuse -lpthread -ldbus-1
 endif
 
 ifeq ($(OSTYPE),NetBSD)
-CFLAGS   += -Wall -Wextra -std=c99 -g
-CPPFLAGS += -DNetBSD -I/usr/pkg/include -I/usr/pkg/include/dbus-1.0 -I/usr/pkg/lib/dbus-1.0/include
+CFLAGS   += -Wall -Wextra -std=c99 -g $(PKGCFG)
+CPPFLAGS += -DNetBSD -I/usr/pkg/include -I/usr/pkg/include/dbus-1.0 -I/usr/pkg/lib/dbus-1.0/include $(DBUS_INCLUDE)
 LDLIBS  += -L/usr/pkg/lib -lconfuse -lpthread -ldbus-1
 endif
 
 ifeq ($(OSTYPE),OpenBSD)
 USE_HAL=
 CFLAGS   += -Wall -Wextra -std=c99 -g
-CPPFLAGS += -DOpenBSD -I/usr/local/include -I/usr/local/include/dbus-1.0 -I/usr/local/lib/dbus-1.0/include
+CPPFLAGS += -DOpenBSD -I/usr/local/include -I/usr/local/include/dbus-1.0 -I/usr/local/lib/dbus-1.0/include $(DBUS_INCLUDE)
 LDLIBS  += -L/usr/local/lib -lconfuse -lpthread -ldbus-1
 endif
 
