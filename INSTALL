@@ -2,7 +2,7 @@ $Id$
 
 scanbd - KMUX scanner button daemon
 
-Copyright (C) 2008 - 2012, 2009, 2010, 2011  Wilhelm Meier (wilhelm.meier@fh-kl.de)
+Copyright (C) 2008, 2009, 2010, 2011, 2012  Wilhelm Meier (wilhelm.meier@fh-kl.de)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ and scanning on the same host is mutual exclusive.
 0.1) the solution
 
 scanbd (the scanner button daemon) opens and polls the scanner and therefore locks the device. So no other 
-application can access the device directly (open the /dev/..., usb). To solve this, we use a so called
+application can access the device directly (open the /dev/..., or via libusb, etc). To solve this, we use a so called
 "manager-mode" of scanbd: scanbd is configured as a "proxy" to access the scanner and, if another application
 tries to use the scanner, the polling is disabled for the time the other scan-application wants to
 use the scanner. To make this happen, scanbd is configured instead of saned as the network scanning daemon. If
@@ -45,7 +45,7 @@ a dbus-signal (default) or a posix-signal (SIGUSR1) (signal-mode) to the polling
 starts the real saned which scans and sends the data back to the requesting application. Afterwords the scanbd-manager
 restarts the polling by sending another dbus-signal (or the posix-signal SIGUSR2). 
 
-So all applications must be enabled to use network-scanning (even if the scanner is local).
+So all applications must be enabled to use network-scanning (even if the scanner is local, see below)!
 
 1) build
 
@@ -61,8 +61,8 @@ USE_SCANBUTTOND=yes make -e clean all
 USE_SANE=yes make -e clean all
 
 copy the executable scanbd and config-files scanbd.conf, etc. to useful places
-(or use "make install" to copy to /usr/local/etc/scanbd).
-If you use the scanbuttond-backends copy the shared-objects from scanbuttond/backends directory
+(or use "make install" to copy to /usr/local/bin and /usr/local/etc/scanbd).
+If you use the scanbuttond-backends, copy the shared-objects from scanbuttond/backends directory
 to /usr/local/etc/scanbd/scanbuttond/backends (or use "make install").
 
 Needed packages on debian-based systems:
@@ -91,16 +91,18 @@ then restart dbus and hald.
 3) inetd.conf
 
 edit the saned-line to use scanbd as a wrapper, e.g.:
-
+---
 sane-port stream tcp4 nowait saned /usr/local/bin/scanbd scanbd -m -c /usr/local/etc/scanbd/scanbd.conf
+---
 
 or 
 
 (if the saned user can't open the devices, e.g. ubuntu)
-
+---
 sane-port stream tcp4 nowait root /usr/local/bin/scanbd scanbd -m -c /usr/local/etc/scanbd/scanbd.conf
+---
 
-(if you are worried about running scanbd with root privileges, see below on 7))
+(if you are worried about running scanbd with root privileges, see below on 7)
 
 be sure to give the -m (and perhaps -s) flag to scanbd to enable the "manager-mode" (if you
 add also the -s flag the "signal-mode" is used, e.g. if dbus isn't available).
@@ -118,26 +120,54 @@ avaliable. So be sure to adapt the scripts!)
 6) sane config
 
 all desktop applications should only get access to the scanners via the net-backend, so edit /etc/sane.d/dll.conf
-to only contain the net-backend. Give the net-backend a suitable configuration and add the machines, where the 
-scanners (and scanbd) are (this could be also localhost).
+to only contain the net-backend on the desktop machines. 
 
-If scanbd is running on a desktop machine, saned needs another config which only includes local scanners. Therefore
-the env-var SANE_CONFIG_DIR is used in the debian-script and the upstart job of scanbd. Put the directory of this dll.conf
-into this env-var (e.g. /usr/local/etc/scanbd) and remove the net-backend from this config-file.
+example dll.conf:
+---
+net
+---
+
+Give the net-backend a suitable configuration and add the machines, where the 
+scanners (and scanbd) are (this could be also localhost, but see below!):
+
+example net.conf
+---
+connect_timeout = 3
+scanbd-host1.local.net   # the host with the scanbd running (and the attached scanners with buttons)
+# scanbd-host2.local.net # there can be more than one scanbd one the net (and attached scanners with buttons)
+# sane-host.local.net    # there can also be a sane host without scanbd running (and scanner without buttons)
+# localhost              # if desktop machine with scanbd AND scan-applications like xsane
+---
+
+IMPORTANT:
+If scanbd is running on a desktop machine (e.g. a machine using a sane-frontend: xsane, scanimage), saned needs another config 
+which only includes local scanners. 
+
+Therefore the env-var SANE_CONFIG_DIR is used in the debian-start-stop-script and the upstart-job of scanbd (scanbdservice.conf). 
+Put the directory of this dll.conf into this env-var (e.g. /usr/local/etc/scanbd) and remove the net-backend from this config-file. 
+All other backends can be included as needed. Now the desktop applications (wich use libsane) use the above dll.conf with only
+the net backend. This prevents them from using the locally attached scanners directly (and blocking them). 
+If a scan is issued, the scan application contacts (via net backend) the scanbd, whih in turn starts saned with the environment variable
+SANE_CONFIG_DIR set to /usr/local/etc/scanbd (or any other directory, see scanbd.conf). Here saned and therefore libsane 
+find a different dll.conf without the net-backend but with all needed local scanner backends!
+
+So as a safe rule: 
+- the file /etc/sane.d/dll.conf should only contain the net backend   
+- copy all config-files from /etc/sane.d to /usr/local/etc/scanbd and edit dll.conf as stated above (not include the net backend)
 
 6) start the scanbd 
 
 e.g.:
 
 export SANE_CONFIG_DIR=/usr/local/etc/scanbd
-/usr/local/scanbd -c /usr/local/etc/scanbd/scanbd.conf
+/usr/local/bin/scanbd -c /usr/local/etc/scanbd/scanbd.conf
 
 or use the debian script (scanbd.script) or the upstart service (scanbdservice.conf)
 
-If you are unfamiliar wirh scanbd it would be best to first try starting scanbd in the foreground
-in debug mode:
+If you are unfamiliar wirh scanbd it would be best to first try starting scanbd in the foreground (-f)
+and in debug mode (-d):
 
-/usr/local/scanbd -df -c /usr/local/etc/scanbd/scanbd.conf
+/usr/local/bin/scanbd -df -c /usr/local/etc/scanbd/scanbd.conf
 
 Then you can watch scanbd recognizing all scanners and polling the options / buttons. If you press the buttons
 or modify the function knob or insert/remove sheets of paper some of the options / buttons must change their value.
@@ -167,7 +197,7 @@ Also edit/check scanbd.conf to set the effective group = lp !
 - if there are problems recognizing new / removed devices, it is possible to send scanbd the SIGHUP signal to
   reconfigure and look for new devices. This can be done also via udev-rules.
 
-- be sure to include only the necessary drivers in /etc/saned.d/dll.conf, since scanadf will hang (timeout)
+- be sure to include only the necessary drivers in /usr/local/scanbd/dll.conf, since scanadf will hang (timeout)
 
 - to test an action for a specific device, use
 
@@ -181,8 +211,8 @@ Also edit/check scanbd.conf to set the effective group = lp !
 
   most desktop-scan-applications open the scanner but never closes them, therefore the saned is started but 
   never (as long as the scan-application runs) exits. This blocks the scanbd from gaining again the control 
-  over the scanner and go on polling.
-
+  over the scanner and go on polling. This can also be a problem of the net backend (see connect_timeout parameter
+  in net.conf).
   The better way to do scanning would be to first get a list of available scanners (scanimage -L or scanadf -L),
   store the list but then close the connection to the found scanners. If a scan is requested, a device from
   the list is choosen, the scan happens and thereafter the connection to the scanner is closed!
