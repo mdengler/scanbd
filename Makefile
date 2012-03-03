@@ -29,13 +29,27 @@ else
 DBUS_INCLUDE=
 endif
 
+ifndef PREFIX
 PREFIX = /usr/local
+endif
+
+ifndef DESTDIR
 SCANBD_DIR = $(PREFIX)/etc/scanbd
+else
+PREFIX = $(DESTDIR)/usr
+SCANBD_DIR = $(DESTDIR)/etc/scanbd
+endif
+
 BIN_DIR = $(PREFIX)/bin
+
 ifeq ($(OSTYPE),FreeBSD)
 DBUS_PREFIX = /usr/local
 else
+ifndef DESTDIR
 DBUS_PREFIX = 
+else
+DBUS_PREFIX = $(DESTDIR)
+endif
 endif
 
 ifeq ($(OSTYPE),Linux)
@@ -160,11 +174,12 @@ install: scanbd
 	cp scanadf.script $(SCANBD_DIR)
 	cp test.script $(SCANBD_DIR)
 	echo "Copy scanbd to $(BIN_DIR)"
+	mkdir -p "$(BIN_DIR)"
 	cp scanbd $(BIN_DIR)
 	echo "Copy scanbuttond backends to $(SCANBD_DIR)/scanbuttond/backends"
 	mkdir -p "$(SCANBD_DIR)/scanbuttond/backends"
-	-cp scanbuttond/backends/*.so "$(SCANBD_DIR)/scanbuttond/backends"
+	-cp scanbuttond/backends/*.so "$(SCANBD_DIR)/scanbuttond/backends" || /bin/true
 	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"	
 	cp scanbd_dbus.conf "$(DBUS_PREFIX)/etc/dbus-1/system.d"
-	-cp scanbuttond/backends/meta.conf "$(SCANBD_DIR)/scanbuttond/backends"
+	-cp scanbuttond/backends/meta.conf "$(SCANBD_DIR)/scanbuttond/backends" || /bin/true
 	echo "Edit /etc/inetd.conf"
