@@ -194,7 +194,7 @@ Also edit/check scanbd.conf to set the effective group = lp !
 
 8) Additional hints:
 
-- There is another howto for scanbd: https://bbs.archlinux.de/viewtopic.php?id=20954
+- There is another howto for scanbd: https://bbs.archlinux.de/viewtopic.php?id=20954 by <alex@tomisch.de>
   It is written for ArchLinux but will also be valuable for other distros.
 
 - if there are problems recognizing new / removed devices, it is possible to send scanbd the SIGHUP signal to
