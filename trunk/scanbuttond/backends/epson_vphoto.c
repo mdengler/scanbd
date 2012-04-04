@@ -1,6 +1,6 @@
-// epson.c: Epson ESC/I device backend
+// epson_vphoto.c: Epson ESC/V device backend
 // This file is part of scanbuttond.
-// Copyleft )c( 2004-2006 by Bernhard Stiftner
+// Copyleft )c( 2011 by Philipp Klaus, based on code from Bernhard Stiftner
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -16,8 +16,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
-// Thanks to:
-//  - James Gilliland (Epson CX3200 support)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,62 +25,31 @@
 #include <syslog.h>
 #include "scanbuttond/scanbuttond.h"
 #include "scanbuttond/libusbi.h"
-#include "epson.h"
+#include "epson_vphoto.h"
 
 #define	ESC        	0x1B		/* ASCII value for ESC */
 
-static char* backend_name = "Epson USB";
+static char* backend_name = "Epson VX00 Photo USB";
 
-#define NUM_SUPPORTED_USB_DEVICES 16
+#define NUM_SUPPORTED_USB_DEVICES 1
 
 static int supported_usb_devices[NUM_SUPPORTED_USB_DEVICES][3] = {
 	// vendor, product, num_buttons
-	{ 0x04B8, 0x0107, 1 },	// Epson Expression 1600
-	{ 0x04B8, 0x010E, 1 },	// Epson Expression 1680
-	{ 0x04B8, 0x012C, 1 },	// Epson Perfection V700
-	{ 0x04B8, 0x0103, 1 },	// Epson Perfection 610
-	{ 0x04B8, 0x0101, 3 },	// Epson Perfection 636U
-	{ 0x04B8, 0x010C, 3 },	// Epson Perfection 640
-	{ 0x04B8, 0x0104, 1 },	// Epson Perfection 1200U
-	{ 0x04B8, 0x010B, 3 },	// Epson Perfection 1240
-	{ 0x04B8, 0x010A, 1 },	// Epson Perfection 1640
-	{ 0x04B8, 0x0110, 4 },	// Epson Perfection 1650
-	{ 0x04B8, 0x011E, 4 },	// Epson Perfection 1660
-	{ 0x04B8, 0x011B, 4 },	// Epson Perfection 2400
-	{ 0x04B8, 0x0112, 1 },	// Epson Perfection 2450
-	{ 0x04B8, 0x011C, 1 },	// Epson Perfection 3200
-	{ 0x04B8, 0x0802, 1 },	// Epson CX3200 (note: is the button number
-				// really correct?)
-	{ 0x04B8, 0x0106, 1 }   // Epson Stylus Scan 2500
+	{ 0x04B8, 0x012E, 4 }	// Epson Perfection V200
 };
 
 static char* usb_device_descriptions[NUM_SUPPORTED_USB_DEVICES][2] = {
-	{ "Epson", "Expression 1600"},
-	{ "Epson", "Expression 1680"},
-	{ "Epson", "Perfection V700"},
-	{ "Epson", "Perfection 610"},
-	{ "Epson", "Perfection 636U"},
-	{ "Epson", "Perfection 640"},
-	{ "Epson", "Perfection 1200U"},
-	{ "Epson", "Perfection 1240"},
-	{ "Epson", "Perfection 1640"},
-	{ "Epson", "Perfection 1650"},
-	{ "Epson", "Perfection 1660"},
-	{ "Epson", "Perfection 2400"},
-	{ "Epson", "Perfection 2450"},
-	{ "Epson", "Perfection 3200"},
-	{ "Epson", "Stylus CX3200"},
-	{ "Epson", "Stylus Scan 2500"}
+	{ "Epson", "Perfection V200"}
 };
 
 
 static libusb_handle_t* libusb_handle;
-static scanner_t* epson_scanners = NULL;
+static scanner_t* epsonvp_scanners = NULL;
 
 
 // returns -1 if the scanner is unsupported, or the index of the
 // corresponding vendor-product pair in the supported_usb_devices array.
-int epson_match_libusb_scanner(libusb_device_t* device)
+int epsonvp_match_libusb_scanner(libusb_device_t* device)
 {
 	int index;
 	for (index = 0; index < NUM_SUPPORTED_USB_DEVICES; index++) {
@@ -96,10 +63,10 @@ int epson_match_libusb_scanner(libusb_device_t* device)
 }
 
 
-void epson_attach_libusb_scanner(libusb_device_t* device)
+void epsonvp_attach_libusb_scanner(libusb_device_t* device)
 {
-	const char* descriptor_prefix = "epson:libusb:";
-	int index = epson_match_libusb_scanner(device);
+	const char* descriptor_prefix = "epkowa:interpreter:";
+	int index = epsonvp_match_libusb_scanner(device);
 	if (index < 0) return; // unsupported
 	scanner_t* scanner = (scanner_t*)malloc(sizeof(scanner_t));
 	scanner->vendor = usb_device_descriptions[index][0];
@@ -113,43 +80,43 @@ void epson_attach_libusb_scanner(libusb_device_t* device)
 	strcat(scanner->sane_device, device->location);
 	scanner->num_buttons = supported_usb_devices[index][2];
 	scanner->is_open = 0;
-	scanner->next = epson_scanners;
-	epson_scanners = scanner;
+	scanner->next = epsonvp_scanners;
+	epsonvp_scanners = scanner;
 }
 
 
-void epson_detach_scanners(void)
+void epsonvp_detach_scanners(void)
 {
 	scanner_t* next;
-	while (epson_scanners != NULL) {
-		next = epson_scanners->next;
-		free(epson_scanners->sane_device);
-		free(epson_scanners);
-		epson_scanners = next;
+	while (epsonvp_scanners != NULL) {
+		next = epsonvp_scanners->next;
+		free(epsonvp_scanners->sane_device);
+		free(epsonvp_scanners);
+		epsonvp_scanners = next;
 	}
 }
 
 
-void epson_scan_devices(libusb_device_t* devices)
+void epsonvp_scan_devices(libusb_device_t* devices)
 {
 	int index;
 	libusb_device_t* device = devices;
 	while (device != NULL) {
-		index = epson_match_libusb_scanner(device);
+		index = epsonvp_match_libusb_scanner(device);
 		if (index >= 0)
-			epson_attach_libusb_scanner(device);
+			epsonvp_attach_libusb_scanner(device);
 		device = device->next;
 	}
 }
 
 
-int epson_init_libusb(void)
+int epsonvp_init_libusb(void)
 {
 	libusb_device_t* devices;
 
 	libusb_handle = libusb_init();
 	devices = libusb_get_devices(libusb_handle);
-	epson_scan_devices(devices);
+	epsonvp_scan_devices(devices);
 	return 0;
 }
 
@@ -162,10 +129,10 @@ const char* scanbtnd_get_backend_name(void)
 
 int scanbtnd_init(void)
 {
-	epson_scanners = NULL;
+	epsonvp_scanners = NULL;
 
-	syslog(LOG_INFO, "epson-backend: init");
-	return epson_init_libusb();
+	syslog(LOG_INFO, "epson-vphoto-backend: init");
+	return epsonvp_init_libusb();
 }
 
 
@@ -173,18 +140,18 @@ int scanbtnd_rescan(void)
 {
 	libusb_device_t *devices;
 
-	epson_detach_scanners();
-	epson_scanners = NULL;
+	epsonvp_detach_scanners();
+	epsonvp_scanners = NULL;
 	libusb_rescan(libusb_handle);
 	devices = libusb_get_devices(libusb_handle);
-	epson_scan_devices(devices);
+	epsonvp_scan_devices(devices);
 	return 0;
 }
 
 
 const scanner_t* scanbtnd_get_supported_devices(void)
 {
-	return epson_scanners;
+	return epsonvp_scanners;
 }
 
 
@@ -224,7 +191,7 @@ int scanbtnd_close(scanner_t* scanner)
 }
 
 
-int epson_read(scanner_t* scanner, void* buffer, int bytecount)
+int epsonvp_read(scanner_t* scanner, void* buffer, int bytecount)
 {
 	switch (scanner->connection) {
 		case CONNECTION_LIBUSB:
@@ -236,7 +203,7 @@ int epson_read(scanner_t* scanner, void* buffer, int bytecount)
 }
 
 
-int epson_write(scanner_t* scanner, void* buffer, int bytecount)
+int epsonvp_write(scanner_t* scanner, void* buffer, int bytecount)
 {
 	switch (scanner->connection) {
 		case CONNECTION_LIBUSB:
@@ -248,7 +215,7 @@ int epson_write(scanner_t* scanner, void* buffer, int bytecount)
 }
 
 
-void epson_flush(scanner_t* scanner)
+void epsonvp_flush(scanner_t* scanner)
 {
 	switch (scanner->connection) {
 		case CONNECTION_LIBUSB:
@@ -262,38 +229,30 @@ int scanbtnd_get_button(scanner_t* scanner)
 {
 	#define BUFFER_SIZE 16
 	unsigned char bytes[BUFFER_SIZE];
-	int rcv_len;
+	//int rcv_len;
 	int num_bytes;
-
-	bytes[0] = ESC;
-	bytes[1] = '!';
-	bytes[2] = '\0';
-
 	if (!scanner->is_open)
 		return -EINVAL;
 
-	num_bytes = epson_write(scanner, (void*)bytes, 2);
+	bytes[0] = 0x1E;
+	bytes[1] = 0x85;
+	bytes[2] = '\0';
+	num_bytes = epsonvp_write(scanner, (void*)bytes, 2);
 	if (num_bytes != 2) {
-		syslog(LOG_WARNING, "epson-backend: communication error: "
+		syslog(LOG_WARNING, "epson-vphoto-backend: communication error: "
 			"write length:%d (expected:%d)", num_bytes, 2);
-		epson_flush(scanner); 
+		epsonvp_flush(scanner); 
 		return 0;
 	}
-	num_bytes = epson_read(scanner, (void*)bytes, 4);
-	if (num_bytes != 4) {
-		syslog(LOG_WARNING, "epson-backend: communication error: "
-			"read length:%d (expected:%d)", num_bytes, 4);
-		epson_flush(scanner);
+
+	num_bytes = epsonvp_read(scanner, (void*)bytes, 1);
+	if (num_bytes != 1) {
+		syslog(LOG_WARNING, "epson-vphoto-backend: communication error: "
+			"read length:%d (expected:%d)", num_bytes, 1);
+		epsonvp_flush(scanner);
 		return 0;
 	}
-	rcv_len = bytes[3] << 8 | bytes[2];
-	num_bytes = epson_read(scanner, (void*)bytes, MAX(rcv_len, BUFFER_SIZE));
-	if (num_bytes != rcv_len) {
-		syslog(LOG_WARNING, "epson-backend: communication error: "
-			"read length:%d (expected:%d)", num_bytes, MAX(rcv_len, BUFFER_SIZE));
-		epson_flush(scanner);
-		return 0;
-	}
+	
 	return bytes[0];
 }
 
@@ -306,9 +265,8 @@ const char* scanbtnd_get_sane_device_descriptor(scanner_t* scanner)
 
 int scanbtnd_exit(void)
 {
-	syslog(LOG_INFO, "epson-backend: exit");
-	epson_detach_scanners();
+	syslog(LOG_INFO, "epson-vphoto-backend: exit");
+	epsonvp_detach_scanners();
 	libusb_exit(libusb_handle);
 	return 0;
 }
-
