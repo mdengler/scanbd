@@ -43,10 +43,9 @@ endif
 %.so: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared -o $@ $<
 
-all: mustek.so plustek.so plustek_umax.so snapscan.so hp3500.so meta.so niash.so artec_eplus48u.so epson.so genesys.so gt68xx.so hp3900.so hp5590.so
+all: mustek.so plustek.so plustek_umax.so snapscan.so hp3500.so meta.so niash.so artec_eplus48u.so epson.so genesys.so gt68xx.so hp3900.so hp5590.so epson_vphoto.so
 
 mustek.so: mustek.c mustek.h
-
 
 snapscan.so: snapscan.c snapscan.h
 
@@ -55,6 +54,8 @@ hp3500.so: hp3500.c hp3500.h
 meta.so: meta.c meta.h
 
 niash.so: niash.c niash.h
+
+epson_vphoto.so: epson_vphoto.c epson_vphoto.h
 
 clean:
 	$(RM) *.o *~ *.so
