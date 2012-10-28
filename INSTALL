@@ -164,7 +164,7 @@ export SANE_CONFIG_DIR=/usr/local/etc/scanbd
 
 or use the debian script (scanbd.script) or the upstart service (scanbdservice.conf)
 
-If you are unfamiliar wirh scanbd it would be best to first try starting scanbd in the foreground (-f)
+If you are unfamiliar with scanbd it would be best to first try starting scanbd in the foreground (-f)
 and in debug mode (-d):
 
 /usr/local/bin/scanbd -df -c /usr/local/etc/scanbd/scanbd.conf
