@@ -894,7 +894,7 @@ static void* sane_poll(void* arg) {
                     }
                     if ((fdesc->type == SANE_TYPE_BOOL) || (fdesc->type == SANE_TYPE_INT) ||
                             (fdesc->type == SANE_TYPE_FIXED) || (odesc->type == SANE_TYPE_BUTTON)) {
-                        snprintf(env[e], NAME_MAX, "%s=%lud", st->functions[e].env,
+                        snprintf(env[e], NAME_MAX, "%s=%lu", st->functions[e].env,
                                  v.num_value);
                         slog(SLOG_DEBUG, "setting env: %s", env[e]);
                     }
