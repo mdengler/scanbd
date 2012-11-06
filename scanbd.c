@@ -611,8 +611,8 @@ int main(int argc, char** argv) {
                     slog(SLOG_ERROR, "Can't clear pidfile: %s", strerror(errno));
                     exit(EXIT_FAILURE);
                 }
-                char buf[80];
-                snprintf(buf, 79, "%d\n", getpid());
+                char buf[LINE_MAX];
+                snprintf(buf, LINE_MAX - 1, "%d\n", getpid());
                 if (write(pid_fd, buf, strlen(buf)) < 0) {
                     slog(SLOG_ERROR, "Can't write pidfile: %s", strerror(errno));
                     exit(EXIT_FAILURE);
