@@ -228,14 +228,12 @@ void hp3900_flush(scanner_t* scanner)
 
 int scanbtnd_get_button(scanner_t* scanner)
 {
-	unsigned char bytes[2];
-	int num_bytes;
+    unsigned char bytes[2] = {};
+    int num_bytes = 0;
 	int button = 0;
-	int c;
-	int mask;
-	
-	bytes[2] = 0;
-	
+    int c = 0;
+    int mask = 0;
+		
 	if (!scanner->is_open)
 		return -EINVAL;
 
