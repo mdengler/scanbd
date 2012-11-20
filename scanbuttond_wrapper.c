@@ -21,9 +21,9 @@
  */
 
 #include "scanbd.h"
+#include "scanbuttond/include/scanbuttond/scanbuttond.h"
 #include "scanbuttond_loader.h"
 #include "scanbuttond_wrapper.h"
-#include "scanbuttond/include/scanbuttond/scanbuttond.h"
 
 // all programm-global scbtn functions use this mutex to avoid races
 #ifdef PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP

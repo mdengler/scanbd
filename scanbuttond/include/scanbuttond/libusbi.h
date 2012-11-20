@@ -21,7 +21,7 @@
 
 #include <sys/types.h>
 
-#ifdef Linux
+#ifdef HAVE_LINUX_LIMITS_H
 #include <linux/limits.h>
 #endif
 

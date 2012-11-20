@@ -49,16 +49,37 @@ So all applications must be enabled to use network-scanning (even if the scanner
 
 1) build
 
+There are two general options for building scanbd: using configure (preferred) (see 1.1) or using the (old) 
+simple Makefiles (see 1.2).
+
+1.1) using autotools configure script
+
+Please execute:
+
+./configure [--enable-scanbuttond]
+make all
+
+The use of HAL instead of libudev is now detected via configure. 
+If you want to use the scanbuttond-backends instead of sane-backends, use --enable-scanbuttond for configure.
+For all other options consult the output of
+
+./configure --help
+
+
+1.2) using plain Makefiles
+
+If you don't want to use the configure script to generate the Makefiles, you can still use the (old) Makefile.simple 
+as an input-file for the make tool.
 scanbd now uses libudev by default instead of HAL.
-If you want scanbd to use HAL, comment the line in the Makefile (USE_LIBUDEV=yes).
-If you want to use the sane-backends, set USE_SANE=yes in the Makefile. Otherwise the
+If you want scanbd to use HAL, comment the line in the Makefile.simple (USE_LIBUDEV=yes).
+If you want to use the sane-backends, set USE_SANE=yes in the Makefile.simpe. Otherwise the
 scanbuttond backends are used.
 
-make clean all
+make -f Makefile.simple clean all
 -or-
-USE_SCANBUTTOND=yes make -e clean all
+USE_SCANBUTTOND=yes make -e Makefile.simple clean all
 -or-
-USE_SANE=yes make -e clean all
+USE_SANE=yes make -e Makefile.simple clean all
 
 copy the executable scanbd and config-files scanbd.conf, etc. to useful places
 (or use "make install" to copy to /usr/local/bin and /usr/local/etc/scanbd).
