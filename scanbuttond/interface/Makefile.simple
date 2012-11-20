@@ -25,19 +25,19 @@ OSTYPE = $(shell uname)
 CFLAGS   += -Wall -Wextra -std=c99 -g
 
 ifeq ($(OSTYPE),NetBSD)
-CPPFLAGS += -D__NetBSD__ -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+CPPFLAGS += -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
 endif
 
 ifeq ($(OSTYPE),FreeBSD)
-CPPFLAGS += -D__FreeBSD__ -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
 endif 
 
 ifeq ($(OSTYPE),OpenBSD)
-CPPFLAGS += -D__OpenBSD__ -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+CPPFLAGS += -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
 endif
 
 ifeq ($(OSTYPE),Linux)
-CPPFLAGS += -D__Linux__ -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
 endif 
 
 all: libusbi.o
