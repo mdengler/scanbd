@@ -1,5 +1,5 @@
 #
-# $Id$
+# $Id: Makefile 76 2012-02-16 13:54:54Z wimalopaan $
 #
 #  scanbd - KMUX scanner button daemon
 #
@@ -25,13 +25,13 @@
 all: backends interface
 
 backends:
-	$(MAKE) -C backends all
+	$(MAKE) -f Makefile.simple -C backends all
 
 interface:
-	$(MAKE) -C interface all
+	$(MAKE) -f Makefile.simple -C interface all
 
 
 clean:
-	$(MAKE) -C backends clean
-	$(MAKE) -C interface clean
+	$(MAKE) -f Makefile.simple -C backends clean
+	$(MAKE) -f Makefile.simple -C interface clean
 	$(RM) *~

@@ -1,5 +1,5 @@
 #
-# $Id$
+# $Id: Makefile 82 2012-04-04 06:02:45Z wimalopaan $
 #
 #  scanbd - KMUX scanner button daemon
 #
@@ -25,19 +25,19 @@ OSTYPE = $(shell uname)
 CFLAGS   += -Wall -Wextra -std=c99 -g
 
 ifeq ($(OSTYPE),NetBSD)
-CPPFLAGS += -DNetBSD -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -D__NetBSD__ -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
 endif
 
 ifeq ($(OSTYPE),Linux)
-CPPFLAGS += -DLinux -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -D__Linux__ -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
 endif 
 
 ifeq ($(OSTYPE),FreeBSD)
-CPPFLAGS += -DFreeBSD -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -D__FreeBSD__ -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
 endif 
 
 ifeq ($(OSTYPE),OpenBSD)
-CPPFLAGS += -DOpenBSD -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -D__OpenBSD__ -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
 endif
 
 %.so: %.c

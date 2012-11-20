@@ -30,12 +30,12 @@
 #define _XOPEN_SOURCE	700
 #endif
 
-#ifdef FreeBSD
+#ifdef __FreeBSD__
 // otherwise usleep() isn't declared
 #define __BSD_VISIBLE 1
 #endif
 
-#ifdef OpenBSD
+#ifdef __OpenBSD__
 #ifndef _POSIX_THREADS
 #define _POSIX_THREADS 1
 #endif
@@ -95,11 +95,13 @@
 
 #ifdef _XOPEN_UNIX
 #include <strings.h>
-#ifndef FreeBSD
+#ifdef HAVE_UTMPX_H
 #include <utmpx.h>
 #else
+#ifdef HAVE_UTMP_H
 #include <utmp.h>
-#endif
+#endif /* HAVE_UTMP_H */
+#endif /* HAVE_UTMPX_H */
 #include <sys/resource.h>
 #include <sys/uio.h>
 #include <sys/time.h>
