@@ -627,6 +627,7 @@ USE_SCANBUTTOND_FALSE
 USE_SCANBUTTOND_TRUE
 USE_SANE_FALSE
 USE_SANE_TRUE
+SANE_CONFIG
 SANE_LIBS
 SANE_CFLAGS
 HAL_LIBS
@@ -12335,27 +12336,6 @@ else
 fi
 
 
-#AC_MSG_CHECKING([OS-type])
-#case "$host" in
-#        *-*-*linux*)
-#		OS_CFLAGS="-Wall -Wextra -std=c99 -g"
-#		OS_CPPFLAGS="-DLinux"
-#	;;
-#        *-*-*freebsd*)
-#		OS_CFLAGS="-Wall -Wextra -std=c99 -g"
-#		OS_CPPFLAGS="-DFreeBSD"
-#	;;
-#        *-*-*netbsd*)
-#		OS_CFLAGS="-Wall -Wextra -std=c99 -g"
-#		OS_CPPFLAGS="-DNetBSD"
-#	;;
-#        *-*-*openbsd*)
-#		OS_CFLAGS="-Wall -Wextra -std=c99 -g"
-#		OS_CPPFLAGS="-DOpenBSD"
-#	;;
-#	*)
-#		AC_MSG_ERROR([Your OS is not yet supported])
-#esac
 OS_CFLAGS="-Wall -Wextra -std=c99 -g"
 
 for ac_header in linux/limits.h \
@@ -12979,7 +12959,7 @@ if test "${enable_scanbuttond+set}" = set; then :
 fi
 
 
-
+# TODO: are the -U flags really necessary? Just remove them?
 if test x"${enable_scanbuttond}" == "xyes"
 then
 	use_scanbuttond=yes
@@ -12987,6 +12967,9 @@ then
 
 else
 	use_sane=yes
+
+$as_echo "#define USE_SANE 1" >>confdefs.h
+
 	SCANNER_CFLAGS="-DUSE_SANE -UUSE_SCANBUTTOND"
 
 pkg_failed=no
@@ -13047,40 +13030,74 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$SANE_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (sane-backends >= 1.0) were not met:
-
-$SANE_PKG_ERRORS
-
-Consider adjusting the PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
-
-Alternatively, you may set the environment variables SANE_CFLAGS
-and SANE_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details." "$LINENO" 5
+	test_sane_config=yes
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the PKG_CONFIG environment variable to the full
-path to pkg-config.
-
-Alternatively, you may set the environment variables SANE_CFLAGS
-and SANE_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
-
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.
-See \`config.log' for more details" "$LINENO" 5; }
+	test_sane_config=yes
 else
 	SANE_CFLAGS=$pkg_cv_SANE_CFLAGS
 	SANE_LIBS=$pkg_cv_SANE_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+	test_sane_config=no
+fi
+fi
 
+# fallback to usage of sane-config if pkg-config fails
+if test x"${use_sane}" == "xyes" -a x"${test_sane_config}" == "xyes"
+then
+	if test x"${SANE_LIBS}" == "x" -a  x"${SANE_CFLAGS}" = "x"
+	then
+		# Extract the first word of "sane-config", so it can be a program name with args.
+set dummy sane-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_SANE_CONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$SANE_CONFIG"; then
+  ac_cv_prog_SANE_CONFIG="$SANE_CONFIG" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_SANE_CONFIG="sane-config"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_SANE_CONFIG" && ac_cv_prog_SANE_CONFIG="no"
 fi
 fi
- if test "x$use_sane" == xyes; then
+SANE_CONFIG=$ac_cv_prog_SANE_CONFIG
+if test -n "$SANE_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SANE_CONFIG" >&5
+$as_echo "$SANE_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+		if test x"${SANE_CONFIG}" = "xno"
+		then
+			as_fn_error $? "Cannot find configuration for sane using pkg-config and sane-config does not exist" "$LINENO" 5
+		fi
+
+		SANE_LIBS=`sane-config --libs`
+		SANE_CFLAGS=`sane-config --cflags`
+	fi
+fi
+
+ if test "x$use_sane" == "xyes"; then
   USE_SANE_TRUE=
   USE_SANE_FALSE='#'
 else

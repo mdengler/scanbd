@@ -27,27 +27,6 @@ AC_SEARCH_LIBS([dlopen], [dl dld], [], [
   AC_MSG_ERROR([unable to find the dlopen() function])
 ])
 
-#AC_MSG_CHECKING([OS-type])
-#case "$host" in
-#        *-*-*linux*)
-#		OS_CFLAGS="-Wall -Wextra -std=c99 -g"
-#		OS_CPPFLAGS="-DLinux"
-#	;;
-#        *-*-*freebsd*)
-#		OS_CFLAGS="-Wall -Wextra -std=c99 -g"
-#		OS_CPPFLAGS="-DFreeBSD"
-#	;;
-#        *-*-*netbsd*)
-#		OS_CFLAGS="-Wall -Wextra -std=c99 -g"
-#		OS_CPPFLAGS="-DNetBSD"
-#	;;
-#        *-*-*openbsd*)
-#		OS_CFLAGS="-Wall -Wextra -std=c99 -g"
-#		OS_CPPFLAGS="-DOpenBSD"
-#	;;
-#	*)
-#		AC_MSG_ERROR([Your OS is not yet supported])
-#esac
 OS_CFLAGS="-Wall -Wextra -std=c99 -g"
 
 dnl check for optional headers
@@ -97,7 +76,7 @@ fi
 AC_ARG_ENABLE(scanbuttond,
 	AC_HELP_STRING([--enable-scanbuttond], [Use scanbuttond instead of Sane]))
 
-
+# TODO: are the -U flags really necessary? Just remove them?
 if test x"${enable_scanbuttond}" == "xyes"
 then
 	use_scanbuttond=yes
@@ -105,10 +84,30 @@ then
 	
 else
 	use_sane=yes
+	AC_DEFINE([USE_SANE], [1], [Use Sane])
 	SCANNER_CFLAGS="-DUSE_SANE -UUSE_SCANBUTTOND"
-	PKG_CHECK_MODULES([SANE], [sane-backends >= 1.0])
+	PKG_CHECK_MODULES([SANE], [sane-backends >= 1.0],
+		[test_sane_config=no],
+		[test_sane_config=yes])
 fi
-AM_CONDITIONAL(USE_SANE, test "x$use_sane" == xyes)
+
+# fallback to usage of sane-config if pkg-config fails
+if test x"${use_sane}" == "xyes" -a x"${test_sane_config}" == "xyes" 
+then
+	if test x"${SANE_LIBS}" == "x" -a  x"${SANE_CFLAGS}" = "x"
+	then
+		AC_CHECK_PROG([SANE_CONFIG], [sane-config], sane-config, no)
+		if test x"${SANE_CONFIG}" = "xno"
+		then
+			AC_MSG_ERROR([Cannot find configuration for sane using pkg-config and sane-config does not exist])
+		fi
+
+		SANE_LIBS=`sane-config --libs`
+		SANE_CFLAGS=`sane-config --cflags`
+	fi
+fi
+
+AM_CONDITIONAL(USE_SANE, test "x$use_sane" == "xyes")
 AM_CONDITIONAL(USE_SCANBUTTOND, test "x$use_scanbuttond" == xyes)
 
 AC_TYPE_SIZE_T
