@@ -78,19 +78,31 @@ fi
 AC_ARG_ENABLE(scanbuttond,
 	AC_HELP_STRING([--enable-scanbuttond], [Use scanbuttond instead of Sane]))
 
-# TODO: are the -U flags really necessary? Just remove them?
 if test x"${enable_scanbuttond}" == "xyes"
 then
 	use_scanbuttond=yes
-	# Check for libusb
-	PKG_CHECK_MODULES([LIBUSB], [libusb])
+	# Check for libusb except for FreeBSD that does not have libusb.pc
+	if test `uname` == "FreeBSD"
+	then
+		if test x"${LIBUSB_CFLAGS}" == "x"
+		then
+			LIBUSB_CFLAGS="-I/usr/include "
+		fi
+		if test x"${LIBUSB_LIBS}" == "x"
+		then
+			LIBUSB_LIBS="-L/usr/lib -lusb "
+		fi
+		AC_SUBST(LIBUSB_CFLAGS)
+		AC_SUBST(LIBUSB_LIBS)
+	else
+		PKG_CHECK_MODULES([LIBUSB], [libusb])
+	fi
 
-	SCANNER_CFLAGS="-UUSE_SANE -DUSE_SCANBUTTOND"
+	SCANNER_CFLAGS="-DUSE_SCANBUTTOND"
 	
 else
 	use_sane=yes
 	AC_DEFINE([USE_SANE], [1], [Use Sane])
-	SCANNER_CFLAGS="-DUSE_SANE -UUSE_SCANBUTTOND"
 	PKG_CHECK_MODULES([SANE], [sane-backends >= 1.0],
 		[test_sane_config=no],
 		[test_sane_config=yes])
