@@ -12933,11 +12933,23 @@ if test "${enable_scanbuttond+set}" = set; then :
 fi
 
 
-# TODO: are the -U flags really necessary? Just remove them?
 if test x"${enable_scanbuttond}" == "xyes"
 then
 	use_scanbuttond=yes
-	# Check for libusb
+	# Check for libusb except for FreeBSD that does not have libusb.pc
+	if test `uname` == "FreeBSD"
+	then
+		if test x"${LIBUSB_CFLAGS}" == "x"
+		then
+			LIBUSB_CFLAGS="-I/usr/include "
+		fi
+		if test x"${LIBUSB_LIBS}" == "x"
+		then
+			LIBUSB_LIBS="-L/usr/lib -lusb "
+		fi
+
+
+	else
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBUSB" >&5
@@ -13029,15 +13041,15 @@ else
 $as_echo "yes" >&6; }
 
 fi
+	fi
 
-	SCANNER_CFLAGS="-UUSE_SANE -DUSE_SCANBUTTOND"
+	SCANNER_CFLAGS="-DUSE_SCANBUTTOND"
 
 else
 	use_sane=yes
 
 $as_echo "#define USE_SANE 1" >>confdefs.h
 
-	SCANNER_CFLAGS="-DUSE_SANE -UUSE_SCANBUTTOND"
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SANE" >&5
