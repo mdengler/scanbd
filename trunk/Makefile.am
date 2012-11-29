@@ -55,6 +55,9 @@ noinst_PROGRAMS = scanbd_test
 AM_CFLAGS += \
 	-I scanbuttond/include 
 
+AM_LDFLAGS += \
+	$(LIBUSB_LIBS)
+
 scanbd_LDADD = \
 	-Lscanbuttond/interface \
 	-lusbi

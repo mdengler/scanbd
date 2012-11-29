@@ -604,6 +604,8 @@ static void* sane_poll(void* arg) {
     sigfillset(&mask);
     pthread_sigmask(SIG_BLOCK, &mask, NULL);
     
+    static int si = 0;
+
     // this thread uses the device and the san_thread_t datastructure
     // lock it
     pthread_cleanup_push(sane_thread_cleanup_mutex, ((void*)&st->mutex));
@@ -735,18 +737,19 @@ static void* sane_poll(void* arg) {
     
     slog(SLOG_DEBUG, "Start the polling for device %s", st->dev->name);
     while(true) {
+
         slog(SLOG_DEBUG, "polling thread for %s cancellation point", st->dev->name);
         // special cancellation point
         pthread_testcancel();
         slog(SLOG_DEBUG, "polling device %s", st->dev->name);
 
-        for(int i = 0; i < st->num_of_options_with_scripts; i += 1) {
+        for(si = 0; si < st->num_of_options_with_scripts; si += 1) {
             const SANE_Option_Descriptor* odesc = NULL;
-            odesc = sane_get_option_descriptor(st->h, st->opts[i].number);
+            odesc = sane_get_option_descriptor(st->h, st->opts[si].number);
             assert(odesc);
 
-            if (st->opts[i].script != NULL) {
-                if (strlen(st->opts[i].script) <= 0) {
+            if (st->opts[si].script != NULL) {
+                if (strlen(st->opts[si].script) <= 0) {
                     slog(SLOG_WARN, "No valid script for option %s for device %s",
                          odesc->name, st->dev->name);
                     continue;
@@ -757,8 +760,8 @@ static void* sane_poll(void* arg) {
                      odesc->name, st->dev->name);
                 continue;
             }
-            assert(st->opts[i].script != NULL);
-            assert(strlen(st->opts[i].script) > 0);
+            assert(st->opts[si].script != NULL);
+            assert(strlen(st->opts[si].script) > 0);
 
             sane_opt_value_t value;
             sane_option_value_init(&value);
@@ -771,15 +774,15 @@ static void* sane_poll(void* arg) {
             // detected
             int o = 0;
             bool gotAlready = false;
-            for(o = 0; o < i; o += 1) {
-                if (st->opts[o].number == st->opts[i].number) {
+            for(o = 0; o < si; o += 1) {
+                if (st->opts[o].number == st->opts[si].number) {
                     gotAlready = true;
                     break;
                 }
             }
             if (!gotAlready) {
                 // first query of option with this number
-                value = get_sane_option_value(st->h, st->opts[i].number);
+                value = get_sane_option_value(st->h, st->opts[si].number);
             }
             else {
                 // additional query, so copy the value
@@ -794,16 +797,16 @@ static void* sane_poll(void* arg) {
             }
 
             slog(SLOG_INFO, "checking option %s number %d (%d) for device %s: value: %d",
-                 odesc->name, st->opts[i].number, i,
+                 odesc->name, st->opts[si].number, si,
                  st->dev->name, value);
 
             if ((odesc->type == SANE_TYPE_BOOL) || (odesc->type == SANE_TYPE_INT) ||
                     (odesc->type == SANE_TYPE_FIXED) || (odesc->type == SANE_TYPE_BUTTON)) {
-                if ((st->opts[i].from_value.num_value == st->opts[i].value.num_value) &&
-                        (st->opts[i].to_value.num_value == value.num_value)) {
+                if ((st->opts[si].from_value.num_value == st->opts[si].value.num_value) &&
+                        (st->opts[si].to_value.num_value == value.num_value)) {
                     slog(SLOG_DEBUG, "value trigger: numerical");
                     st->triggered = true;
-                    st->triggered_option = i;
+                    st->triggered_option = si;
                     // we need to trigger all waiting threads
                     if (pthread_cond_broadcast(&st->cv) < 0) {
                         slog(SLOG_ERROR, "pthread_cond_broadcats: this shouln't happen");
@@ -811,13 +814,13 @@ static void* sane_poll(void* arg) {
                 }
             }
             else if (odesc->type == SANE_TYPE_STRING) {
-                if ((regexec(st->opts[i].from_value.str_value.reg,
-                             st->opts[i].value.str_value.str, 0, NULL, 0) == 0) &&
-                        (regexec(st->opts[i].to_value.str_value.reg,
+                if ((regexec(st->opts[si].from_value.str_value.reg,
+                             st->opts[si].value.str_value.str, 0, NULL, 0) == 0) &&
+                        (regexec(st->opts[si].to_value.str_value.reg,
                                  value.str_value.str, 0, NULL, 0) == 0)) {
                     slog(SLOG_DEBUG, "value trigger: string");
                     st->triggered = true;
-                    st->triggered_option = i;
+                    st->triggered_option = si;
                     // we need to trigger all waiting threads
                     if (pthread_cond_broadcast(&st->cv) < 0) {
                         slog(SLOG_ERROR, "pthread_cond_broadcats: this shouln't happen");
@@ -828,14 +831,14 @@ static void* sane_poll(void* arg) {
                 assert(false);
             }
             // free the previous allocated value
-            sane_option_value_free(&st->opts[i].value);
+            sane_option_value_free(&st->opts[si].value);
 
             // pass the responsibility to free the value to the main
             // thread, if this thread gets canceled
             if (pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL) < 0) {
                 slog(SLOG_ERROR, "pthread_setcancelstate: %s", strerror(errno));
             }
-            st->opts[i].value = value;
+            st->opts[si].value = value;
             pthread_cleanup_pop(0);
             if (pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL) < 0) {
                 slog(SLOG_ERROR, "pthread_setcancelstate: %s", strerror(errno));

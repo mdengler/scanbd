@@ -50,6 +50,9 @@ sbin_PROGRAMS = scanbd$(EXEEXT)
 @USE_SCANBUTTOND_TRUE@	-I scanbuttond/include 
 
 @USE_SCANBUTTOND_TRUE@am__append_5 = \
+@USE_SCANBUTTOND_TRUE@	$(LIBUSB_LIBS)
+
+@USE_SCANBUTTOND_TRUE@am__append_6 = \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_wrapper.c \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_loader.c \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_wrapper.h \
@@ -237,6 +240,8 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBUSB_CFLAGS = @LIBUSB_CFLAGS@
+LIBUSB_LIBS = @LIBUSB_LIBS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -332,14 +337,14 @@ scanbdconfdir = $(sysconfdir)/scanbd/
 scanbuttondconfdir = $(scanbdconfdir)/scanbuttond/backend/
 scanbd_SOURCES = scanbd.c common.h daemonize.c dbus.c udev.c udev.h \
 	slog.c slog.h scanbd_dbus.h scanbd.h $(am__append_1) \
-	$(am__append_5)
+	$(am__append_6)
 AM_CFLAGS = $(OS_CFLAGS) $(OS_CPPFLAGS) $(SCANNER_CFLAGS) \
 	$(EXTRA_CFLAGS) $(CONFUSE_CFLAGS) $(UDEV_CFLAGS) \
 	$(DBUS_CFLAGS) $(HAL_CFLAGS) \
 	-DCFG_DIR=\"$(scanbuttondconfdir)\" $(am__append_2) \
 	$(am__append_4)
 AM_LDFLAGS = $(OS_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) $(DBUS_LIBS) \
-	$(HAL_LIBS) $(am__append_3)
+	$(HAL_LIBS) $(am__append_3) $(am__append_5)
 @USE_SCANBUTTOND_TRUE@SUBDIRS = scanbuttond
 @USE_SCANBUTTOND_TRUE@scanbd_LDADD = \
 @USE_SCANBUTTOND_TRUE@	-Lscanbuttond/interface \
