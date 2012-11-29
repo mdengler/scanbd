@@ -22,6 +22,7 @@ backend_LTLIBRARIES = \
 AM_CFLAGS = \
 	$(OS_CFLAGS) \
 	$(OS_CPPFLAGS) \
+	$(LIBUSB_CFLAGS) \
 	$(EXTRA_CFLAGS) \
 	-I../include \
 	-Dsyslog=slog \

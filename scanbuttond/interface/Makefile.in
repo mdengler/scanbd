@@ -112,6 +112,8 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBUSB_CFLAGS = @LIBUSB_CFLAGS@
+LIBUSB_LIBS = @LIBUSB_LIBS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -204,7 +206,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libusbi.a
 libusbi_a_SOURCES = libusbi.c
-AM_CFLAGS = $(OS_CFLAGS)  $(OS_CPPFLAGS) $(EXTRA_CFLAGS) -I../include
+AM_CFLAGS = \
+	$(OS_CFLAGS) \
+	$(OS_CPPFLAGS) \
+	$(LIBUSB_CFLAGS) \
+	$(EXTRA_CFLAGS) \
+	-I../include
+
 all: all-am
 
 .SUFFIXES:

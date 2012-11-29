@@ -37,18 +37,20 @@ AC_CHECK_HEADERS(linux/limits.h \
 # check for mandatory dependencies 
 #=================================
 
-#check for libconfuse
+# check for libconfuse
 PKG_CHECK_MODULES([CONFUSE], [libconfuse])
 
+# check for dbus
 PKG_CHECK_MODULES([DBUS], [dbus-1])
 
 dnl Check for udev and if we do not have it, check for hal
 PKG_CHECK_MODULES([UDEV],[libudev],
 	[AC_DEFINE([USE_UDEV], [1], [Use UDEV])],
 	[PKG_CHECK_MODULES([HAL], [hal],
-	[AC_DEFINE([USE_HAL], [1], [Use HAL])
-	])
-])
+		[AC_DEFINE([USE_HAL], [1], [Use HAL])],
+		[AC_MSG_WARN([Neither Udev nor Hal are found, dynamic detection of scanners is not supported!])]
+	)]
+)
 
 # check configuration options 
 #============================
@@ -80,6 +82,9 @@ AC_ARG_ENABLE(scanbuttond,
 if test x"${enable_scanbuttond}" == "xyes"
 then
 	use_scanbuttond=yes
+	# Check for libusb
+	PKG_CHECK_MODULES([LIBUSB], [libusb])
+
 	SCANNER_CFLAGS="-UUSE_SANE -DUSE_SCANBUTTOND"
 	
 else
