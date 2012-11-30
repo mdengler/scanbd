@@ -27,18 +27,18 @@
 #include "scanbuttond/libusbi.h"
 #include "genesys.h"
 
-static char* backend_name = "Genesys USB";
+static const char* backend_name = "Genesys USB";
 
 #define NUM_SUPPORTED_USB_DEVICES 3
 
-static int supported_usb_devices[NUM_SUPPORTED_USB_DEVICES][3] = {
+static const int supported_usb_devices[NUM_SUPPORTED_USB_DEVICES][NUM_SUPPORTED_USB_DEVICES] = {
 	// vendor, product, num_buttons
 	{ 0x04a9, 0x221c, 15 },	// CanoScan LiDE 60 (15 includes combined buttons - only 4 real buttons)
     { 0x04a9, 0x2213, 15 },	// CanoScan LiDE 35 (15 includes combined buttons - only 4 real buttons)
     { 0x04a9, 0x1905, 15 }, // CanoScan LiDE 200 (15 includes combined buttons - only 4 real buttons)
 };
 
-static char* usb_device_descriptions[NUM_SUPPORTED_USB_DEVICES][3] = {
+static const char* usb_device_descriptions[NUM_SUPPORTED_USB_DEVICES][NUM_SUPPORTED_USB_DEVICES] = {
 	{ "Canon", "CanoScan LiDE 60" },
     { "Canon", "CanoScan LiDE 35" },
     { "Canon", "CanoScan LiDE 200" }
@@ -53,10 +53,10 @@ static scanner_t* genesys_scanners = NULL;
 // button 3 = 0x02 pdf 
 // button 4 = 0x04 mail
 // all others are combinations of the above (if pressed together)
-static char button_map_lide60[256] = {  0,  2,  3,  5,
-				        4,  6,  7,  8,
-				        1,  9, 10, 11,
-				       12, 13, 14, 15};
+static const char button_map_lide60[256] = {  0,  2,  3,  5,
+                                              4,  6,  7,  8,
+                                              1,  9, 10, 11,
+                                              12, 13, 14, 15};
 
 // returns -1 if the scanner is unsupported, or the index of the
 // corresponding vendor-product pair in the supported_usb_devices array.
@@ -72,7 +72,6 @@ int genesys_match_libusb_scanner(libusb_device_t* device)
    if (index >= NUM_SUPPORTED_USB_DEVICES) return -1;
    return index;
 }
-
 
 void genesys_attach_libusb_scanner(libusb_device_t* device)
 {
@@ -209,7 +208,7 @@ int scanbtnd_get_button(scanner_t* scanner)
    // current_button_map should be select according to the current scanner
    // there is no space left inside scanner_t to store some additional data (for example a pointer)
    // currently we only support one type of scanner and so this one can be hardcoded
-   char *current_button_map = button_map_lide60;
+   const char *current_button_map = button_map_lide60;
    
    if (!scanner->is_open)
       return -EINVAL;
@@ -220,7 +219,7 @@ int scanbtnd_get_button(scanner_t* scanner)
    bytes[0] = 0x6d;
    bytes[1] = 0x00; // not really needed, but just to be sure ;-)
    num_bytes = libusb_control_msg((libusb_device_t*)scanner->internal_dev_ptr,
-				  0x40, 0x0c, 0x0083, 0x0000, (void *)bytes, 0x0001);
+                                  0x40, 0x0c, 0x0083, 0x0000, (void *)bytes, 0x0001);
    
    if (num_bytes != 1) {
       syslog(LOG_WARNING, "genesys-backend: communication error: "
