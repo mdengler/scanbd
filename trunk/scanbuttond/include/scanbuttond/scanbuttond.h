@@ -37,8 +37,8 @@ struct scanner;
 typedef struct scanner scanner_t;
 
 struct scanner {
-	char* vendor;
-	char* product;
+    const char* vendor;
+    const char* product;
 	int connection;
 	void* internal_dev_ptr;
 	char* sane_device;
