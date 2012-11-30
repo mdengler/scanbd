@@ -43,7 +43,8 @@ use the scanner. To make this happen, scanbd is configured instead of saned as t
 a scan request arrives to scanbd (in manager-mode) on the sane-port, scanbd stops the polling by sending
 a dbus-signal (default) or a posix-signal (SIGUSR1) (signal-mode) to the polling scanbd-daemon. Then it 
 starts the real saned which scans and sends the data back to the requesting application. Afterwords the scanbd-manager
-restarts the polling by sending another dbus-signal (or the posix-signal SIGUSR2). 
+restarts the polling by sending another dbus-signal (or the posix-signal SIGUSR2) to the scanbd. scanbd now reenables
+polling of the devices.
 
 So all applications must be enabled to use network-scanning (even if the scanner is local, see below)!
 
@@ -65,6 +66,8 @@ For all other options consult the output of
 
 ./configure --help
 
+If neither HAL nor libudev is available (e.g. OpenBSD), scanbd works without dynamic detection of inserted or
+removed devices (but can be triggered by sending SIGHUP).
 
 1.2) using plain Makefiles
 
@@ -72,7 +75,7 @@ If you don't want to use the configure script to generate the Makefiles, you can
 as an input-file for the make tool.
 scanbd now uses libudev by default instead of HAL.
 If you want scanbd to use HAL, comment the line in the Makefile.simple (USE_LIBUDEV=yes).
-If you want to use the sane-backends, set USE_SANE=yes in the Makefile.simpe. Otherwise the
+If you want to use the sane-backends, set USE_SANE=yes in the Makefile.simple. Otherwise the
 scanbuttond backends are used.
 
 make -f Makefile.simple clean all
@@ -81,7 +84,7 @@ USE_SCANBUTTOND=yes make -e Makefile.simple clean all
 -or-
 USE_SANE=yes make -e Makefile.simple clean all
 
-copy the executable scanbd and config-files scanbd.conf, etc. to useful places
+Then copy the executable scanbd and config-files scanbd.conf, etc. to useful places
 (or use "make install" to copy to /usr/local/bin and /usr/local/etc/scanbd).
 If you use the scanbuttond-backends, copy the shared-objects from scanbuttond/backends directory
 to /usr/local/etc/scanbd/scanbuttond/backends (or use "make install").
