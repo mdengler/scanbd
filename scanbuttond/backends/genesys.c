@@ -29,17 +29,19 @@
 
 static char* backend_name = "Genesys USB";
 
-#define NUM_SUPPORTED_USB_DEVICES 2
+#define NUM_SUPPORTED_USB_DEVICES 3
 
 static int supported_usb_devices[NUM_SUPPORTED_USB_DEVICES][3] = {
 	// vendor, product, num_buttons
 	{ 0x04a9, 0x221c, 15 },	// CanoScan LiDE 60 (15 includes combined buttons - only 4 real buttons)
-	{ 0x04a9, 0x2213, 15 }	// CanoScan LiDE 35 (15 includes combined buttons - only 4 real buttons)
+    { 0x04a9, 0x2213, 15 },	// CanoScan LiDE 35 (15 includes combined buttons - only 4 real buttons)
+    { 0x04a9, 0x1905, 15 }, // CanoScan LiDE 200 (15 includes combined buttons - only 4 real buttons)
 };
 
-static char* usb_device_descriptions[NUM_SUPPORTED_USB_DEVICES][2] = {
+static char* usb_device_descriptions[NUM_SUPPORTED_USB_DEVICES][3] = {
 	{ "Canon", "CanoScan LiDE 60" },
-	{ "Canon", "CanoScan LiDE 35" }
+    { "Canon", "CanoScan LiDE 35" },
+    { "Canon", "CanoScan LiDE 200" }
 };
 
 static libusb_handle_t* libusb_handle;
@@ -60,7 +62,7 @@ static char button_map_lide60[256] = {  0,  2,  3,  5,
 // corresponding vendor-product pair in the supported_usb_devices array.
 int genesys_match_libusb_scanner(libusb_device_t* device)
 {
-   int index;
+   int index = -1;
    for (index = 0; index < NUM_SUPPORTED_USB_DEVICES; index++) {
       if (supported_usb_devices[index][0] == device->vendorID &&
 	  supported_usb_devices[index][1] == device->productID) {
@@ -96,7 +98,7 @@ void genesys_attach_libusb_scanner(libusb_device_t* device)
 
 void genesys_detach_scanners(void)
 {
-   scanner_t* next;
+   scanner_t* next = NULL;
    while (genesys_scanners != NULL) {
       next = genesys_scanners->next;
       free(genesys_scanners->sane_device);
@@ -108,12 +110,12 @@ void genesys_detach_scanners(void)
 
 void genesys_scan_devices(libusb_device_t* devices)
 {
-   int index;
+   int index = -1;
    libusb_device_t* device = devices;
    while (device != NULL) {
       index = genesys_match_libusb_scanner(device);
       if (index >= 0) 
-	 genesys_attach_libusb_scanner(device);
+          genesys_attach_libusb_scanner(device);
       device = device->next;
    }
 }
@@ -121,7 +123,7 @@ void genesys_scan_devices(libusb_device_t* devices)
 
 int genesys_init_libusb(void)
 {
-   libusb_device_t* devices;
+   libusb_device_t* devices = NULL;
    
    libusb_handle = libusb_init();
    devices = libusb_get_devices(libusb_handle);
@@ -147,7 +149,7 @@ int scanbtnd_init(void)
 
 int scanbtnd_rescan(void)
 {
-   libusb_device_t* devices;
+   libusb_device_t* devices = NULL;
    
    genesys_detach_scanners();
    genesys_scanners = NULL;
@@ -201,9 +203,8 @@ int scanbtnd_close(scanner_t* scanner)
 
 int scanbtnd_get_button(scanner_t* scanner)
 {
-   unsigned char bytes[2];
-   int num_bytes;
-//   int button = 0;
+   unsigned char bytes[2] = {};
+   int num_bytes = -1;
 
    // current_button_map should be select according to the current scanner
    // there is no space left inside scanner_t to store some additional data (for example a pointer)
