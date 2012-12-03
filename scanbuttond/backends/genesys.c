@@ -31,14 +31,14 @@ static const char* backend_name = "Genesys USB";
 
 #define NUM_SUPPORTED_USB_DEVICES 3
 
-static const int supported_usb_devices[NUM_SUPPORTED_USB_DEVICES][NUM_SUPPORTED_USB_DEVICES] = {
+static const int supported_usb_devices[NUM_SUPPORTED_USB_DEVICES][3] = {
 	// vendor, product, num_buttons
 	{ 0x04a9, 0x221c, 15 },	// CanoScan LiDE 60 (15 includes combined buttons - only 4 real buttons)
     { 0x04a9, 0x2213, 15 },	// CanoScan LiDE 35 (15 includes combined buttons - only 4 real buttons)
     { 0x04a9, 0x1905, 15 }, // CanoScan LiDE 200 (15 includes combined buttons - only 4 real buttons)
 };
 
-static const char* usb_device_descriptions[NUM_SUPPORTED_USB_DEVICES][NUM_SUPPORTED_USB_DEVICES] = {
+static const char* usb_device_descriptions[NUM_SUPPORTED_USB_DEVICES][2] = {
 	{ "Canon", "CanoScan LiDE 60" },
     { "Canon", "CanoScan LiDE 35" },
     { "Canon", "CanoScan LiDE 200" }
