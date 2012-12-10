@@ -195,7 +195,6 @@ LIBUSB_LIBS = @LIBUSB_LIBS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -222,7 +221,8 @@ RANLIB = @RANLIB@
 SANE_CFLAGS = @SANE_CFLAGS@
 SANE_CONFIG = @SANE_CONFIG@
 SANE_LIBS = @SANE_LIBS@
-SCANNER_CFLAGS = @SCANNER_CFLAGS@
+SCANBD_CFG_DIR = @SCANBD_CFG_DIR@
+SCANBUTTOND_CFG_DIR = @SCANBUTTOND_CFG_DIR@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -283,7 +283,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 backenddir = ${libdir}/scanbuttond/backends/
-backendcfgdir = $(sysconfdir)/scanbd/scanbuttond/backend/
+backendcfgdir = @SCANBUTTOND_CFG_DIR@/
 backendcfg_DATA = meta.conf
 backend_LTLIBRARIES = \
 	mustek.la \
@@ -309,7 +309,8 @@ AM_CFLAGS = \
 	-I../include \
 	-Dsyslog=slog \
 	-DLOG_INFO=SLOG_INFO \
-	-DLOG_WARNING=SLOG_WARN 
+	-DLOG_WARNING=SLOG_WARN \
+	-DCFG_DIR=${backendcfgdir}
 
 AM_LDFLAGS = -shared -avoid-version -module
 mustek_la_SOURCES = mustek.c mustek.h
@@ -330,7 +331,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -355,9 +356,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
+$(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 install-backendLTLIBRARIES: $(backend_LTLIBRARIES)
@@ -694,7 +695,6 @@ uninstall-am: uninstall-backendLTLIBRARIES uninstall-backendcfgDATA
 	tags uninstall uninstall-am uninstall-backendLTLIBRARIES \
 	uninstall-backendcfgDATA
 
-	-DCFG_DIR=\"${backendcfgdir}\"
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

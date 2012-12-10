@@ -1,8 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 ## AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
-scanbdconfdir = $(sysconfdir)/scanbd/
-scanbuttondconfdir = $(scanbdconfdir)/scanbuttond/backend/
+scanbdconfdir = @SCANBD_CFG_DIR@/
+scanbuttondconfdir = @SCANBUTTOND_CFG_DIR@/
 sbin_PROGRAMS = scanbd
 
 scanbd_SOURCES = \
@@ -21,13 +21,13 @@ scanbd_SOURCES = \
 AM_CFLAGS = \
 	$(OS_CFLAGS) \
 	$(OS_CPPFLAGS) \
-	$(SCANNER_CFLAGS) \
 	$(EXTRA_CFLAGS) \
 	$(CONFUSE_CFLAGS) \
 	$(UDEV_CFLAGS) \
 	$(DBUS_CFLAGS) \
 	$(HAL_CFLAGS) \
-	-DCFG_DIR=\"$(scanbuttondconfdir)\"
+	-DCFG_DIR=\"$(scanbuttondconfdir)\" \
+	-DSCANBD_CFG_DIR=\"$(scanbdconfdir)\"
 
 
 AM_LDFLAGS = \

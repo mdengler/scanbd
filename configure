@@ -616,10 +616,6 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-MAINT
-MAINTAINER_MODE_FALSE
-MAINTAINER_MODE_TRUE
-SCANNER_CFLAGS
 EXTRA_CFLAGS
 OS_CPPFLAGS
 OS_CFLAGS
@@ -632,6 +628,8 @@ SANE_LIBS
 SANE_CFLAGS
 LIBUSB_LIBS
 LIBUSB_CFLAGS
+SCANBUTTOND_CFG_DIR
+SCANBD_CFG_DIR
 HAL_LIBS
 HAL_CFLAGS
 UDEV_LIBS
@@ -762,10 +760,11 @@ enable_dependency_tracking
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_scanbdconfdir
+with_scanbuttondconfdir
 enable_Werror
 enable_debug
 enable_scanbuttond
-enable_maintainer_mode
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1421,8 +1420,6 @@ Optional Features:
   --disable-Werror        don't use gcc's -Werror option when building
   --disable-debug         disable debugging code (NDEBUG)
   --enable-scanbuttond    Use scanbuttond instead of Sane
-  --disable-maintainer-mode  disable make rules and dependencies not useful
-			  (and sometimes confusing) to the casual installer
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1432,6 +1429,11 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
+  --with-scanbdconfdir=DIR
+                          scanbd configuration directory (PREFIX/etc/scanbd)
+  --with-scanbuttondconfdir=DIR
+                          scanbuttond backend configuration directory
+                          (SCANBDCONFDIR/scanbuttond/backend)
 
 Some influential environment variables:
   CC          C compiler command
@@ -12901,6 +12903,28 @@ fi
 # check configuration options
 #============================
 
+# scanbd configurationdir
+
+# Check whether --with-scanbdconfdir was given.
+if test "${with_scanbdconfdir+set}" = set; then :
+  withval=$with_scanbdconfdir; SCANBD_CFG_DIR="${withval}"
+else
+  SCANBD_CFG_DIR="${sysconfdir}/scanbd"
+fi
+
+
+
+# scanbuttond configurationdir
+
+# Check whether --with-scanbuttondconfdir was given.
+if test "${with_scanbuttondconfdir+set}" = set; then :
+  withval=$with_scanbuttondconfdir; SCANBUTTOND_CFG_DIR="${withval}"
+else
+  SCANBUTTOND_CFG_DIR="$SCANBD_CFG_DIR/scanbuttond/backend"
+fi
+
+
+
 # check for Werror
 EXTRA_CFLAGS=""
 # Check whether --enable-Werror was given.
@@ -13044,6 +13068,10 @@ fi
 	fi
 
 	SCANNER_CFLAGS="-DUSE_SCANBUTTOND"
+
+
+$as_echo "#define USE_SCANBUTTOND 1" >>confdefs.h
+
 
 else
 	use_sane=yes
@@ -13261,31 +13289,6 @@ _ACEOF
 
 
 
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
-$as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
-    # Check whether --enable-maintainer-mode was given.
-if test "${enable_maintainer_mode+set}" = set; then :
-  enableval=$enable_maintainer_mode; USE_MAINTAINER_MODE=$enableval
-else
-  USE_MAINTAINER_MODE=yes
-fi
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $USE_MAINTAINER_MODE" >&5
-$as_echo "$USE_MAINTAINER_MODE" >&6; }
-   if test $USE_MAINTAINER_MODE = yes; then
-  MAINTAINER_MODE_TRUE=
-  MAINTAINER_MODE_FALSE='#'
-else
-  MAINTAINER_MODE_TRUE='#'
-  MAINTAINER_MODE_FALSE=
-fi
-
-  MAINT=$MAINTAINER_MODE_TRUE
-
-
-
 # header file that contains output from configure
 # We do not use it now, so all flags are set as -D on the compiler command line
 # AC_CONFIG_HEADERS([config.h])
@@ -13464,10 +13467,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SCANBUTTOND_TRUE}" && test -z "${USE_SCANBUTTOND_FALSE}"; then
   as_fn_error $? "conditional \"USE_SCANBUTTOND\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
-  as_fn_error $? "conditional \"MAINTAINER_MODE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

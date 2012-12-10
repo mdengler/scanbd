@@ -55,6 +55,22 @@ PKG_CHECK_MODULES([UDEV],[libudev],
 # check configuration options 
 #============================
 
+# scanbd configurationdir
+AC_ARG_WITH(scanbdconfdir,
+	AC_HELP_STRING([--with-scanbdconfdir=DIR],
+		[ scanbd configuration directory (PREFIX/etc/scanbd)]),
+	[SCANBD_CFG_DIR="${withval}"],
+	[SCANBD_CFG_DIR="${sysconfdir}/scanbd"])
+AC_SUBST(SCANBD_CFG_DIR)
+
+# scanbuttond configurationdir
+AC_ARG_WITH(scanbuttondconfdir,
+	AC_HELP_STRING([--with-scanbuttondconfdir=DIR],
+		[ scanbuttond backend configuration directory (SCANBDCONFDIR/scanbuttond/backend)]),
+	[SCANBUTTOND_CFG_DIR="${withval}"],
+	[SCANBUTTOND_CFG_DIR="$SCANBD_CFG_DIR/scanbuttond/backend"])
+AC_SUBST(SCANBUTTOND_CFG_DIR)
+
 # check for Werror
 EXTRA_CFLAGS=""
 AC_ARG_ENABLE(Werror,
@@ -99,6 +115,8 @@ then
 	fi
 
 	SCANNER_CFLAGS="-DUSE_SCANBUTTOND"
+
+	AC_DEFINE([USE_SCANBUTTOND], [1], ["Use scanbuttond"])
 	
 else
 	use_sane=yes
@@ -137,9 +155,6 @@ AC_TYPE_UINT8_T
 AC_SUBST([OS_CFLAGS])
 AC_SUBST([OS_CPPFLAGS])
 AC_SUBST([EXTRA_CFLAGS])
-AC_SUBST([SCANNER_CFLAGS])
-
-AM_MAINTAINER_MODE([enable])
 
 # header file that contains output from configure
 # We do not use it now, so all flags are set as -D on the compiler command line
