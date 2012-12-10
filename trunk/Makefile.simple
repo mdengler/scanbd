@@ -134,10 +134,12 @@ all: scanbuttond scanbd test
 
 testonly: scanbuttond test
 
+test: scanbuttond testscanbuttond
+
 scanbd: scanbd.o slog.o daemonize.o dbus.o scanbuttond_wrapper.o scanbuttond_loader.o udev.o
 	$(LINK.c) $^ scanbuttond/interface/libusbi.o $(LDLIBS) -o $@
 
-test: test.o scanbuttond_loader.o slog.o scanbuttond_wrapper.o dbus.o
+testscanbuttond: testscanbuttond.o scanbuttond_loader.o slog.o scanbuttond_wrapper.o dbus.o
 	$(LINK.c) $^ scanbuttond/interface/libusbi.o $(LDLIBS) -o $@
 
 endif # USE_SANE
