@@ -1,5 +1,5 @@
 backenddir = ${libdir}/scanbuttond/backends/
-backendcfgdir = $(sysconfdir)/scanbd/scanbuttond/backend/
+backendcfgdir =  @SCANBUTTOND_CFG_DIR@/
 
 backendcfg_DATA = meta.conf
 
@@ -27,8 +27,8 @@ AM_CFLAGS = \
 	-I../include \
 	-Dsyslog=slog \
 	-DLOG_INFO=SLOG_INFO \
-	-DLOG_WARNING=SLOG_WARN 
-	-DCFG_DIR=\"${backendcfgdir}\"
+	-DLOG_WARNING=SLOG_WARN \
+	-DCFG_DIR=${backendcfgdir}
 
 AM_LDFLAGS = -shared -avoid-version -module
 

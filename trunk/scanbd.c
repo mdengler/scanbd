@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #include "scanbd.h"
@@ -35,7 +35,7 @@ struct scanbdOptions scanbd_options = {
     /* managerMode */      false,
     /* foreground */       false,
     /* signal */	   false,
-    /* config_file_name */ "scanbd.conf"
+    /* config_file_name */ SCANBD_CONF
 };
 
 // the options for getopt_long()
