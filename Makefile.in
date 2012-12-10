@@ -61,7 +61,7 @@ sbin_PROGRAMS = scanbd$(EXEEXT)
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(dist_doc_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/configure AUTHORS INSTALL compile config.guess \
+	$(top_srcdir)/configure AUTHORS compile config.guess \
 	config.sub depcomp install-sh ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \

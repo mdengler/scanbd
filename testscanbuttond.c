@@ -21,8 +21,10 @@
  */
 
 #include "scanbd.h"
+#ifdef USE_SCANBUTTOND
 #include "scanbuttond_loader.h"
 #include "scanbuttond_wrapper.h"
+#endif
 
 #define DEF_POLL_DELAY			333000L
 #define MIN_POLL_DELAY			1000L
