@@ -1,6 +1,5 @@
 scanbdconfdir = @SCANBD_CFG_DIR@/
-scanbdconf_DATA = \
-	example.script
-	Makefile.am
-	scanadf.script
+scanbdconf_SCRIPTS = \
+	example.script \
+	scanadf.script \
 	test.script
