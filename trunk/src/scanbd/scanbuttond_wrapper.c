@@ -21,7 +21,7 @@
  */
 
 #include "scanbd.h"
-#include "scanbuttond/include/scanbuttond/scanbuttond.h"
+#include <scanbuttond/scanbuttond.h>
 #include "scanbuttond_loader.h"
 #include "scanbuttond_wrapper.h"
 

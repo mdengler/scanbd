@@ -29,7 +29,7 @@ CPPFLAGS += -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -
 endif
 
 ifeq ($(OSTYPE),Linux)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR) -DHAVE_LINUX_LIMITS_H
 endif 
 
 ifeq ($(OSTYPE),FreeBSD)

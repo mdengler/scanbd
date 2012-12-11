@@ -24,20 +24,24 @@ OSTYPE = $(shell uname)
 
 CFLAGS   += -Wall -Wextra -std=c99 -g
 
+# common CPPFLAGS
+#
+CPPFLAGS +=  -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+
 ifeq ($(OSTYPE),NetBSD)
-CPPFLAGS += -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+CPPFLAGS += -I/usr/pkg/include 
 endif
 
 ifeq ($(OSTYPE),FreeBSD)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+CPPFLAGS += 
 endif 
 
 ifeq ($(OSTYPE),OpenBSD)
-CPPFLAGS += -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+CPPFLAGS += -I/usr/local/include
 endif
 
 ifeq ($(OSTYPE),Linux)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
+CPPFLAGS += -DHAVE_LINUX_LIMITS_H
 endif 
 
 all: libusbi.o
