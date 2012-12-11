@@ -18,7 +18,10 @@ AC_CANONICAL_HOST
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
+AC_PROG_CXX
 AM_PROG_CC_C_O
+# autoscan complains about this being missing, but autoreconf thinks it is superfluous
+# AC_PROG_RANLIB
 
 # The dlopen() function is in the C library for *BSD and in
 # libdl on GLIBC-based systems
@@ -26,6 +29,30 @@ AM_PROG_CC_C_O
 AC_SEARCH_LIBS([dlopen], [dl dld], [], [
   AC_MSG_ERROR([unable to find the dlopen() function])
 ])
+
+# Check for required functions
+AC_CHECK_FUNCS([alarm dup2 ftruncate getcwd memset putenv regcomp strdup strerror],
+		[], AC_MSG_ERROR([Required function is missing ]))
+
+# Check for required header files
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netinet/in.h sys/socket.h sys/time.h syslog.h],
+		[], AC_MSG_ERROR([Required header file is missing ]))
+
+#  check for required types
+
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT8_T
+AC_TYPE_PID_T
+
+# We define these to make autoscan happy, but we do not use the results
+AC_FUNC_CHOWN
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_HEADER_STDBOOL
+
 
 OS_CFLAGS="-Wall -Wextra -std=c99 -g"
 
@@ -144,12 +171,6 @@ fi
 
 AM_CONDITIONAL(USE_SANE, test "x$use_sane" == "xyes")
 AM_CONDITIONAL(USE_SCANBUTTOND, test "x$use_scanbuttond" == xyes)
-
-AC_TYPE_SIZE_T
-AC_TYPE_SSIZE_T
-AC_TYPE_UINT16_T
-AC_TYPE_UINT32_T
-AC_TYPE_UINT8_T
 
 # define substitutions to be applied in the output
 AC_SUBST([OS_CFLAGS])
