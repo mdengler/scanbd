@@ -575,7 +575,7 @@ PACKAGE_STRING='scanbd 1.2.1'
 PACKAGE_BUGREPORT='wilhelm.meier@fh-kl.de'
 PACKAGE_URL=''
 
-ac_unique_file="scanbd.c"
+ac_unique_file="src/scanbd/scanbd.c"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -5183,7 +5183,7 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
   lt_cv_deplibs_check_method=pass_all
   ;;
 
-netbsd* | netbsdelf*-gnu)
+netbsd*)
   if echo __ELF__ | $CC -E - | $GREP __ELF__ > /dev/null; then
     lt_cv_deplibs_check_method='match_pattern /lib[^/]+(\.so\.[0-9]+\.[0-9]+|_pic\.a)$'
   else
@@ -8584,9 +8584,6 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   openbsd*)
     with_gnu_ld=no
     ;;
-  linux* | k*bsd*-gnu | gnu*)
-    link_all_deplibs=no
-    ;;
   esac
 
   ld_shlibs=yes
@@ -8808,7 +8805,7 @@ _LT_EOF
       fi
       ;;
 
-    netbsd* | netbsdelf*-gnu)
+    netbsd*)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable $libobjs $deplibs $linker_flags -o $lib'
 	wlarc=
@@ -8985,7 +8982,6 @@ _LT_EOF
 	if test "$aix_use_runtimelinking" = yes; then
 	  shared_flag="$shared_flag "'${wl}-G'
 	fi
-	link_all_deplibs=no
       else
 	# not using gcc
 	if test "$host_cpu" = ia64; then
@@ -9439,7 +9435,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
       link_all_deplibs=yes
       ;;
 
-    netbsd* | netbsdelf*-gnu)
+    netbsd*)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'  # a.out
       else
@@ -10452,10 +10448,14 @@ fi
   # before this can be enabled.
   hardcode_into_libs=yes
 
+  # Add ABI-specific directories to the system library path.
+  sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib"
+
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s 2>/dev/null", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;/^[	 ]*hwcap[	 ]/d;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;s/"//g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
+    sys_lib_dlsearch_path_spec="$sys_lib_dlsearch_path_spec $lt_ld_extra"
+
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on
@@ -10465,18 +10465,6 @@ fi
   # people can always --disable-shared, the test was removed, and we
   # assume the GNU/Linux dynamic linker is in use.
   dynamic_linker='GNU/Linux ld.so'
-  ;;
-
-netbsdelf*-gnu)
-  version_type=linux
-  need_lib_prefix=no
-  need_version=no
-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major ${libname}${shared_ext}'
-  soname_spec='${libname}${release}${shared_ext}$major'
-  shlibpath_var=LD_LIBRARY_PATH
-  shlibpath_overrides_runpath=no
-  hardcode_into_libs=yes
-  dynamic_linker='NetBSD ld.elf_so'
   ;;
 
 netbsd*)
@@ -12373,7 +12361,6 @@ done
 
 
 
-
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -12502,7 +12489,6 @@ if test -n "$CONFUSE_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_CONFUSE_CFLAGS=`$PKG_CONFIG --cflags "libconfuse" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12519,7 +12505,6 @@ if test -n "$CONFUSE_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_CONFUSE_LIBS=`$PKG_CONFIG --libs "libconfuse" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12539,9 +12524,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        CONFUSE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libconfuse" 2>&1`
+	        CONFUSE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "libconfuse" 2>&1`
         else
-	        CONFUSE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libconfuse" 2>&1`
+	        CONFUSE_PKG_ERRORS=`$PKG_CONFIG --print-errors "libconfuse" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$CONFUSE_PKG_ERRORS" >&5
@@ -12556,6 +12541,7 @@ installed software in a non-standard prefix.
 Alternatively, you may set the environment variables CONFUSE_CFLAGS
 and CONFUSE_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details." "$LINENO" 5
+
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -12571,6 +12557,7 @@ See the pkg-config man page for more details.
 
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.
 See \`config.log' for more details" "$LINENO" 5; }
+
 else
 	CONFUSE_CFLAGS=$pkg_cv_CONFUSE_CFLAGS
 	CONFUSE_LIBS=$pkg_cv_CONFUSE_LIBS
@@ -12595,7 +12582,6 @@ if test -n "$DBUS_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_DBUS_CFLAGS=`$PKG_CONFIG --cflags "dbus-1" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12612,7 +12598,6 @@ if test -n "$DBUS_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_DBUS_LIBS=`$PKG_CONFIG --libs "dbus-1" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12632,9 +12617,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        DBUS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "dbus-1" 2>&1`
+	        DBUS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "dbus-1" 2>&1`
         else
-	        DBUS_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "dbus-1" 2>&1`
+	        DBUS_PKG_ERRORS=`$PKG_CONFIG --print-errors "dbus-1" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$DBUS_PKG_ERRORS" >&5
@@ -12649,6 +12634,7 @@ installed software in a non-standard prefix.
 Alternatively, you may set the environment variables DBUS_CFLAGS
 and DBUS_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details." "$LINENO" 5
+
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -12664,6 +12650,7 @@ See the pkg-config man page for more details.
 
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.
 See \`config.log' for more details" "$LINENO" 5; }
+
 else
 	DBUS_CFLAGS=$pkg_cv_DBUS_CFLAGS
 	DBUS_LIBS=$pkg_cv_DBUS_LIBS
@@ -12687,7 +12674,6 @@ if test -n "$UDEV_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_UDEV_CFLAGS=`$PKG_CONFIG --cflags "libudev" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12704,7 +12690,6 @@ if test -n "$UDEV_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_UDEV_LIBS=`$PKG_CONFIG --libs "libudev" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12724,9 +12709,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        UDEV_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libudev" 2>&1`
+	        UDEV_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "libudev" 2>&1`
         else
-	        UDEV_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libudev" 2>&1`
+	        UDEV_PKG_ERRORS=`$PKG_CONFIG --print-errors "libudev" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$UDEV_PKG_ERRORS" >&5
@@ -12746,7 +12731,6 @@ if test -n "$HAL_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_HAL_CFLAGS=`$PKG_CONFIG --cflags "hal" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12763,7 +12747,6 @@ if test -n "$HAL_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_HAL_LIBS=`$PKG_CONFIG --libs "hal" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12783,9 +12766,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        HAL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "hal" 2>&1`
+	        HAL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "hal" 2>&1`
         else
-	        HAL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "hal" 2>&1`
+	        HAL_PKG_ERRORS=`$PKG_CONFIG --print-errors "hal" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$HAL_PKG_ERRORS" >&5
@@ -12827,7 +12810,6 @@ if test -n "$HAL_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_HAL_CFLAGS=`$PKG_CONFIG --cflags "hal" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12844,7 +12826,6 @@ if test -n "$HAL_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_HAL_LIBS=`$PKG_CONFIG --libs "hal" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -12864,9 +12845,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        HAL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "hal" 2>&1`
+	        HAL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "hal" 2>&1`
         else
-	        HAL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "hal" 2>&1`
+	        HAL_PKG_ERRORS=`$PKG_CONFIG --print-errors "hal" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$HAL_PKG_ERRORS" >&5
@@ -12989,7 +12970,6 @@ if test -n "$LIBUSB_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_LIBUSB_CFLAGS=`$PKG_CONFIG --cflags "libusb" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -13006,7 +12986,6 @@ if test -n "$LIBUSB_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_LIBUSB_LIBS=`$PKG_CONFIG --libs "libusb" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -13026,9 +13005,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        LIBUSB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libusb" 2>&1`
+	        LIBUSB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "libusb" 2>&1`
         else
-	        LIBUSB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libusb" 2>&1`
+	        LIBUSB_PKG_ERRORS=`$PKG_CONFIG --print-errors "libusb" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$LIBUSB_PKG_ERRORS" >&5
@@ -13043,6 +13022,7 @@ installed software in a non-standard prefix.
 Alternatively, you may set the environment variables LIBUSB_CFLAGS
 and LIBUSB_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details." "$LINENO" 5
+
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -13058,6 +13038,7 @@ See the pkg-config man page for more details.
 
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.
 See \`config.log' for more details" "$LINENO" 5; }
+
 else
 	LIBUSB_CFLAGS=$pkg_cv_LIBUSB_CFLAGS
 	LIBUSB_LIBS=$pkg_cv_LIBUSB_LIBS
@@ -13093,7 +13074,6 @@ if test -n "$SANE_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_SANE_CFLAGS=`$PKG_CONFIG --cflags "sane-backends >= 1.0" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -13110,7 +13090,6 @@ if test -n "$SANE_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_SANE_LIBS=`$PKG_CONFIG --libs "sane-backends >= 1.0" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -13130,9 +13109,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        SANE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "sane-backends >= 1.0" 2>&1`
+	        SANE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "sane-backends >= 1.0" 2>&1`
         else
-	        SANE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "sane-backends >= 1.0" 2>&1`
+	        SANE_PKG_ERRORS=`$PKG_CONFIG --print-errors "sane-backends >= 1.0" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$SANE_PKG_ERRORS" >&5
@@ -13294,7 +13273,7 @@ _ACEOF
 # AC_CONFIG_HEADERS([config.h])
 
 # Generate the output files
-ac_config_files="$ac_config_files Makefile scanbuttond/Makefile scanbuttond/backends/Makefile scanbuttond/interface/Makefile scanbuttond/include/Makefile"
+ac_config_files="$ac_config_files Makefile src/scanbd/Makefile src/scanbuttond/Makefile src/scanbuttond/backends/Makefile src/scanbuttond/interface/Makefile src/scanbuttond/include/Makefile integration/Makefile contrib/Makefile doc/Makefile conf/Makefile scripts/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -14333,10 +14312,16 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "scanbuttond/Makefile") CONFIG_FILES="$CONFIG_FILES scanbuttond/Makefile" ;;
-    "scanbuttond/backends/Makefile") CONFIG_FILES="$CONFIG_FILES scanbuttond/backends/Makefile" ;;
-    "scanbuttond/interface/Makefile") CONFIG_FILES="$CONFIG_FILES scanbuttond/interface/Makefile" ;;
-    "scanbuttond/include/Makefile") CONFIG_FILES="$CONFIG_FILES scanbuttond/include/Makefile" ;;
+    "src/scanbd/Makefile") CONFIG_FILES="$CONFIG_FILES src/scanbd/Makefile" ;;
+    "src/scanbuttond/Makefile") CONFIG_FILES="$CONFIG_FILES src/scanbuttond/Makefile" ;;
+    "src/scanbuttond/backends/Makefile") CONFIG_FILES="$CONFIG_FILES src/scanbuttond/backends/Makefile" ;;
+    "src/scanbuttond/interface/Makefile") CONFIG_FILES="$CONFIG_FILES src/scanbuttond/interface/Makefile" ;;
+    "src/scanbuttond/include/Makefile") CONFIG_FILES="$CONFIG_FILES src/scanbuttond/include/Makefile" ;;
+    "integration/Makefile") CONFIG_FILES="$CONFIG_FILES integration/Makefile" ;;
+    "contrib/Makefile") CONFIG_FILES="$CONFIG_FILES contrib/Makefile" ;;
+    "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
+    "conf/Makefile") CONFIG_FILES="$CONFIG_FILES conf/Makefile" ;;
+    "scripts/Makefile") CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

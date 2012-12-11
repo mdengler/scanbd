@@ -39,7 +39,7 @@
 #ifdef USE_SANE
 #include <sane/sane.h>
 #else
-#include "scanbuttond/include/scanbuttond/libusbi.h"
+#include <scanbuttond/libusbi.h>
 #endif
 
 #include "slog.h"

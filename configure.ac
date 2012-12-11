@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(scanbd, 1.2.1, wilhelm.meier@fh-kl.de)
 
 # allow check that we are really in the source directory
-AC_CONFIG_SRCDIR([scanbd.c])
+AC_CONFIG_SRCDIR([src/scanbd/scanbd.c])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Do not enforce GNU file conventions like ChangeLog README etc.
@@ -161,4 +161,17 @@ AC_SUBST([EXTRA_CFLAGS])
 # AC_CONFIG_HEADERS([config.h])
 
 # Generate the output files
-AC_OUTPUT([Makefile scanbuttond/Makefile scanbuttond/backends/Makefile] scanbuttond/interface/Makefile scanbuttond/include/Makefile)
+AC_OUTPUT([
+		Makefile 
+		src/scanbd/Makefile 
+		src/scanbuttond/Makefile 
+		src/scanbuttond/backends/Makefile 
+		src/scanbuttond/interface/Makefile 
+		src/scanbuttond/include/Makefile
+		integration/Makefile
+		contrib/Makefile
+		doc/Makefile
+		conf/Makefile
+		scripts/Makefile
+
+])
