@@ -173,5 +173,4 @@ AC_OUTPUT([
 		doc/Makefile
 		conf/Makefile
 		scripts/Makefile
-
 ])
