@@ -140,7 +140,7 @@
 #ifdef SCANBD_CFG_DIR
 #define SCANBD_CONF  SCANBD_CFG_DIR "/scanbd.conf"
 #else
-#define SCANBD_CONF "/scanbd.conf"
+#define SCANBD_CONF "scanbd.conf"
 #endif
 
 
