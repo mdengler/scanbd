@@ -104,6 +104,9 @@
 #define C_SANED_OPTS "saned_opt"
 #define C_SANED_OPTS_DEF "{}"
 
+#define C_SCRIPTDIR "scriptdir"
+#define C_SCRIPTDIR_DEF ""
+
 #define C_SCANBUTTONS_BACKENDS_DIR "scanbuttond_backends_dir"
 #ifdef CFG_DIR
 #define C_SCANBUTTONS_BACKENDS_DIR_DEF CFG_DIR

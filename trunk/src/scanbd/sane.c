@@ -458,21 +458,48 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
             }
             // match
 
-            // now get the script
+            // get pointer to global section of config
+
+            cfg_t* cfg_sec_global = NULL;
+            cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+            assert(cfg_sec_global);
+
+            // now get the script from the action
+
             const char* script = cfg_getstr(action_i, C_SCRIPT);
 
             if (!script || (strlen(script) == 0)) {
                 script = SCANBD_NULL_STRING;
-            }
+            } else if (script[0] != '/') {
+
+                char * scriptpath = malloc(PATH_MAX);
+
+                // script has a relative path, determine the directory
+                // get the scriptdir from the global config
+
+                const char* scriptdir =  cfg_getstr(cfg_sec_global, C_SCRIPTDIR);
+
+                if(!scriptdir || (strlen(scriptdir) == 0)) 
+                    scriptdir = "";
+
+                if (scriptdir[0] == '/') {
+
+                    // scriptdir is an aboslute path
+
+                    snprintf(scriptpath, PATH_MAX, "%s/%s", scriptdir, script);
+                } else {
+
+                    // scriptdir is relative to config directory
+ 
+                   snprintf(scriptpath, PATH_MAX, "%s/%s/%s", SCANBD_CFG_DIR, scriptdir, script);
+                }
+                script = scriptpath;
+            }       
 
             assert(script != NULL);
             slog(SLOG_INFO, "installing action %s (%d) for %s, option[%d]: %s as: %s",
                  title, st->num_of_options_with_scripts, st->dev->name, opt, odesc->name, script);
 
-
-            cfg_t* cfg_sec_global = NULL;
-            cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
-            assert(cfg_sec_global);
 
             bool multiple_actions = cfg_getbool(cfg_sec_global, C_MULTIPLE_ACTIONS);
             slog(SLOG_INFO, "multiple actions allowed");
