@@ -28,7 +28,7 @@ AM_CFLAGS = \
 	-Dsyslog=slog \
 	-DLOG_INFO=SLOG_INFO \
 	-DLOG_WARNING=SLOG_WARN \
-	-DCFG_DIR=${backendcfgdir}
+	-DSCANBUTTOND_CFG_DIR=${backendcfgdir}
 
 AM_LDFLAGS = -shared -avoid-version -module
 

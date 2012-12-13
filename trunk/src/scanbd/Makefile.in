@@ -272,16 +272,15 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-scanbdconfdir = @SCANBD_CFG_DIR@/
-scanbuttondconfdir = @SCANBUTTOND_CFG_DIR@/
 scanbd_SOURCES = scanbd.c common.h daemonize.c dbus.c udev.c udev.h \
 	slog.c slog.h scanbd_dbus.h scanbd.h $(am__append_1) \
 	$(am__append_6)
 AM_CFLAGS = $(OS_CFLAGS) $(OS_CPPFLAGS) $(EXTRA_CFLAGS) \
 	$(CONFUSE_CFLAGS) $(UDEV_CFLAGS) $(DBUS_CFLAGS) $(HAL_CFLAGS) \
-	-DCFG_DIR=\"$(scanbuttondconfdir)\" \
-	-DSCANBD_CFG_DIR=\"$(scanbdconfdir)\" $(am__append_2) \
-	$(am__append_4)
+	-DSCANBUTTOND_CFG_DIR=\"@SCANBUTTOND_CFG_DIR@/\" \
+	-DSCANBD_CFG_DIR=\"@SCANBD_CFG_DIR@/\" \
+	-DSCANBUTTOND_LIB_DIR=\"${libdir}/scanbd/scanbuttond\" \
+	$(am__append_2) $(am__append_4)
 AM_LDFLAGS = $(OS_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) $(DBUS_LIBS) \
 	$(HAL_LIBS) $(am__append_3) $(am__append_5)
 @USE_SCANBUTTOND_TRUE@scanbd_LDADD = \

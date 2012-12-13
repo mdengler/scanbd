@@ -1,7 +1,5 @@
 ## Process this file with automake to produce Makefile.in
 ## AUTOMAKE_OPTIONS = foreign
-scanbdconfdir = @SCANBD_CFG_DIR@/
-scanbuttondconfdir = @SCANBUTTOND_CFG_DIR@/
 sbin_PROGRAMS = scanbd
 
 scanbd_SOURCES = \
@@ -25,8 +23,9 @@ AM_CFLAGS = \
 	$(UDEV_CFLAGS) \
 	$(DBUS_CFLAGS) \
 	$(HAL_CFLAGS) \
-	-DCFG_DIR=\"$(scanbuttondconfdir)\" \
-	-DSCANBD_CFG_DIR=\"$(scanbdconfdir)\"
+	-DSCANBUTTOND_CFG_DIR=\"@SCANBUTTOND_CFG_DIR@/\" \
+	-DSCANBD_CFG_DIR=\"@SCANBD_CFG_DIR@/\" \
+	-DSCANBUTTOND_LIB_DIR=\"${libdir}/scanbd/scanbuttond\"
 
 
 AM_LDFLAGS = \
