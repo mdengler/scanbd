@@ -24,20 +24,29 @@ OSTYPE = $(shell uname)
 
 CFLAGS   += -Wall -Wextra -std=c99 -g
 
+ifndef DESTDIR
+SCANBD_DIR = $(PREFIX)/etc/scanbd
+else
+PREFIX = $(DESTDIR)/usr
+SCANBD_DIR = $(DESTDIR)/etc/scanbd
+endif
+
+SCANBUTTOND_CFG_DIR=$(SCANBD_DIR)/scanbuttond/backends
+
 ifeq ($(OSTYPE),NetBSD)
-CPPFLAGS += -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -I/usr/pkg/include -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DSCANBUTTOND_CFG_DIR=$(SCANBUTTOND_CFG_DIR)
 endif
 
 ifeq ($(OSTYPE),Linux)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR) -DHAVE_LINUX_LIMITS_H
+CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DSCANBUTTOND_CFG_DIR=$(SCANBUTTOND_CFG_DIR) -DHAVE_LINUX_LIMITS_H
 endif 
 
 ifeq ($(OSTYPE),FreeBSD)
-CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DSCANBUTTOND_CFG_DIR=$(SCANBUTTOND_CFG_DIR)
 endif 
 
 ifeq ($(OSTYPE),OpenBSD)
-CPPFLAGS += -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DCFG_DIR=$(CFG_DIR)
+CPPFLAGS += -I../include -I/usr/local/include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -DSCANBUTTOND_CFG_DIR=$(SCANBUTTOND_CFG_DIR)
 endif
 
 %.so: %.c

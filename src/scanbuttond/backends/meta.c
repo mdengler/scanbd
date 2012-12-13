@@ -32,7 +32,7 @@
 #define MAX_SCANNERS_PER_BACKEND 16
 
 static char* backend_name = "Dynamic Module Loader";
-static char* config_file = STRINGIFY(CFG_DIR) "/meta.conf";
+static char* config_file = STRINGIFY(SCANBUTTOND_CFG_DIR) "/meta.conf";
 
 static libusb_handle_t* libusb_handle;
 static scanner_t* meta_scanners = NULL;
