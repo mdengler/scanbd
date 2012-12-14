@@ -33,10 +33,12 @@ static char lib_dir[PATH_MAX] = SCANBUTTOND_LIB_DIR;
 
 int scanbtnd_init() {
     const char* backends_dir = NULL;
-    char backends_dir_abs[PATH_MAX];
+    char backends_dir_abs[PATH_MAX] = SCANBD_NULL_STRING;
+
     backends_dir = cfg_getstr(cfg_getsec(cfg, C_GLOBAL), C_SCANBUTTONS_BACKENDS_DIR);
     if ( backends_dir && (backends_dir[0] != '/')) {
         // Relative path, expand 
+        assert(backends_dir_abs);
         snprintf(backends_dir_abs, PATH_MAX, "%s/%s", SCANBD_CFG_DIR, backends_dir);
         backends_dir = backends_dir_abs;
     }
