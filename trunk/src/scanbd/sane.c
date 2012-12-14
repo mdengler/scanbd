@@ -459,7 +459,6 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
             // match
 
             // get pointer to global section of config
-
             cfg_t* cfg_sec_global = NULL;
             cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
             assert(cfg_sec_global);
@@ -471,26 +470,20 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
             if (!script || (strlen(script) == 0)) {
                 script = SCANBD_NULL_STRING;
             } else if (script[0] != '/') {
-
                 char * scriptpath = malloc(PATH_MAX);
-
                 // script has a relative path, determine the directory
                 // get the scriptdir from the global config
 
                 const char* scriptdir =  cfg_getstr(cfg_sec_global, C_SCRIPTDIR);
 
-                if(!scriptdir || (strlen(scriptdir) == 0)) 
+                if(!scriptdir || (strlen(scriptdir) == 0)) {
                     scriptdir = "";
-
+                }
                 if (scriptdir[0] == '/') {
-
                     // scriptdir is an aboslute path
-
                     snprintf(scriptpath, PATH_MAX, "%s/%s", scriptdir, script);
                 } else {
-
                     // scriptdir is relative to config directory
- 
                    snprintf(scriptpath, PATH_MAX, "%s/%s/%s", SCANBD_CFG_DIR, scriptdir, script);
                 }
                 script = scriptpath;
