@@ -38,7 +38,6 @@ int scanbtnd_init() {
     backends_dir = cfg_getstr(cfg_getsec(cfg, C_GLOBAL), C_SCANBUTTONS_BACKENDS_DIR);
     if ( backends_dir && (backends_dir[0] != '/')) {
         // Relative path, expand 
-        assert(backends_dir_abs);
         snprintf(backends_dir_abs, PATH_MAX, "%s/%s", SCANBD_CFG_DIR, backends_dir);
         backends_dir = backends_dir_abs;
     }
