@@ -98,7 +98,7 @@ void cfg_do_parse(void) {
         CFG_STR(C_SANED, C_SANED_DEF, CFGF_NONE),
         CFG_STR_LIST(C_SANED_OPTS, C_SANED_OPTS_DEF, CFGF_NONE),
         CFG_STR_LIST(C_SANED_ENVS, C_SANED_ENVS_DEF, CFGF_NONE),
-	CFG_STR(C_SCRIPTDIR, C_SCRIPTDIR_DEF, CFGF_NONE),
+        CFG_STR(C_SCRIPTDIR, C_SCRIPTDIR_DEF, CFGF_NONE),
         CFG_STR(C_SCANBUTTONS_BACKENDS_DIR, C_SCANBUTTONS_BACKENDS_DIR_DEF, CFGF_NONE),
         CFG_INT(C_TIMEOUT, C_TIMEOUT_DEF, CFGF_NONE),
         CFG_STR(C_PIDFILE, C_PIDFILE_DEF, CFGF_NONE),
@@ -119,7 +119,7 @@ void cfg_do_parse(void) {
     cfg_opt_t cfg_options[] = {
         CFG_SEC(C_GLOBAL, cfg_global, CFGF_NONE),
         CFG_SEC(C_DEVICE, cfg_device, CFGF_MULTI | CFGF_TITLE),
-	CFG_FUNC(C_INCLUDE, cfg_include),
+        CFG_FUNC(C_INCLUDE, cfg_include),
         CFG_END()
     };
 
@@ -127,22 +127,26 @@ void cfg_do_parse(void) {
         cfg_free(cfg);
         cfg = NULL;
     }
-   
-    char wd[PATH_MAX];
-    char config_file[PATH_MAX];
-    char *scanbd_conf_dir;
+
+    char wd[PATH_MAX] = {};
+    char config_file[PATH_MAX] = {};
+    char* scanbd_conf_dir = NULL;
 
     // get current directory
-    getcwd (wd, PATH_MAX);
+    if (getcwd(wd, PATH_MAX) == NULL) {
+        slog(SLOG_ERROR, "can't get working directory");
+        exit(EXIT_FAILURE);
+    }
 
     // cd into directory where scanbd.conf lives
     
-    strncpy(config_file, scanbd_options.config_file_name, PATH_MAX);    
+    strncpy(config_file, scanbd_options.config_file_name, PATH_MAX);
 
     scanbd_conf_dir = dirname(config_file);
+    assert(scanbd_conf_dir);
 
     if (chdir(scanbd_conf_dir) != 0) {
-	slog(SLOG_ERROR, "can't access the directory for: %s", scanbd_options.config_file_name);
+        slog(SLOG_ERROR, "can't access the directory for: %s", scanbd_options.config_file_name);
         exit(EXIT_FAILURE);
     }
 
@@ -162,11 +166,11 @@ void cfg_do_parse(void) {
     }
 
     // cd back to original
-    if (chdir(wd) != 0) {
-	slog(SLOG_ERROR, "can't cd back to: %s", wd);
+    if (chdir(wd) < 0) {
+        slog(SLOG_ERROR, "can't cd back to: %s", wd);
         exit(EXIT_FAILURE);
     }
-   
+
     cfg_t* cfg_sec_global = NULL;
     cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
     assert(cfg_sec_global);
@@ -597,25 +601,25 @@ int main(int argc, char** argv) {
         slog(SLOG_INFO, "dropping privs to uid %s", euser);
         struct passwd* pwd = NULL;
         if ((pwd = getpwnam(euser)) == NULL) {
-	    if (errno != 0) {
-		slog(SLOG_ERROR, "No user %s: %s", euser, strerror(errno));
-	    }
-	    else {
-		slog(SLOG_ERROR, "No user %s", euser);
-	    }
+            if (errno != 0) {
+                slog(SLOG_ERROR, "No user %s: %s", euser, strerror(errno));
+            }
+            else {
+                slog(SLOG_ERROR, "No user %s", euser);
+            }
             exit(EXIT_FAILURE);
         }
         assert(pwd);
 
-	slog(SLOG_INFO, "dropping privs to gid %s", egroup);
+        slog(SLOG_INFO, "dropping privs to gid %s", egroup);
         struct group* grp = NULL;
         if ((grp = getgrnam(egroup)) == NULL) {
-	    if (errno != 0) {
-		slog(SLOG_ERROR, "No group %s: %s", egroup, strerror(errno));
-	    }
-	    else {
-		slog(SLOG_ERROR, "No group %s", egroup);
-	    }
+            if (errno != 0) {
+                slog(SLOG_ERROR, "No group %s: %s", egroup, strerror(errno));
+            }
+            else {
+                slog(SLOG_ERROR, "No group %s", egroup);
+            }
             exit(EXIT_FAILURE);
         }
         assert(grp);
