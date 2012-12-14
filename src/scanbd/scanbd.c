@@ -27,6 +27,7 @@
 #include "scanbuttond_wrapper.h"
 backend_t* backend = NULL;
 #endif
+#include <libgen.h>
 
 cfg_t* cfg = NULL;
 
@@ -118,6 +119,7 @@ void cfg_do_parse(void) {
     cfg_opt_t cfg_options[] = {
         CFG_SEC(C_GLOBAL, cfg_global, CFGF_NONE),
         CFG_SEC(C_DEVICE, cfg_device, CFGF_MULTI | CFGF_TITLE),
+	CFG_FUNC(C_INCLUDE, cfg_include),
         CFG_END()
     };
 
@@ -125,7 +127,25 @@ void cfg_do_parse(void) {
         cfg_free(cfg);
         cfg = NULL;
     }
+   
+    char wd[PATH_MAX];
+    char config_file[PATH_MAX];
+    char *scanbd_conf_dir;
+
+    // get current directory
+    getcwd (wd, PATH_MAX);
+
+    // cd into directory where scanbd.conf lives
     
+    strncpy(config_file, scanbd_options.config_file_name, PATH_MAX);    
+
+    scanbd_conf_dir = dirname(config_file);
+
+    if (chdir(scanbd_conf_dir) != 0) {
+	slog(SLOG_ERROR, "can't access the directory for: %s", scanbd_options.config_file_name);
+        exit(EXIT_FAILURE);
+    }
+
     cfg = cfg_init(cfg_options, CFGF_NONE);
 
     int ret = 0;
@@ -141,6 +161,12 @@ void cfg_do_parse(void) {
         exit(EXIT_FAILURE); // not reached
     }
 
+    // cd back to original
+    if (chdir(wd) != 0) {
+	slog(SLOG_ERROR, "can't cd back to: %s", wd);
+        exit(EXIT_FAILURE);
+    }
+   
     cfg_t* cfg_sec_global = NULL;
     cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
     assert(cfg_sec_global);

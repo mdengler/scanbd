@@ -135,6 +135,8 @@
 #define C_GLOBAL "global"
 #define C_DEVICE "device"
 
+#define C_INCLUDE "include"
+
 #define SCANBD_NULL_STRING "(null)"
 
 #ifdef SCANBD_CFG_DIR
