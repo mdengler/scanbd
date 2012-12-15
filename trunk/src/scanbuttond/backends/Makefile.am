@@ -1,4 +1,4 @@
-backenddir = ${libdir}/scanbuttond/backends/
+backenddir = ${libdir}/scanbd/scanbuttond/
 backendcfgdir =  @SCANBUTTOND_CFG_DIR@/
 
 backendcfg_DATA = meta.conf
