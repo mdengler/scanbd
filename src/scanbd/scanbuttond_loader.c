@@ -43,7 +43,6 @@ int scanbtnd_init() {
     }
 
     assert(backends_dir);
-    scanbtnd_set_libdir(backends_dir);
 
     if (scanbtnd_loader_init() != 0) {
         slog(SLOG_INFO, "Could not initialize module loader!\n");
