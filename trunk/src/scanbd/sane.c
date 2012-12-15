@@ -458,41 +458,23 @@ static void sane_find_matching_options(sane_thread_t* st, cfg_t* sec) {
             }
             // match
 
-            // get pointer to global section of config
-            cfg_t* cfg_sec_global = NULL;
-            cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
-            assert(cfg_sec_global);
-
             // now get the script from the action
 
             const char* script = cfg_getstr(action_i, C_SCRIPT);
 
             if (!script || (strlen(script) == 0)) {
                 script = SCANBD_NULL_STRING;
-            } else if (script[0] != '/') {
-                char * scriptpath = malloc(PATH_MAX);
-                // script has a relative path, determine the directory
-                // get the scriptdir from the global config
-
-                const char* scriptdir =  cfg_getstr(cfg_sec_global, C_SCRIPTDIR);
-
-                if(!scriptdir || (strlen(scriptdir) == 0)) {
-                    scriptdir = "";
-                }
-                if (scriptdir[0] == '/') {
-                    // scriptdir is an aboslute path
-                    snprintf(scriptpath, PATH_MAX, "%s/%s", scriptdir, script);
-                } else {
-                    // scriptdir is relative to config directory
-                   snprintf(scriptpath, PATH_MAX, "%s/%s/%s", SCANBD_CFG_DIR, scriptdir, script);
-                }
-                script = scriptpath;
             }       
 
             assert(script != NULL);
             slog(SLOG_INFO, "installing action %s (%d) for %s, option[%d]: %s as: %s",
                  title, st->num_of_options_with_scripts, st->dev->name, opt, odesc->name, script);
 
+            // get pointer to global section of config
+
+            cfg_t* cfg_sec_global = NULL;
+            cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+            assert(cfg_sec_global);
 
             bool multiple_actions = cfg_getbool(cfg_sec_global, C_MULTIPLE_ACTIONS);
             slog(SLOG_INFO, "multiple actions allowed");
@@ -1022,9 +1004,36 @@ static void* sane_poll(void* arg) {
 
                 // need to copy the values because we leave the
                 // critical section
+                // While doing so, convert the script to an absolute path
                 // int triggered_option = st->triggered_option;
-                char* script = strdup(st->opts[st->triggered_option].script);
-                assert(script != NULL);
+                
+                char* script_abs = malloc(PATH_MAX);
+                assert(script_abs);
+                strncpy(script_abs, SCANBD_NULL_STRING, PATH_MAX);
+
+                const char* script = st->opts[st->triggered_option].script;
+                assert(script);
+
+                if ((script[0] == '/') || (strcmp(script, SCANBD_NULL_STRING) == 0)) {
+                    // Script has already an absolute path or is an empty string
+                    strncpy(script_abs, script, PATH_MAX);
+                } else {
+                    // script has a relative path, determine the directory
+                    // get the scriptdir from the global config
+
+                    const char* scriptdir =  cfg_getstr(cfg_sec_global, C_SCRIPTDIR);
+                    if(!scriptdir || (strlen(scriptdir) == 0)) {
+                        scriptdir = "";
+                    }
+ 
+                    if (scriptdir[0] == '/') {
+                        // scriptdir is an absolute path
+                        snprintf(script_abs, PATH_MAX, "%s/%s", scriptdir, script);
+                    } else {
+                        // scriptdir is relative to config directory
+                        snprintf(script_abs, PATH_MAX, "%s/%s/%s", SCANBD_CFG_DIR, scriptdir, script);
+                    }
+                } 
 
                 // leave the critical section
                 if (pthread_mutex_unlock(&st->mutex) < 0) {
@@ -1033,7 +1042,7 @@ static void* sane_poll(void* arg) {
                     pthread_exit(NULL);
                 }
 
-                if (strcmp(script, SCANBD_NULL_STRING) != 0) {
+                if (strcmp(script_abs, SCANBD_NULL_STRING) != 0) {
 
                     assert(timeout > 0);
                     usleep(timeout * 1000); //ms
@@ -1043,31 +1052,31 @@ static void* sane_poll(void* arg) {
                         slog(SLOG_ERROR, "Can't fork: %s", strerror(errno));
                     }
                     else if (cpid > 0) { // parent
-                        slog(SLOG_INFO, "waiting for child: %s", script);
+                        slog(SLOG_INFO, "waiting for child: %s", script_abs);
                         int status;
                         if (waitpid(cpid, &status, 0) < 0) {
                             slog(SLOG_ERROR, "waitpid: %s", strerror(errno));
                         }
                         if (WIFEXITED(status)) {
                             slog(SLOG_INFO, "child %s exited with status: %d",
-                                 script, WEXITSTATUS(status));
+                                 script_abs, WEXITSTATUS(status));
                         }
                         if (WIFSIGNALED(status)) {
                             slog(SLOG_INFO, "child %s signaled with signal: %d",
-                                 script, WTERMSIG(status));
+                                 script_abs, WTERMSIG(status));
                         }
                     }
                     else { // child
-                        slog(SLOG_DEBUG, "exec for %s", script);
-                        if (execle(script, script, NULL, env) < 0) {
+                        slog(SLOG_DEBUG, "exec for %s", script_abs);
+                        if (execle(script_abs, script_abs, NULL, env) < 0) {
                             slog(SLOG_ERROR, "execlp: %s", strerror(errno));
                         }
                         exit(EXIT_FAILURE); // not reached
                     }
-                } // script == SCANBD_NULL_STRING
+                } // script_abs == SCANBD_NULL_STRING
 
-                assert(script != NULL);
-                free(script);
+                assert(script_abs != NULL);
+                free(script_abs);
 
                 // free (last element is the sentinel!)
                 assert(env != NULL);
