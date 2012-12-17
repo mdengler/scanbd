@@ -33,7 +33,8 @@ AM_LDFLAGS = \
 	$(CONFUSE_LIBS)\
 	$(UDEV_LIBS) \
 	$(DBUS_LIBS) \
-	$(HAL_LIBS) 
+	$(HAL_LIBS) \
+	-rdynamic
 
 if USE_SANE
 scanbd_SOURCES += \

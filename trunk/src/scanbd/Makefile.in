@@ -282,7 +282,7 @@ AM_CFLAGS = $(OS_CFLAGS) $(OS_CPPFLAGS) $(EXTRA_CFLAGS) \
 	-DSCANBUTTOND_LIB_DIR=\"${libdir}/scanbd/scanbuttond\" \
 	$(am__append_2) $(am__append_4)
 AM_LDFLAGS = $(OS_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) $(DBUS_LIBS) \
-	$(HAL_LIBS) $(am__append_3) $(am__append_5)
+	$(HAL_LIBS) -rdynamic $(am__append_3) $(am__append_5)
 @USE_SCANBUTTOND_TRUE@scanbd_LDADD = \
 @USE_SCANBUTTOND_TRUE@	-L../scanbuttond/interface \
 @USE_SCANBUTTOND_TRUE@	-lusbi
