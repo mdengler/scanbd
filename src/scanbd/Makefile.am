@@ -13,7 +13,6 @@ scanbd_SOURCES = \
 	slog.h \
 	scanbd_dbus.h \
 	scanbd.h 
-	
 
 AM_CFLAGS = \
 	$(OS_CFLAGS) \
@@ -34,6 +33,7 @@ AM_LDFLAGS = \
 	$(UDEV_LIBS) \
 	$(DBUS_LIBS) \
 	$(HAL_LIBS) \
+	$(LIBUSB_LIBS) \
 	-rdynamic
 
 if USE_SANE
@@ -53,11 +53,7 @@ AM_CFLAGS += \
 	-I ../scanbuttond/include 
 
 AM_LDFLAGS += \
-	$(LIBUSB_LIBS)
-
-scanbd_LDADD = \
-	-L../scanbuttond/interface \
-	-lusbi
+	../scanbuttond/interface/libusbi.o
 
 scanbd_SOURCES += \
 	scanbuttond_wrapper.c \
