@@ -66,7 +66,7 @@ sbin_PROGRAMS = scanbd$(EXEEXT)
 @USE_SCANBUTTOND_TRUE@	-I ../scanbuttond/include 
 
 @USE_SCANBUTTOND_TRUE@am__append_5 = \
-@USE_SCANBUTTOND_TRUE@	$(LIBUSB_LIBS)
+@USE_SCANBUTTOND_TRUE@	../scanbuttond/interface/libusbi.o
 
 @USE_SCANBUTTOND_TRUE@am__append_6 = \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_wrapper.c \
@@ -99,7 +99,7 @@ am_scanbd_OBJECTS = scanbd.$(OBJEXT) daemonize.$(OBJEXT) \
 	dbus.$(OBJEXT) udev.$(OBJEXT) slog.$(OBJEXT) $(am__objects_1) \
 	$(am__objects_2)
 scanbd_OBJECTS = $(am_scanbd_OBJECTS)
-scanbd_DEPENDENCIES =
+scanbd_LDADD = $(LDADD)
 am__scanbd_test_SOURCES_DIST = testscanbuttond.c slog.c \
 	scanbuttond_loader.c scanbuttond_wrapper.c dbus.c
 @USE_SCANBUTTOND_TRUE@am_scanbd_test_OBJECTS =  \
@@ -282,11 +282,8 @@ AM_CFLAGS = $(OS_CFLAGS) $(OS_CPPFLAGS) $(EXTRA_CFLAGS) \
 	-DSCANBUTTOND_LIB_DIR=\"${libdir}/scanbd/scanbuttond\" \
 	$(am__append_2) $(am__append_4)
 AM_LDFLAGS = $(OS_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) $(DBUS_LIBS) \
-	$(HAL_LIBS) -rdynamic $(am__append_3) $(am__append_5)
-@USE_SCANBUTTOND_TRUE@scanbd_LDADD = \
-@USE_SCANBUTTOND_TRUE@	-L../scanbuttond/interface \
-@USE_SCANBUTTOND_TRUE@	-lusbi
-
+	$(HAL_LIBS) $(LIBUSB_LIBS) -rdynamic $(am__append_3) \
+	$(am__append_5)
 @USE_SCANBUTTOND_TRUE@scanbd_test_SOURCES = \
 @USE_SCANBUTTOND_TRUE@	testscanbuttond.c \
 @USE_SCANBUTTOND_TRUE@	slog.c \

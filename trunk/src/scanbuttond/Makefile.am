@@ -1,1 +1,1 @@
-SUBDIRS = backends interface include
+SUBDIRS = interface include backends

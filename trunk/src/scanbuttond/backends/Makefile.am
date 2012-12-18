@@ -22,7 +22,6 @@ backend_LTLIBRARIES = \
 AM_CFLAGS = \
 	$(OS_CFLAGS) \
 	$(OS_CPPFLAGS) \
-	$(LIBUSB_CFLAGS) \
 	$(EXTRA_CFLAGS) \
 	-I../include \
 	-Dsyslog=slog \
@@ -30,7 +29,10 @@ AM_CFLAGS = \
 	-DLOG_WARNING=SLOG_WARN \
 	-DSCANBUTTOND_CFG_DIR=${backendcfgdir}
 
-AM_LDFLAGS = -shared -avoid-version -module
+AM_LDFLAGS = \
+	-shared \
+	-avoid-version \
+	-module 
 
 mustek_la_SOURCES = mustek.c mustek.h
 plustek_la_SOURCES = plustek.c plustek.h
