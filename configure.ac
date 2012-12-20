@@ -91,12 +91,12 @@ AC_ARG_WITH(scanbdconfdir,
 AC_SUBST(SCANBD_CFG_DIR)
 
 # scanbuttond configurationdir
-AC_ARG_WITH(scanbuttondconfdir,
-	AC_HELP_STRING([--with-scanbuttondconfdir=DIR],
-		[ scanbuttond backend configuration directory (SCANBDCONFDIR/scanbuttond/backend)]),
-	[SCANBUTTOND_CFG_DIR="${withval}"],
-	[SCANBUTTOND_CFG_DIR="$SCANBD_CFG_DIR/scanbuttond/backend"])
-AC_SUBST(SCANBUTTOND_CFG_DIR)
+AC_ARG_WITH(scanbuttondlibdir,
+	AC_HELP_STRING([--with-scanbuttondlibdir=DIR],
+		[ scanbuttond backend configuration directory (LIBDIR/scanbd/scanbuttond/backends)]),
+	[SCANBUTTOND_LIB_DIR="${withval}"],
+	[SCANBUTTOND_LIB_DIR="${libdir}/scanbd/scanbuttond/backends"])
+AC_SUBST(SCANBUTTOND_LIB_DIR)
 
 # check for Werror
 EXTRA_CFLAGS=""

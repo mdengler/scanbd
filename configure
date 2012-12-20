@@ -627,7 +627,7 @@ SANE_LIBS
 SANE_CFLAGS
 LIBUSB_LIBS
 LIBUSB_CFLAGS
-SCANBUTTOND_CFG_DIR
+SCANBUTTOND_LIB_DIR
 SCANBD_CFG_DIR
 HAL_LIBS
 HAL_CFLAGS
@@ -768,7 +768,7 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 with_scanbdconfdir
-with_scanbuttondconfdir
+with_scanbuttondlibdir
 enable_Werror
 enable_debug
 enable_scanbuttond
@@ -1442,9 +1442,9 @@ Optional Packages:
                         (or the compiler's sysroot if not specified).
   --with-scanbdconfdir=DIR
                           scanbd configuration directory (PREFIX/etc/scanbd)
-  --with-scanbuttondconfdir=DIR
+  --with-scanbuttondlibdir=DIR
                           scanbuttond backend configuration directory
-                          (SCANBDCONFDIR/scanbuttond/backend)
+                          (LIBDIR/scanbd/scanbuttond/backends)
 
 Some influential environment variables:
   CC          C compiler command
@@ -17201,11 +17201,11 @@ fi
 
 # scanbuttond configurationdir
 
-# Check whether --with-scanbuttondconfdir was given.
-if test "${with_scanbuttondconfdir+set}" = set; then :
-  withval=$with_scanbuttondconfdir; SCANBUTTOND_CFG_DIR="${withval}"
+# Check whether --with-scanbuttondlibdir was given.
+if test "${with_scanbuttondlibdir+set}" = set; then :
+  withval=$with_scanbuttondlibdir; SCANBUTTOND_LIB_DIR="${withval}"
 else
-  SCANBUTTOND_CFG_DIR="$SCANBD_CFG_DIR/scanbuttond/backend"
+  SCANBUTTOND_LIB_DIR="${libdir}/scanbd/scanbuttond/backends"
 fi
 
 

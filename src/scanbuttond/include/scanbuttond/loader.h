@@ -51,4 +51,10 @@ backend_t* scanbtnd_load_backend(const char* filename);
 
 void scanbtnd_unload_backend(backend_t* backend);
 
+// Callback to get library dir
+
+#define HAVE_SCANBTND_GET_LIB_DIR 1
+
+char *scanbtnd_get_lib_dir(void);
+
 #endif

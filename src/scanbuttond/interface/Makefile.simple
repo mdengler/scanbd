@@ -19,30 +19,10 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
-
-OSTYPE = $(shell uname)
+include ../../../Makefile.conf
 
 CFLAGS   += -Wall -Wextra -std=c99 -g
-
-# common CPPFLAGS
-#
 CPPFLAGS +=  -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
-
-ifeq ($(OSTYPE),NetBSD)
-CPPFLAGS += -I/usr/pkg/include 
-endif
-
-ifeq ($(OSTYPE),FreeBSD)
-CPPFLAGS += 
-endif 
-
-ifeq ($(OSTYPE),OpenBSD)
-CPPFLAGS += -I/usr/local/include
-endif
-
-ifeq ($(OSTYPE),Linux)
-CPPFLAGS += -DHAVE_LINUX_LIMITS_H
-endif 
 
 all: libusbi.o
 

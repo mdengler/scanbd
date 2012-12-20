@@ -1,5 +1,5 @@
 #
-# $Id: Makefile 78 2012-03-03 10:52:47Z wimalopaan $
+# $Id: Makefile.simple 78 2012-03-03 10:52:47Z wimalopaan $
 #
 #  scanbd - KMUX scanner button daemon
 #
@@ -20,10 +20,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-
-ifndef USE_SCANBUTTOND
-USE_SANE=yes # otherwise USE_SCANBUTTOND
-endif
+include Makefile.conf
 
 .PHONY: scanbuttond scanbd all
 
@@ -45,21 +42,27 @@ clean:
 	# $(RM) -f scanbd test *.o *~
 
 # TODO: update install section
+ifdef USE_SANE
+install: scanbd
+else
 install: scanbuttond scanbd
-	echo "Make $(SCANBD_DIR)"
-	mkdir -p $(SCANBD_DIR)
-	echo "Copy files to $(SCANBD_DIR)"
-	cp scanbd.conf $(SCANBD_DIR)
-	cp example.script $(SCANBD_DIR)
-	cp scanadf.script $(SCANBD_DIR)
-	cp test.script $(SCANBD_DIR)
+endif
+	echo "Make $(SCANBD_CFG_DIR)"
+	mkdir -p $(SCANBD_CFG_DIR)
+	echo "Copy files to $(SCANBD_CFG_DIR)"
+	cp conf/scanbd.conf $(SCANBD_CFG_DIR)
+	cp scripts/example.script $(SCANBD_CFG_DIR)
+	cp scripts/scanadf.script $(SCANBD_CFG_DIR)
+	cp scripts/test.script $(SCANBD_CFG_DIR)
 	echo "Copy scanbd to $(BIN_DIR)"
 	mkdir -p "$(BIN_DIR)"
-	cp scanbd $(BIN_DIR)
-	echo "Copy scanbuttond backends to $(SCANBD_DIR)/scanbuttond/backends"
-	mkdir -p "$(SCANBD_DIR)/scanbuttond/backends"
-	-cp scanbuttond/backends/*.so "$(SCANBD_DIR)/scanbuttond/backends" || /bin/true
+	cp src/scanbd/scanbd $(BIN_DIR)
+ifdef USE_SCANBUTTOND
+	echo "Copy scanbuttond backends to $(SCANBUTTOND_LIB_DIR)"
+	mkdir -p "$(SCANBUTTOND_LIB_DIR)"
+	cp src/scanbuttond/backends/*.so "$(SCANBUTTOND_LIB_DIR)" || /bin/true
+	cp src/scanbuttond/backends/meta.conf "$(SCANBUTTOND_LIB_DIR)" || /bin/true
+endif
 	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"	
-	cp scanbd_dbus.conf "$(DBUS_PREFIX)/etc/dbus-1/system.d"
-	-cp scanbuttond/backends/meta.conf "$(SCANBD_DIR)/scanbuttond/backends" || /bin/true
-	echo "Edit /etc/inetd.conf"
+	cp integration/scanbd_dbus.conf "$(DBUS_PREFIX)/etc/dbus-1/system.d"
+	echo "Now please edit /etc/inetd.conf"
