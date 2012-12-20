@@ -29,10 +29,10 @@
 // this file is basicly the same as loader.c from the scanbuttond-project,
 // but modified to meet the needs of scanbd
 
-static char lib_dir[PATH_MAX] = SCANBUTTOND_LIB_DIR;
+static char lib_dir[PATH_MAX] = SCANBD_NULL_STRING;
 
 int scanbtnd_init() {
-    const char* backends_dir = NULL;
+    char *backends_dir = NULL;
     char backends_dir_abs[PATH_MAX] = SCANBD_NULL_STRING;
 
     backends_dir = cfg_getstr(cfg_getsec(cfg, C_GLOBAL), C_SCANBUTTONS_BACKENDS_DIR);
@@ -41,8 +41,10 @@ int scanbtnd_init() {
         snprintf(backends_dir_abs, PATH_MAX, "%s/%s", SCANBD_CFG_DIR, backends_dir);
         backends_dir = backends_dir_abs;
     }
+    if (backends_dir) {
+        strncpy(lib_dir, backends_dir, PATH_MAX );
+    }
 
-    assert(backends_dir);
 
     if (scanbtnd_loader_init() != 0) {
         slog(SLOG_INFO, "Could not initialize module loader!\n");
@@ -65,6 +67,9 @@ void scanbtnd_set_libdir(const char* dir){
     strncpy(lib_dir, dir, PATH_MAX);
 }
 
+char *scanbtnd_get_lib_dir(void) {
+    return lib_dir;
+}
 
 int scanbtnd_loader_init(){
     return 0;

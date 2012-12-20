@@ -91,8 +91,7 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(backenddir)" \
-	"$(DESTDIR)$(backendcfgdir)"
+am__installdirs = "$(DESTDIR)$(backenddir)" "$(DESTDIR)$(backenddir)"
 LTLIBRARIES = $(backend_LTLIBRARIES)
 artec_eplus48u_la_LIBADD =
 am_artec_eplus48u_la_OBJECTS = artec_eplus48u.lo
@@ -166,7 +165,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-DATA = $(backendcfg_DATA)
+DATA = $(backend_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -248,7 +247,7 @@ SANE_CFLAGS = @SANE_CFLAGS@
 SANE_CONFIG = @SANE_CONFIG@
 SANE_LIBS = @SANE_LIBS@
 SCANBD_CFG_DIR = @SCANBD_CFG_DIR@
-SCANBUTTOND_CFG_DIR = @SCANBUTTOND_CFG_DIR@
+SCANBUTTOND_LIB_DIR = @SCANBUTTOND_LIB_DIR@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -309,9 +308,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-backenddir = ${libdir}/scanbd/scanbuttond/
-backendcfgdir = @SCANBUTTOND_CFG_DIR@/
-backendcfg_DATA = meta.conf
+backenddir = @SCANBUTTOND_LIB_DIR@
+backend_DATA = meta.conf
 backend_LTLIBRARIES = \
 	mustek.la \
 	plustek.la \
@@ -336,7 +334,7 @@ AM_CFLAGS = \
 	-Dsyslog=slog \
 	-DLOG_INFO=SLOG_INFO \
 	-DLOG_WARNING=SLOG_WARN \
-	-DSCANBUTTOND_CFG_DIR=${backendcfgdir}
+	-DSCANBUTTOND_LIB_DIR=@SCANBUTTOND_LIB_DIR@/
 
 AM_LDFLAGS = \
 	-shared \
@@ -499,27 +497,27 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-backendcfgDATA: $(backendcfg_DATA)
+install-backendDATA: $(backend_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(backendcfg_DATA)'; test -n "$(backendcfgdir)" || list=; \
+	@list='$(backend_DATA)'; test -n "$(backenddir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(backendcfgdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(backendcfgdir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(backenddir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(backenddir)" || exit 1; \
 	fi; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(backendcfgdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(backendcfgdir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(backenddir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(backenddir)" || exit $$?; \
 	done
 
-uninstall-backendcfgDATA:
+uninstall-backendDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(backendcfg_DATA)'; test -n "$(backendcfgdir)" || list=; \
+	@list='$(backend_DATA)'; test -n "$(backenddir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(backendcfgdir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(backenddir)'; $(am__uninstall_files_from_dir)
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -607,7 +605,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(backenddir)" "$(DESTDIR)$(backendcfgdir)"; do \
+	for dir in "$(DESTDIR)$(backenddir)" "$(DESTDIR)$(backenddir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -663,7 +661,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-backendLTLIBRARIES install-backendcfgDATA
+install-data-am: install-backendDATA install-backendLTLIBRARIES
 
 install-dvi: install-dvi-am
 
@@ -709,7 +707,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-backendLTLIBRARIES uninstall-backendcfgDATA
+uninstall-am: uninstall-backendDATA uninstall-backendLTLIBRARIES
 
 .MAKE: install-am install-strip
 
@@ -717,17 +715,17 @@ uninstall-am: uninstall-backendLTLIBRARIES uninstall-backendcfgDATA
 	clean-backendLTLIBRARIES clean-generic clean-libtool ctags \
 	distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am \
-	install-backendLTLIBRARIES install-backendcfgDATA install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-backendLTLIBRARIES \
-	uninstall-backendcfgDATA
+	html-am info info-am install install-am install-backendDATA \
+	install-backendLTLIBRARIES install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-backendDATA \
+	uninstall-backendLTLIBRARIES
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

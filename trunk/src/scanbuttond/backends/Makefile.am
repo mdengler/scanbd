@@ -1,7 +1,5 @@
-backenddir = ${libdir}/scanbd/scanbuttond/
-backendcfgdir =  @SCANBUTTOND_CFG_DIR@/
-
-backendcfg_DATA = meta.conf
+backenddir = @SCANBUTTOND_LIB_DIR@
+backend_DATA = meta.conf
 
 backend_LTLIBRARIES = \
 	mustek.la \
@@ -27,7 +25,7 @@ AM_CFLAGS = \
 	-Dsyslog=slog \
 	-DLOG_INFO=SLOG_INFO \
 	-DLOG_WARNING=SLOG_WARN \
-	-DSCANBUTTOND_CFG_DIR=${backendcfgdir}
+	-DSCANBUTTOND_LIB_DIR=@SCANBUTTOND_LIB_DIR@/
 
 AM_LDFLAGS = \
 	-shared \

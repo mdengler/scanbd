@@ -108,8 +108,8 @@
 #define C_SCRIPTDIR_DEF ""
 
 #define C_SCANBUTTONS_BACKENDS_DIR "scanbuttond_backends_dir"
-#ifdef SCANBUTTOND_CFG_DIR
-#define C_SCANBUTTONS_BACKENDS_DIR_DEF SCANBUTTOND_CFG_DIR
+#ifdef SCANBUTTOND_LIB_DIR
+#define C_SCANBUTTONS_BACKENDS_DIR_DEF SCANBUTTOND_LIB_DIR
 #else
 #ifndef USE_SANE
 #warning "Using predefined directory: /usr/local/etc/scanbd/scanbuttond/backends"

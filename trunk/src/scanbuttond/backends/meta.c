@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,9 +30,10 @@
 
 #define MAX_CONFIG_LINE 255
 #define MAX_SCANNERS_PER_BACKEND 16
+#define CONFIG_FILE "meta.conf"
 
 static char* backend_name = "Dynamic Module Loader";
-static char* config_file = STRINGIFY(SCANBUTTOND_CFG_DIR) "/meta.conf";
+static char config_file[PATH_MAX] = "(null)";
 
 static libusb_handle_t* libusb_handle;
 static scanner_t* meta_scanners = NULL;
@@ -63,6 +64,15 @@ void meta_attach_scanner(scanner_t* scanner, backend_t* backend)
 		   scanner->vendor, scanner->product);
 }
 
+static char *get_config_file(void) 
+{
+#ifdef HAVE_SCANBTND_GET_LIB_DIR
+	snprintf(config_file, PATH_MAX, "%s/%s", scanbtnd_get_lib_dir(), CONFIG_FILE);
+#else
+	snprintf(config_file, PATH_MAX, "%s/%s", SCANBUTTOND_LIB_DIR, CONFIG_FILE);
+#endif
+	return config_file;
+}
 
 void meta_attach_scanners(scanner_t* devices, backend_t* backend)
 {
@@ -177,10 +187,10 @@ int scanbtnd_init(void)
 	// read config file
 	char lib[MAX_CONFIG_LINE];
 	backend_t* backend;
-	FILE* f = fopen(config_file, "r");
+	FILE* f = fopen(get_config_file(), "r");
 	if (f == NULL) {
 		syslog(LOG_ERR, "meta-backend: config file \"%s\" not found.",
-			   config_file);
+			   get_config_file());
 		return -1;
 	}
 	while (fgets(lib, MAX_CONFIG_LINE, f)) {

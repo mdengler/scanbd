@@ -211,7 +211,7 @@ SANE_CFLAGS = @SANE_CFLAGS@
 SANE_CONFIG = @SANE_CONFIG@
 SANE_LIBS = @SANE_LIBS@
 SCANBD_CFG_DIR = @SCANBD_CFG_DIR@
-SCANBUTTOND_CFG_DIR = @SCANBUTTOND_CFG_DIR@
+SCANBUTTOND_LIB_DIR = @SCANBUTTOND_LIB_DIR@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -277,10 +277,9 @@ scanbd_SOURCES = scanbd.c common.h daemonize.c dbus.c udev.c udev.h \
 	$(am__append_6)
 AM_CFLAGS = $(OS_CFLAGS) $(OS_CPPFLAGS) $(EXTRA_CFLAGS) \
 	$(CONFUSE_CFLAGS) $(UDEV_CFLAGS) $(DBUS_CFLAGS) $(HAL_CFLAGS) \
-	-DSCANBUTTOND_CFG_DIR=\"@SCANBUTTOND_CFG_DIR@/\" \
-	-DSCANBD_CFG_DIR=\"@SCANBD_CFG_DIR@/\" \
-	-DSCANBUTTOND_LIB_DIR=\"${libdir}/scanbd/scanbuttond\" \
-	$(am__append_2) $(am__append_4)
+	-DSCANBUTTOND_LIB_DIR=\"@SCANBUTTOND_LIB_DIR@/\" \
+	-DSCANBD_CFG_DIR=\"@SCANBD_CFG_DIR@/\" $(am__append_2) \
+	$(am__append_4)
 AM_LDFLAGS = $(OS_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) $(DBUS_LIBS) \
 	$(HAL_LIBS) $(LIBUSB_LIBS) -rdynamic $(am__append_3) \
 	$(am__append_5)
