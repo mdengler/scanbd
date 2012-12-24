@@ -1,4 +1,4 @@
-iEXTRA_DIST = \
+EXTRA_DIST = \
 	99-saned.rules \
 	saned.fdi \
 	scanbd_dbus.conf \

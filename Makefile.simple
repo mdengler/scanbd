@@ -25,9 +25,9 @@ include Makefile.conf
 .PHONY: scanbuttond scanbd all
 
 ifdef USE_SANE
-all: scanbd
+all: scanbd doc
 else # USE_SANE
-all: scanbuttond scanbd 
+all: scanbuttond scanbd doc
 endif # USE_SANE
 
 scanbd:
@@ -35,6 +35,9 @@ scanbd:
 
 scanbuttond:
 	$(MAKE) -f Makefile.simple -C src/scanbuttond all
+
+doc:
+	 $(MAKE) -f Makefile.simple -C doc all
 
 clean:
 	$(MAKE) -f Makefile.simple -C src/scanbuttond clean
@@ -63,6 +66,15 @@ ifdef USE_SCANBUTTOND
 	cp src/scanbuttond/backends/*.so "$(SCANBUTTOND_LIB_DIR)" || /bin/true
 	cp src/scanbuttond/backends/meta.conf "$(SCANBUTTOND_LIB_DIR)" || /bin/true
 endif
-	echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"	
-	cp integration/scanbd_dbus.conf "$(DBUS_PREFIX)/etc/dbus-1/system.d"
+	if test -d $(PREFIX)/man/man8 ;\
+	then \
+	  cp doc/scanbd.8 $(PREFIX)/man/man8 ;\
+        else \
+	  echo Do not know where manpage should go, please copy manually ;\
+	fi
+	if test -n $(DBUS_INCLUDE) ; \
+	then \
+	  echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"; \
+	  cp integration/scanbd_dbus.conf "$(DBUS_PREFIX)/etc/dbus-1/system.d"; \
+	fi
 	echo "Now please edit /etc/inetd.conf"

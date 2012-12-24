@@ -245,6 +245,11 @@ scanbdconf_SCRIPTS = \
 	scanadf.script \
 	test.script
 
+EXTRA_DIST = \
+	example.script \
+	scanadf.script \
+	test.script
+
 all: all-am
 
 .SUFFIXES:

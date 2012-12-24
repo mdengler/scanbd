@@ -14,6 +14,9 @@ scanbd_SOURCES = \
 	scanbd_dbus.h \
 	scanbd.h 
 
+EXTRA_DIST = \
+	Makefile.simple
+
 AM_CFLAGS = \
 	$(OS_CFLAGS) \
 	$(OS_CPPFLAGS) \
@@ -45,8 +48,9 @@ AM_LDFLAGS +=  \
 endif
 
 if USE_SCANBUTTOND
-
-noinst_PROGRAMS = scanbd_test
+# testscanbuttond does not work when we compile with autofoo: libtool
+# onl;y generates the .so files at install time
+noinst_PROGRAMS = testscanbuttond
 
 AM_CFLAGS += \
 	-I ../scanbuttond/include 
@@ -61,7 +65,7 @@ scanbd_SOURCES += \
 	scanbuttond_loader.h 
 
 
-scanbd_test_SOURCES = \
+testscanbuttond_SOURCES = \
 	testscanbuttond.c \
 	slog.c \
 	scanbuttond_loader.c \

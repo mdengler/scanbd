@@ -4,4 +4,6 @@ scanbdconf_DATA = \
 	scanbd.conf
 
 EXTRA_DIST = \
+	scanbd.conf \
 	scanbd.conf.bsd
+

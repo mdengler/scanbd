@@ -8,3 +8,5 @@ AM_CFLAGS = \
 	$(EXTRA_CFLAGS) \
 	-I../include
 
+EXTRA_DIST = \
+	Makefile.simple

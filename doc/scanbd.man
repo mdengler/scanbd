@@ -1,0 +1,168 @@
+.TH scanbd 8 "20 Dec 2012" "@PACKAGENAME@ @PACKAGEVERSION@" "Scanner button daemon"
+.IX scanbd
+.SH NAME
+scanbd\- Scanner button daemon
+.SH SYNOPSIS
+.B scanbd
+.B [ \-c 
+.I [ configuration file ]
+.B  | [\-f]
+.B  | [\-d]
+.B | [\ -m 
+.B  [\-s]
+.B  | [\-t
+.I device
+.B  ] [\-a
+.I action
+.B ] ]
+.SH DESCRIPTION
+.B scanbd
+is a scanner button monitoring daemon that can trigger execution of scripts when
+a button is pressed.
+Scanbd (the scanner button daemon) in polling mode opens and polls the scanner and therefore locks the device. So no other
+application can access the device directly (open the /dev/..., or via libusb, etc). 
+
+To enable scanning from applications, we use a second instance of scanbd in the so called
+"manager-mode": this scanbd instance is configured as a "proxy" for saned to access the scanner from an application. In manager mode, scanbd listens
+for requests in the saned network port for scanning requests.
+All applications therefor need to use the "net backend to access a scanner.
+
+If a scan request arrives to scanbd (in manager-mode) on the sane-port, scanbd requests the scanbd scanner polling daemon instance by sending
+it a dbus-message (default) or a posix-signal (SIGUSR1) (signal-mode) to release the sacanner. Then it
+starts the real saned which scans and sends the data back to the requesting application. When the scanning is done and saned exits, the scanbd-manager 
+restarts the polling by sending a second dbus-message (or the posix-signal SIGUSR2) to the scanbd daemon and ends execution. The polling scanbd now reenables
+polling of the devices.
+   
+Scanbd can be configured at compile time to ether use sane to poll the scannner or use the scanbuttond backends to do so.
+
+.B Note:
+Please note that the scanbd running in manager mode acts as a proxy to saned. This means that all scanner applications must be
+configured to use the net backend to access the scanner. Direct access will not be possible.
+
+.SH OPTIONS
+.TP
+.B \-c <config-file>
+Use <configfile>  instead of the default @SCANBDCFGDIR@/scanbd.conf configuration file.
+.TP
+.B \-d
+turn debug mode on
+.TP
+.B \-m
+run scanbd in manager mode (default is polling mode). This option is used to 
+start scanbd from inetd or xinetd. Scanbd will now request the polling scanbd 
+to stop polling the scanners and then starts saned that will handle the 
+scanning.
+.TP
+.B \-s
+use signals SIGUSR1/ SIGUSR2 instead of dbus messages to request the 
+polling scanbd to stop / restart polling
+.TP
+.B \-t
+Trigger  for device (numerical)
+.I device
+.TP
+.B \-a
+Trigger  for action  (numerical)
+.I action
+.TP
+.B \-f
+Run scanbd in the foreground
+.TP 
+When no options are given, run in polling mode
+.SH MAIN SCANBD CONFIGURATION
+Scanbd is configured trough scanbd.conf ( @SCANBDCFGDIR@/scanbd.conf or 
+the file pointed out by the 
+.B \-c <config-file>
+Scanbd shall normally be started in polling mode from init using your 
+operating
+systems start method. See the intergration directory in the scanbd 
+sources to see what is avaialable for your OS and
+distribution. 
+.SH MANAGER MODE SCANBD CONFIGURATION
+Scanbd im manager mode must be setup very similar to the way a stand-alone 
+saned must be setup.
+.SH INETD CONFIGURATION FOR MANAGER MODE
+For
+.B scanbd
+to work properly in its default mode of operation, it is also necessary to add
+a configuration line to
+.IR /etc/inetd.conf .
+Note that your inetd must support IPv6 if you
+want to connect to scanbd over IPv6 ; xinetd and openbsd-inetd are known to
+support IPv6, check the documentation for your inetd daemon.
+.PP
+The configuration line normally looks like this:
+.PP
+.RS
+sane\-port stream tcp nowait scanbd.scanbd @SBINDIR@/scanbd scanbd -m
+.RE
+.PP
+However, if your system uses
+.BR tcpd (8)
+for additional security screening, you may want to disable scanbd
+access control by putting ``+'' in
+.IR scanbd.conf
+and use a line of the following form in
+.IR /etc/inetd.conf
+instead:
+.PP
+.RS
+sane\-port stream tcp nowait scanbd.scanbd /usr/sbin/tcpd @SBINDIR@/scanbd -m
+.RE
+.PP
+Note that both examples assume that there is a
+.B scanbd
+group and a
+.B scanbd
+user.  If you follow this example, please make sure that the 
+access permissions on the special device are set such that
+.B scanbd
+can access the scanner (the program generally needs read and
+write access to scanner devices).
+.PP
+If xinetd is installed on your system instead of inetd the following example
+for xinetd.conf may be helpful:
+.PP
+.RS
+.ft CR
+.nf
+# default: off
+# description: The sane server accepts requests 
+# for network access to a local scanner via the
+# network.
+service sane\-port
+{
+   port        = 6566
+   socket_type = stream
+   wait        = no
+   user        = scanbd
+   group       = scanbd
+   server      = @SBINDIR@/scanbd 
+   server_args = -m
+}
+.fi
+.ft R
+.RE
+.PP
+Finally, it is also necessary to add a line of the following form to
+.IR /etc/services :
+.PP
+.RS
+sane\-port 6566/tcp # SANE network scanner daemon
+.RE
+.PP
+The official IANA short name for port 6566 is "sane\-port". The older name "sane"
+is now deprecated.
+.RE
+.PP
+Scanbd does not do access control, but it relies on the access control done by i
+saned.
+.SH "SEE ALSO"
+.BR sane (7),
+.BR saned (8),
+.BR sane\-dll (5),
+.BR sane\-net (5)
+.br
+.I http://http://scanbd.sourceforge.net/
+.SH AUTHOR
+Louis Lagendijk
