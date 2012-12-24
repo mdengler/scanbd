@@ -42,7 +42,7 @@ doc:
 clean:
 	$(MAKE) -f Makefile.simple -C src/scanbuttond clean
 	$(MAKE) -f Makefile.simple -C src/scanbd clean
-	# $(RM) -f scanbd test *.o *~
+	$(MAKE) -f Makefile.simple -C doc clean
 
 # TODO: update install section
 ifdef USE_SANE

@@ -14,6 +14,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 am__make_dryrun = \
   { \
@@ -52,9 +53,9 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.conf.in $(srcdir)/Makefile.in \
-	$(top_srcdir)/configure AUTHORS TODO compile config.guess \
-	config.sub depcomp install-sh ltmain.sh missing
+	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS TODO \
+	compile config.guess config.sub depcomp install-sh ltmain.sh \
+	missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -65,7 +66,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_CLEAN_FILES = Makefile.conf
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -81,6 +82,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+DATA = $(noinst_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
@@ -276,6 +278,10 @@ ACLOCAL_AMFLAGS = -I m4
 @USE_SCANBUTTOND_TRUE@	integration scripts contrib doc
 EXTRA_DIST = \
 	Makefile.simple \
+	Makefile.conf.in \
+	Makefile.conf
+
+noinst_DATA = \
 	Makefile.conf
 
 all: all-recursive
@@ -315,8 +321,6 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
-Makefile.conf: $(top_builddir)/config.status $(srcdir)/Makefile.conf.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -651,7 +655,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile
+all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
 install: install-recursive
@@ -773,6 +777,11 @@ uninstall-am:
 	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
 	ps ps-am tags tags-recursive uninstall uninstall-am
 
+
+Makefile.conf: Makefile.conf.in configure
+	echo "Generating $@...";
+	sed  -e 's|@PACKAGEVERSION@|$(PACKAGE_VERSION)|g' \
+	     -e 's|@PACKAGENAME@|$(PACKAGE)|g' $@.in  >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
