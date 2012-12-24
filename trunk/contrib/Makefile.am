@@ -3,4 +3,6 @@ scanbdconf_SCRIPTS = \
 	action.script 
 
 EXTRA_DIST = \
-	PKGBUILD
+	PKGBUILD \
+	action.script 
+

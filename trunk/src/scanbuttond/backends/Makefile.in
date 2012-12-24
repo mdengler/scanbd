@@ -355,6 +355,10 @@ gt68xx_la_SOURCES = gt68xx.c gt68xx.h
 hp3900_la_SOURCES = hp3900.c hp3900.h
 hp5590_la_SOURCES = hp5590.c hp5590.h
 epson_vphoto_la_SOURCES = epson_vphoto.c epson_vphoto.h
+EXTRA_DIST = \
+	Makefile.simple \
+	meta.conf
+
 all: all-am
 
 .SUFFIXES:

@@ -9,7 +9,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE( foreign )
 
 # Initialize libtool support
-LT_INIT
+LT_INIT([disable-static])
 
 # Determine host information 
 AC_CANONICAL_HOST

@@ -61,7 +61,7 @@ sbin_PROGRAMS = scanbd$(EXEEXT)
 @USE_SANE_TRUE@am__append_3 = \
 @USE_SANE_TRUE@	$(SANE_LIBS)
 
-@USE_SCANBUTTOND_TRUE@noinst_PROGRAMS = scanbd_test$(EXEEXT)
+@USE_SCANBUTTOND_TRUE@noinst_PROGRAMS = testscanbuttond$(EXEEXT)
 @USE_SCANBUTTOND_TRUE@am__append_4 = \
 @USE_SCANBUTTOND_TRUE@	-I ../scanbuttond/include 
 
@@ -100,15 +100,15 @@ am_scanbd_OBJECTS = scanbd.$(OBJEXT) daemonize.$(OBJEXT) \
 	$(am__objects_2)
 scanbd_OBJECTS = $(am_scanbd_OBJECTS)
 scanbd_LDADD = $(LDADD)
-am__scanbd_test_SOURCES_DIST = testscanbuttond.c slog.c \
+am__testscanbuttond_SOURCES_DIST = testscanbuttond.c slog.c \
 	scanbuttond_loader.c scanbuttond_wrapper.c dbus.c
-@USE_SCANBUTTOND_TRUE@am_scanbd_test_OBJECTS =  \
+@USE_SCANBUTTOND_TRUE@am_testscanbuttond_OBJECTS =  \
 @USE_SCANBUTTOND_TRUE@	testscanbuttond.$(OBJEXT) slog.$(OBJEXT) \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_loader.$(OBJEXT) \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_wrapper.$(OBJEXT) \
 @USE_SCANBUTTOND_TRUE@	dbus.$(OBJEXT)
-scanbd_test_OBJECTS = $(am_scanbd_test_OBJECTS)
-scanbd_test_LDADD = $(LDADD)
+testscanbuttond_OBJECTS = $(am_testscanbuttond_OBJECTS)
+testscanbuttond_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -122,9 +122,9 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(scanbd_SOURCES) $(scanbd_test_SOURCES)
+SOURCES = $(scanbd_SOURCES) $(testscanbuttond_SOURCES)
 DIST_SOURCES = $(am__scanbd_SOURCES_DIST) \
-	$(am__scanbd_test_SOURCES_DIST)
+	$(am__testscanbuttond_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -275,6 +275,9 @@ top_srcdir = @top_srcdir@
 scanbd_SOURCES = scanbd.c common.h daemonize.c dbus.c udev.c udev.h \
 	slog.c slog.h scanbd_dbus.h scanbd.h $(am__append_1) \
 	$(am__append_6)
+EXTRA_DIST = \
+	Makefile.simple
+
 AM_CFLAGS = $(OS_CFLAGS) $(OS_CPPFLAGS) $(EXTRA_CFLAGS) \
 	$(CONFUSE_CFLAGS) $(UDEV_CFLAGS) $(DBUS_CFLAGS) $(HAL_CFLAGS) \
 	-DSCANBUTTOND_LIB_DIR=\"@SCANBUTTOND_LIB_DIR@/\" \
@@ -283,7 +286,7 @@ AM_CFLAGS = $(OS_CFLAGS) $(OS_CPPFLAGS) $(EXTRA_CFLAGS) \
 AM_LDFLAGS = $(OS_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) $(DBUS_LIBS) \
 	$(HAL_LIBS) $(LIBUSB_LIBS) -rdynamic $(am__append_3) \
 	$(am__append_5)
-@USE_SCANBUTTOND_TRUE@scanbd_test_SOURCES = \
+@USE_SCANBUTTOND_TRUE@testscanbuttond_SOURCES = \
 @USE_SCANBUTTOND_TRUE@	testscanbuttond.c \
 @USE_SCANBUTTOND_TRUE@	slog.c \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_loader.c \
@@ -382,9 +385,9 @@ clean-sbinPROGRAMS:
 scanbd$(EXEEXT): $(scanbd_OBJECTS) $(scanbd_DEPENDENCIES) $(EXTRA_scanbd_DEPENDENCIES) 
 	@rm -f scanbd$(EXEEXT)
 	$(LINK) $(scanbd_OBJECTS) $(scanbd_LDADD) $(LIBS)
-scanbd_test$(EXEEXT): $(scanbd_test_OBJECTS) $(scanbd_test_DEPENDENCIES) $(EXTRA_scanbd_test_DEPENDENCIES) 
-	@rm -f scanbd_test$(EXEEXT)
-	$(LINK) $(scanbd_test_OBJECTS) $(scanbd_test_LDADD) $(LIBS)
+testscanbuttond$(EXEEXT): $(testscanbuttond_OBJECTS) $(testscanbuttond_DEPENDENCIES) $(EXTRA_testscanbuttond_DEPENDENCIES) 
+	@rm -f testscanbuttond$(EXEEXT)
+	$(LINK) $(testscanbuttond_OBJECTS) $(testscanbuttond_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
