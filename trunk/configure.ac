@@ -184,6 +184,7 @@ AC_SUBST([EXTRA_CFLAGS])
 # Generate the output files
 AC_OUTPUT([
 		Makefile 
+		Makefile.conf
 		src/scanbd/Makefile 
 		src/scanbuttond/Makefile 
 		src/scanbuttond/backends/Makefile 
