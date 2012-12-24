@@ -17513,7 +17513,7 @@ fi
 # AC_CONFIG_HEADERS([config.h])
 
 # Generate the output files
-ac_config_files="$ac_config_files Makefile src/scanbd/Makefile src/scanbuttond/Makefile src/scanbuttond/backends/Makefile src/scanbuttond/interface/Makefile src/scanbuttond/include/Makefile integration/Makefile contrib/Makefile doc/Makefile conf/Makefile scripts/Makefile"
+ac_config_files="$ac_config_files Makefile Makefile.conf src/scanbd/Makefile src/scanbuttond/Makefile src/scanbuttond/backends/Makefile src/scanbuttond/interface/Makefile src/scanbuttond/include/Makefile integration/Makefile contrib/Makefile doc/Makefile conf/Makefile scripts/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -18654,6 +18654,7 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "Makefile.conf") CONFIG_FILES="$CONFIG_FILES Makefile.conf" ;;
     "src/scanbd/Makefile") CONFIG_FILES="$CONFIG_FILES src/scanbd/Makefile" ;;
     "src/scanbuttond/Makefile") CONFIG_FILES="$CONFIG_FILES src/scanbuttond/Makefile" ;;
     "src/scanbuttond/backends/Makefile") CONFIG_FILES="$CONFIG_FILES src/scanbuttond/backends/Makefile" ;;
