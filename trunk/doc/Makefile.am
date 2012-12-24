@@ -8,6 +8,10 @@ man8_MANS = scanbd.8
 clean:
 	-rm scanbd.8
 
+distclean: 
+	-rm scanbd.8
+	rm Makefile
+
 %.8: %.man
 	echo "Generating manpage $@...";
 	sed  -e 's|@PACKAGEVERSION@|$(PACKAGE_VERSION)|g' \

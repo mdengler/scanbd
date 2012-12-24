@@ -8,4 +8,15 @@ SUBDIRS += conf integration scripts contrib doc
 
 EXTRA_DIST = \
 	Makefile.simple \
+	Makefile.conf.in \
 	Makefile.conf
+
+noinst_DATA = \
+	Makefile.conf
+
+Makefile.conf: Makefile.conf.in configure
+	echo "Generating $@...";
+	sed  -e 's|@PACKAGEVERSION@|$(PACKAGE_VERSION)|g' \
+	     -e 's|@PACKAGENAME@|$(PACKAGE)|g' $@.in  >$@
+
+

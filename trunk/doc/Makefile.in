@@ -415,8 +415,6 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean-am: clean-generic clean-libtool mostlyclean-am
 
-distclean: distclean-am
-	-rm -f Makefile
 distclean-am: clean-am distclean-generic
 
 dvi: dvi-am
@@ -496,6 +494,10 @@ uninstall-man: uninstall-man8
 
 clean:
 	-rm scanbd.8
+
+distclean: 
+	-rm scanbd.8
+	rm Makefile
 
 %.8: %.man
 	echo "Generating manpage $@...";
