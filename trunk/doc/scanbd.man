@@ -4,40 +4,47 @@
 scanbd\- Scanner button daemon
 .SH SYNOPSIS
 .B scanbd
-.B [ \-c 
-.I [ configuration file ]
-.B  | [\-f]
-.B  | [\-d]
-.B | [\ -m 
+.B [\-c 
+.I configuration file
+.B ] [\-f]
+.B  [\-d]
+.B [\ -m 
 .B  [\-s]
-.B  | [\-t
+.B  [\-t
 .I device
-.B  ] [\-a
+.B ] [\-a
 .I action
-.B ] ]
+.B ]]
 .SH DESCRIPTION
 .B scanbd
 is a scanner button monitoring daemon that can trigger execution of scripts when
 a button is pressed.
-Scanbd (the scanner button daemon) in polling mode opens and polls the scanner and therefore locks the device. So no other
-application can access the device directly (open the /dev/..., or via libusb, etc). 
+Scanbd (the scanner button daemon) in polling mode opens and polls the scanner 
+and therefore locks the device. So no other application can access the device 
+directly (open the /dev/..., or via libusb, etc). 
 
-To enable scanning from applications, we use a second instance of scanbd in the so called
-"manager-mode": this scanbd instance is configured as a "proxy" for saned to access the scanner from an application. In manager mode, scanbd listens
-for requests in the saned network port for scanning requests.
+To enable scanning from applications, we use a second instance of scanbd in the
+so called "manager-mode": this scanbd instance is configured as a "proxy" for 
+saned to access the scanner from an application. In manager mode, scanbd 
+listens for requests in the saned network port for scanning requests.
 All applications therefor need to use the "net backend to access a scanner.
 
-If a scan request arrives to scanbd (in manager-mode) on the sane-port, scanbd requests the scanbd scanner polling daemon instance by sending
-it a dbus-message (default) or a posix-signal (SIGUSR1) (signal-mode) to release the sacanner. Then it
-starts the real saned which scans and sends the data back to the requesting application. When the scanning is done and saned exits, the scanbd-manager 
-restarts the polling by sending a second dbus-message (or the posix-signal SIGUSR2) to the scanbd daemon and ends execution. The polling scanbd now reenables
-polling of the devices.
+If a scan request arrives to scanbd (in manager-mode) on the sane-port, scanbd 
+requests the scanbd scanner polling daemon instance by sending it a 
+dbus-message (default) or a posix-signal (SIGUSR1) (signal-mode) to release 
+the sacanner. Then it starts the real saned which scans and sends the data back
+to the requesting application. When the scanning is done and saned exits, the 
+scanbd-manager restarts the polling by sending a second dbus-message (or the 
+posix-signal SIGUSR2) to the scanbd daemon and ends execution. 
+The polling scanbd now reenables polling of the devices.
    
-Scanbd can be configured at compile time to ether use sane to poll the scannner or use the scanbuttond backends to do so.
+Scanbd can be configured at compile time to ether use sane to poll the scannner
+or use the scanbuttond backends to do so.
 
 .B Note:
-Please note that the scanbd running in manager mode acts as a proxy to saned. This means that all scanner applications must be
-configured to use the net backend to access the scanner. Direct access will not be possible.
+Please note that the scanbd running in manager mode acts as a proxy to saned. 
+This means that all scanner applications must be configured to use the net 
+backend to access the scanner. Direct access will not be possible.
 
 .SH OPTIONS
 .TP
