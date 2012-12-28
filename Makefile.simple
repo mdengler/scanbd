@@ -22,7 +22,7 @@
 
 include Makefile.conf
 
-.PHONY: scanbuttond scanbd all
+.PHONY: scanbuttond scanbd doc all
 
 ifdef USE_SANE
 all: scanbd doc
@@ -50,7 +50,7 @@ else
 install: scanbuttond scanbd
 endif
 	echo "Make $(SCANBD_CFG_DIR)/scanner.d"
-	mkdir -p $(SCANBD_CFG_DIR)/scannner.d
+	mkdir -p $(SCANBD_CFG_DIR)/scanner.d
 	echo "Copy files to $(SCANBD_CFG_DIR)"
 	cp conf/scanbd.conf $(SCANBD_CFG_DIR)
 	cp scripts/example.script $(SCANBD_CFG_DIR)
@@ -73,7 +73,7 @@ endif
         else \
 	  echo Do not know where manpage should go, please copy manually ;\
 	fi
-	if test -n $(DBUS_INCLUDE) ; \
+	if test -n "$(DBUS_INCLUDE)" ; \
 	then \
 	  echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"; \
 	  cp integration/scanbd_dbus.conf "$(DBUS_PREFIX)/etc/dbus-1/system.d"; \
