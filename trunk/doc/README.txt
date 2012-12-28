@@ -84,7 +84,10 @@ USE_SCANBUTTOND=yes make -e Makefile.simple clean all
 -or-
 USE_SANE=yes make -e Makefile.simple clean all
 
-Then copy the executable scanbd and config-files scanbd.conf, etc. to useful places
+Please note that on certain systems (like Freebsd) the native make is not capabpe of processing Makefile.simple.
+Use gmake instead, by substituting the "make" commands above by "gmake".
+
+After building, copy the executable scanbd and config-files scanbd.conf, etc. to useful places
 (or use "make install" to copy to /usr/local/bin and /usr/local/etc/scanbd).
 If you use the scanbuttond-backends, copy the shared-objects from scanbuttond/backends directory
 to /usr/local/etc/scanbd/scanbuttond/backends (or use "make install").
