@@ -43,7 +43,7 @@ struct scanbdOptions scanbd_options = {
 static struct option options[] = {
     {"manager",    0, NULL, 'm'},
     {"signal",     0, NULL, 's'},
-    {"debug",      0, NULL, 'd'},
+    {"debug",      2, NULL, 'd'},
     {"foreground", 0, NULL, 'f'},
     {"config",     1, NULL, 'c'},
     {"trigger",    1, NULL, 't'},
@@ -383,11 +383,14 @@ int main(int argc, char** argv) {
     int trigger_device = -1;
     int trigger_action = -1;
 
+    // read & parse scanbd.conf
+    cfg_do_parse();
+
     // read the options of the commandline
     while(true) {
         int option_index = 0;
         int c = 0;
-        if ((c = getopt_long(argc, argv, "mc:dft:a:", options, &option_index)) < 0) {
+        if ((c = getopt_long(argc, argv, "mc:d::ft:a:", options, &option_index)) < 0) {
             break;
         }
         switch(c) {
@@ -402,6 +405,9 @@ int main(int argc, char** argv) {
         case 'd':
             slog(SLOG_INFO, "debug on");
             debug = true;
+            if (optarg != 0) {
+              debug_level = atoi(optarg);
+            }
             break;
         case 'f':
             slog(SLOG_INFO, "foreground");
@@ -426,7 +432,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    cfg_do_parse();
 
     if (debug) {
         slog(SLOG_INFO, "debug on: level: %d", debug_level);
