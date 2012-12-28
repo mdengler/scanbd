@@ -44,19 +44,20 @@ clean:
 	$(MAKE) -f Makefile.simple -C src/scanbd clean
 	$(MAKE) -f Makefile.simple -C doc clean
 
-# TODO: update install section
 ifdef USE_SANE
 install: scanbd
 else
 install: scanbuttond scanbd
 endif
-	echo "Make $(SCANBD_CFG_DIR)"
-	mkdir -p $(SCANBD_CFG_DIR)
+	echo "Make $(SCANBD_CFG_DIR)/scanner.d"
+	mkdir -p $(SCANBD_CFG_DIR)/scannner.d
 	echo "Copy files to $(SCANBD_CFG_DIR)"
 	cp conf/scanbd.conf $(SCANBD_CFG_DIR)
 	cp scripts/example.script $(SCANBD_CFG_DIR)
 	cp scripts/scanadf.script $(SCANBD_CFG_DIR)
 	cp scripts/test.script $(SCANBD_CFG_DIR)
+	echo "Copy scanner config files to $(SCANBD_CFG_DIR)/scanner.d"
+	cp conf/scanner.d/*.conf $(SCANBD_CFG_DIR)/scanner.d
 	echo "Copy scanbd to $(BIN_DIR)"
 	mkdir -p "$(BIN_DIR)"
 	cp src/scanbd/scanbd $(BIN_DIR)

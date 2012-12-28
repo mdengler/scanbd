@@ -97,8 +97,9 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(scanbdconfdir)"
-DATA = $(scanbdconf_DATA)
+am__installdirs = "$(DESTDIR)$(scanbdconfdir)" \
+	"$(DESTDIR)$(scannerconfdir)"
+DATA = $(scanbdconf_DATA) $(scannerconf_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -240,12 +241,25 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 scanbdconfdir = @SCANBD_CFG_DIR@/
+scannerconfdir = @SCANBD_CFG_DIR@/scanner.d
 scanbdconf_DATA = \
 	scanbd.conf
 
+scannerconf_DATA = \
+	scanner.d/avision.conf \
+	scanner.d/fujitsu.conf \
+	scanner.d/hp.conf \
+	scanner.d/pixma.conf \
+	scanner.d/snapscan.conf
+
 EXTRA_DIST = \
 	scanbd.conf \
-	scanbd.conf.bsd
+	scanbd.conf.bsd \
+	scanner.d/avision.conf \
+	scanner.d/fujitsu.conf \
+	scanner.d/hp.conf \
+	scanner.d/pixma.conf \
+	scanner.d/snapscan.conf
 
 all: all-am
 
@@ -307,6 +321,27 @@ uninstall-scanbdconfDATA:
 	@list='$(scanbdconf_DATA)'; test -n "$(scanbdconfdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(scanbdconfdir)'; $(am__uninstall_files_from_dir)
+install-scannerconfDATA: $(scannerconf_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(scannerconf_DATA)'; test -n "$(scannerconfdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(scannerconfdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(scannerconfdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(scannerconfdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(scannerconfdir)" || exit $$?; \
+	done
+
+uninstall-scannerconfDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(scannerconf_DATA)'; test -n "$(scannerconfdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(scannerconfdir)'; $(am__uninstall_files_from_dir)
 tags: TAGS
 TAGS:
 
@@ -348,7 +383,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(scanbdconfdir)"; do \
+	for dir in "$(DESTDIR)$(scanbdconfdir)" "$(DESTDIR)$(scannerconfdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -401,7 +436,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-scanbdconfDATA
+install-data-am: install-scanbdconfDATA install-scannerconfDATA
 
 install-dvi: install-dvi-am
 
@@ -445,7 +480,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-scanbdconfDATA
+uninstall-am: uninstall-scanbdconfDATA uninstall-scannerconfDATA
 
 .MAKE: install-am install-strip
 
@@ -456,10 +491,11 @@ uninstall-am: uninstall-scanbdconfDATA
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-scanbdconfDATA \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am uninstall-scanbdconfDATA
+	install-scannerconfDATA install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-scanbdconfDATA uninstall-scannerconfDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
