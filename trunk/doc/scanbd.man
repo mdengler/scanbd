@@ -3,18 +3,28 @@
 .SH NAME
 scanbd\- Scanner button daemon
 .SH SYNOPSIS
+.TP Manager mode
 .B scanbd
+.B  \-m
 .B [\-c 
-.I configuration file
+.I configfile
 .B ] [\-f]
-.B  [\-d]
-.B [\ -m 
-.B  [\-s]
+.B  [\-d
+.I [debuglevel]
+.B  ] [\-s]
 .B  [\-t
 .I device
 .B ] [\-a
 .I action
-.B ]]
+.B ]
+.TP Polling mode
+.B scanbd
+.B [\-c 
+.I configfile
+.B ] [\-f]
+.B  [\-d
+.I [debuglevel]
+.B ]
 .SH DESCRIPTION
 .B scanbd
 is a scanner button monitoring daemon that can trigger execution of scripts when
@@ -48,31 +58,33 @@ backend to access the scanner. Direct access will not be possible.
 
 .SH OPTIONS
 .TP
-.B \-c <config-file>
+.B \-m --manager
+run scanbd in manager mode (default is polling mode). This option is used to 
+start scanbd as wrapper around saned from inetd or xinetd. Scanbd will request 
+the polling scanbd to stop polling the scanners and then starts saned 
+that will handle the actual scanning.
+.TP
+.B \-c --config
+.I configfile
 Use <configfile>  instead of the default @SCANBDCFGDIR@/scanbd.conf configuration file.
 .TP
-.B \-d
+.B \-d --debug
+.I debuglevel
 turn debug mode on
 .TP
-.B \-m
-run scanbd in manager mode (default is polling mode). This option is used to 
-start scanbd from inetd or xinetd. Scanbd will now request the polling scanbd 
-to stop polling the scanners and then starts saned that will handle the 
-scanning.
-.TP
-.B \-s
+.B \-s --signal
 use signals SIGUSR1/ SIGUSR2 instead of dbus messages to request the 
 polling scanbd to stop / restart polling
 .TP
-.B \-t
+.B \-t --trigger
 Trigger  for device (numerical)
 .I device
 .TP
-.B \-a
+.B \-a --action
 Trigger  for action  (numerical)
 .I action
 .TP
-.B \-f
+.B \-f --foreground
 Run scanbd in the foreground
 .TP 
 When no options are given, run in polling mode

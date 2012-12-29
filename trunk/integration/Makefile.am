@@ -3,4 +3,9 @@ EXTRA_DIST = \
 	saned.fdi \
 	scanbd_dbus.conf \
 	scanbd.debian \
-	scanbdservice.conf
+	scanbdservice.conf \
+	systemd/scanbd.service \
+	systemd/de.kmux.scanbd.server.service \
+	systemd/README.systemd \
+	systemd/scanbd@.service \
+	systemd/scanbd.socket
