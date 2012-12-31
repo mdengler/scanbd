@@ -79,7 +79,7 @@ int main()
     debug = true;
     debug_level = 7;
 
-    scanbtnd_set_libdir("./scanbuttond/backends");
+    scanbtnd_set_libdir("../scanbuttond/backends");
 
     if (scanbtnd_loader_init() != 0) {
         slog(SLOG_INFO, "Could not initialize module loader!\n");
