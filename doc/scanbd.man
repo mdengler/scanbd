@@ -14,7 +14,7 @@ scanbd\- Scanner button daemon
 .B  ] [\-s]
 .B  [\-t
 .I device
-.B ] [\-a
+.B \-a
 .I action
 .B ]
 .TP Polling mode
@@ -77,12 +77,13 @@ use signals SIGUSR1/ SIGUSR2 instead of dbus messages to request the
 polling scanbd to stop / restart polling
 .TP
 .B \-t --trigger
-Trigger  for device (numerical)
-.I device
+Trigger action for 
+.I device 
+(numerical)
 .TP
 .B \-a --action
-Trigger  for action  (numerical)
-.I action
+.I action 
+(numerical) to be triggered
 .TP
 .B \-f --foreground
 Run scanbd in the foreground
