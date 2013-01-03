@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(scanbd, 1.2.1, wilhelm.meier@fh-kl.de)
+AC_INIT(scanbd, 1.3, wilhelm.meier@fh-kl.de)
 
 # allow check that we are really in the source directory
 AC_CONFIG_SRCDIR([src/scanbd/scanbd.c])
