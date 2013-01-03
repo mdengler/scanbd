@@ -23,6 +23,8 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_CXX
 AM_PROG_CC_C_O
+AC_PROG_LN_S
+
 # autoscan complains about this being missing, but autoreconf thinks it is superfluous
 # AC_PROG_RANLIB
 

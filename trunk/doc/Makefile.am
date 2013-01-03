@@ -1,15 +1,20 @@
 EXTRA_DIST = \
 	README.txt\
 	scanbd.man \
+	scanbm.man \
 	Makefile.simple
 
-man8_MANS = scanbd.8
+man8_MANS = \
+	scanbd.8 \
+	scanbm.8
 
 clean:
-	-rm scanbd.8
+	-rm scanbd.8 
+	-rm scanbm.8
 
 distclean: 
 	-rm scanbd.8
+	-rm scanbm.8
 	rm Makefile
 
 %.8: %.man
