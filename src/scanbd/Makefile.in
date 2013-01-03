@@ -207,6 +207,9 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+PTHREAD_CC = @PTHREAD_CC@
+PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
 SANE_CFLAGS = @SANE_CFLAGS@
 SANE_CONFIG = @SANE_CONFIG@
@@ -233,6 +236,7 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+ax_pthread_config = @ax_pthread_config@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -279,14 +283,15 @@ scanbd_SOURCES = scanbd.c common.h daemonize.c dbus.c udev.c udev.h \
 EXTRA_DIST = \
 	Makefile.simple
 
-AM_CFLAGS = $(OS_CFLAGS) $(OS_CPPFLAGS) $(EXTRA_CFLAGS) \
-	$(CONFUSE_CFLAGS) $(UDEV_CFLAGS) $(DBUS_CFLAGS) $(HAL_CFLAGS) \
+AM_CFLAGS = $(OS_CFLAGS) $(PTHREAD_CFLAGS) $(OS_CPPFLAGS) \
+	$(EXTRA_CFLAGS) $(CONFUSE_CFLAGS) $(UDEV_CFLAGS) \
+	$(DBUS_CFLAGS) $(HAL_CFLAGS) \
 	-DSCANBUTTOND_LIB_DIR=\"@SCANBUTTOND_LIB_DIR@/\" \
 	-DSCANBD_CFG_DIR=\"@SCANBD_CFG_DIR@/\" $(am__append_2) \
 	$(am__append_4)
-AM_LDFLAGS = $(OS_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) $(DBUS_LIBS) \
-	$(HAL_LIBS) $(LIBUSB_LIBS) -rdynamic $(am__append_3) \
-	$(am__append_5)
+AM_LDFLAGS = $(OS_LIBS) $(PTHREAD_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) \
+	$(DBUS_LIBS) $(HAL_LIBS) $(LIBUSB_LIBS) -rdynamic \
+	$(am__append_3) $(am__append_5)
 @USE_SCANBUTTOND_TRUE@testscanbuttond_SOURCES = \
 @USE_SCANBUTTOND_TRUE@	testscanbuttond.c \
 @USE_SCANBUTTOND_TRUE@	slog.c \
