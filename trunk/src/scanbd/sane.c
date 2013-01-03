@@ -1023,10 +1023,9 @@ static void* sane_poll(void* arg) {
 
                     const char* scriptdir =  cfg_getstr(cfg_sec_global, C_SCRIPTDIR);
                     if(!scriptdir || (strlen(scriptdir) == 0)) {
-                        scriptdir = "";
-                    }
- 
-                    if (scriptdir[0] == '/') {
+                        // scriptdir is not set, script is relative to SCANBD_CFG_DIR
+                        snprintf(script_abs, PATH_MAX, "%s/%s", SCANBD_CFG_DIR, script);
+                    } else if (scriptdir[0] == '/') {
                         // scriptdir is an absolute path
                         snprintf(script_abs, PATH_MAX, "%s/%s", scriptdir, script);
                     } else {
