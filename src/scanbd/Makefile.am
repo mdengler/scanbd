@@ -40,6 +40,16 @@ AM_LDFLAGS = \
 	$(LIBUSB_LIBS) \
 	-rdynamic
 
+install-exec-hook:
+	cd  $(DESTDIR)$(sbindir) && \
+	rm -f scanbm$(EXEEXT) && \
+	$(LN_S) scanbd$(EXEEXT) scanbm$(EXEEXT)
+
+uninstall-hook:
+	cd  $(DESTDIR)$(sbindir) && \
+	rm -f scanbm$(EXEEXT)
+
+
 if USE_SANE
 scanbd_SOURCES += \
 	sane.c

@@ -145,6 +145,8 @@
 #define SCANBD_CONF "scanbd.conf"
 #endif
 
+#define NAME_POLLING_MODE "scanbd"
+#define NAME_MANAGER_MODE "scanbm"
 
 struct scanbdOptions {
     bool        managerMode;

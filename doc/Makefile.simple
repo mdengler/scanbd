@@ -21,10 +21,11 @@
 #
 include ../Makefile.conf
 
-all: scanbd.8
+all: scanbd.8 scanbm.8
 
 clean:
-	rm scanbd.8
+	-rm scanbd.8
+	-rm scanbm.8
 
 %.8: %.man
 	echo "Generating manpage $@...";

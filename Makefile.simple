@@ -1,4 +1,3 @@
-#
 # $Id: Makefile.simple 78 2012-03-03 10:52:47Z wimalopaan $
 #
 #  scanbd - KMUX scanner button daemon
@@ -50,32 +49,34 @@ else
 install: scanbuttond scanbd
 endif
 	echo "Make $(SCANBD_CFG_DIR)/scanner.d"
-	mkdir -p $(SCANBD_CFG_DIR)/scanner.d
+	mkdir -p "$(SCANBD_CFG_DIR)"/scanner.d
 	echo "Copy files to $(SCANBD_CFG_DIR)"
-	cp conf/scanbd.conf $(SCANBD_CFG_DIR)
-	cp scripts/example.script $(SCANBD_CFG_DIR)
-	cp scripts/scanadf.script $(SCANBD_CFG_DIR)
-	cp scripts/test.script $(SCANBD_CFG_DIR)
+	cp conf/scanbd.conf "$(SCANBD_CFG_DIR)"
+	cp scripts/example.script "$(SCANBD_CFG_DIR)"
+	cp scripts/scanadf.script "$(SCANBD_CFG_DIR)"
+	cp scripts/test.script "$(SCANBD_CFG_DIR)"
 	echo "Copy scanner config files to $(SCANBD_CFG_DIR)/scanner.d"
-	cp conf/scanner.d/*.conf $(SCANBD_CFG_DIR)/scanner.d
+	cp conf/scanner.d/*.conf "$(SCANBD_CFG_DIR)"/scanner.d
 	echo "Copy scanbd to $(BIN_DIR)"
 	mkdir -p "$(BIN_DIR)"
-	cp src/scanbd/scanbd $(BIN_DIR)
+	cp src/scanbd/scanbd "$(BIN_DIR)"
+	rm -f "$(BIN_DIR)"/scanbm
+	ln -s scanbd "$(BIN_DIR)"/scanbm
 ifdef USE_SCANBUTTOND
 	echo "Copy scanbuttond backends to $(SCANBUTTOND_LIB_DIR)"
 	mkdir -p "$(SCANBUTTOND_LIB_DIR)"
 	cp src/scanbuttond/backends/*.so "$(SCANBUTTOND_LIB_DIR)" || /bin/true
 	cp src/scanbuttond/backends/meta.conf "$(SCANBUTTOND_LIB_DIR)" || /bin/true
 endif
-	if test -d $(PREFIX)/man/man8 ;\
+	if test -d "$(PREFIX)"/man/man8 ;\
 	then \
-	  cp doc/scanbd.8 $(PREFIX)/man/man8 ;\
+	  cp doc/*.8 "$(PREFIX)"/man/man8 ;\
         else \
-	  echo Do not know where manpage should go, please copy manually ;\
+	  echo Do not know where manpages should go, please copy manually ;\
 	fi
 	if test -n "$(DBUS_INCLUDE)" ; \
 	then \
 	  echo "Copy scanbd_dbus.conf to /etc/dbus-1/system.d/"; \
-	  cp integration/scanbd_dbus.conf "$(DBUS_PREFIX)/etc/dbus-1/system.d"; \
+	  cp integration/scanbd_dbus.conf "$(DBUS_PREFIX)"/etc/dbus-1/system.d; \
 	fi
 	echo "Now please edit /etc/inetd.conf"
