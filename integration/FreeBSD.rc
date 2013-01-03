@@ -1,0 +1,32 @@
+#!/bin/sh
+# $FreeBSD: - ,v 1.4 2013/03/01 23:33:15 dougb Exp $
+# Install this file as /usr/local/etc/rc.d/scanbd
+#
+# PROVIDE: scanbd
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+#
+# Add the following line to /etc/rc.conf[.local] to enable scanbd:
+#	scanbd_enable="YES"
+
+. /etc/rc.subr
+
+name=scanbd
+rcvar=scanbd_enable
+
+load_rc_config scanbd
+
+: ${scanbd_enable:="NO"}
+
+command="/usr/local/sbin/scanbd"
+
+start_precmd=scanbd_prestart
+
+scanbd_prestart()
+{
+export SANE_CONFIG_DIR=/usr/local/etc/scanbd
+}
+
+command_args=""
+
+run_rc_command "$1"

@@ -1,8 +1,0 @@
-[Unit]
-Description=Scanner Service
-Requires=scanbd.socket
-
-[Service]
-ExecStart=-/usr/sbin/scanbd -m 
-StandardInput=socket
-# Environment=SANE_DLL_PREFIX=saned

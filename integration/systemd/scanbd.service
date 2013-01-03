@@ -2,15 +2,17 @@
 Description=Scanner button polling Service
 
 [Service]
-Type=dbus
+Type=simple
 BusName=de.kmux.scanbd.server
 ExecStart=/usr/sbin/scanbd -f
-#Environment=SANE_DLL_PREFIX=saned
+#ExecReload=?
+Environment=SANE_CONFIG_DIR=/etc/scanbd
 StandardInput=null
 StandardOutput=syslog
 StandardError=syslog
+#NotifyAccess=?
 
 [Install]
 WantedBy=multi-user.target
-Also=scanbd.socket
-Alias=dbus-de.kmux.scanbd.server
+Also=scanbm.socket
+# Alias=dbus-de.kmux.scanbd.server.service

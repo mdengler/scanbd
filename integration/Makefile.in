@@ -51,7 +51,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = integration
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -216,6 +216,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = \
 	99-saned.rules \
+	FreeBSD.rc \
 	saned.fdi \
 	scanbd_dbus.conf \
 	scanbd.debian \
@@ -223,8 +224,8 @@ EXTRA_DIST = \
 	systemd/scanbd.service \
 	systemd/de.kmux.scanbd.server.service \
 	systemd/README.systemd \
-	systemd/scanbd@.service \
-	systemd/scanbd.socket
+	systemd/scanbm@.service \
+	systemd/scanbm.socket
 
 all: all-am
 
