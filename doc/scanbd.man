@@ -183,6 +183,6 @@ saned.
 .BR sane\-dll (5),
 .BR sane\-net (5)
 .br
-.I http://http://scanbd.sourceforge.net/
+.I http://scanbd.sourceforge.net
 .SH AUTHOR
 Louis Lagendijk
