@@ -1,0 +1,188 @@
+.\" $Id$
+.TH scanbm 8 "02 Jan 2013" "@PACKAGENAME@ @PACKAGEVERSION@" "Scanner button daemon"
+.IX scanbm
+.SH NAME
+scanbm\- User scanning suppport daemon for scanbd / scanbd manager
+.SH SYNOPSIS
+.B scanbm
+.B [\-c 
+.I configfile
+.BI  [\-d [debuglevel]
+.B  ] [\-s]
+.B  [\-t
+.I device
+.B \-a
+.I action
+.B ]
+.TP
+.B scanbd
+.B \-m
+.B [\-c
+.I configfile
+.BI  [\-d [debuglevel]
+.B  ] [\-s]
+.B  [\-t
+.I device
+.B \-a
+.I action
+.B ]
+.SH DESCRIPTION
+.B scanbm
+is a companion to scanbd, 
+a scanner button monitoring daemon that can trigger execution of scripts when
+a button is pressed. 
+.PP
+scanbm is actually a (symbolic) link to scanbd and can be called as 
+.B scanbm 
+or 
+.B scanbd -m.
+.PP
+scanbd (the scanner button daemon) opens and polls the scanner 
+and therefore locks the device. So no other application can access the device 
+directly (open the /dev/..., or via libusb, etc). 
+.PP
+To enable scanning from applications, we use scanbm as a manager for scanbd.
+scanbm is a "proxy" for saned to access the scanner from an application. scanbm 
+listens for requests on the saned network port.
+All applications therefore need to use the "net backend to access a scanner.
+.PP
+If a scan request arrives to scanbm on the sane-port, scanbm 
+requests the scanbd scanner polling daemon to interrupt polling and to release the
+device by sending it a 
+dbus-message (default) or a posix-signal (SIGUSR1) (signal-mode).
+It then starts the real saned which does the scanning and sends the data back
+to the requesting application. When the scanning is done and saned exits, scanbm 
+requests scanbd to restart the polling by sending a second dbus-message (or the 
+posix-signal SIGUSR2) and ends execution. 
+The polling scanbd now re-enables polling of the devices.
+.PP
+scanbm is meant to be started from 
+.B inetd, xinetd or systemd.
+Unlike saned it does not support stand-alone mode.
+.PP   
+.B Note:
+Please note that the scanbm acts as a proxy to saned, 
+all scanner applications must be configured to use the sane "net" 
+backend to access the scanner. Direct access will not be possible.
+.PP
+.SH OPTIONS
+.TP
+.BI \-c " configfile" " \-\-config" =configfile
+Use
+.I configfile
+instead of the default @SCANBDCFGDIR@/scanbd.conf configuration file.
+.TP
+.BI \-d [debuglevel] " \-\-debug" [=debuglevel]
+turn debug mode on. If specified, set the debug level to
+.I debuglevel
+.RS
+ (1 = error, 2 = warn, 3 = info, 4 - 7 = debug)
+.RE
+.TP
+.B \-s --signal
+use signals SIGUSR1/ SIGUSR2 instead of dbus messages to request the 
+polling scanbd to stop / restart polling
+.TP
+.BI \-t " device "  --trigger =device
+Trigger action for 
+.I device 
+(numerical)
+.TP
+.BI \-a " action " --action =action
+.I action 
+(numerical) to be triggered
+.SH SCANBD/SCANBM CONFIGURATION
+scanbd and scanbm are configured trough scanbd.conf (@SCANBDCFGDIR@/scanbd.conf or 
+the file pointed out by the 
+.B \-c <config-file>
+)
+.SH NETWORK SETUP FOR SCANBM 
+scanbm must be setup very similar to the way saned must be setup.
+Note that your inetd must support IPv6 if you
+want to connect to scanbm over IPv6 ; xinetd, openbsd-inetd and systemd are known to
+support IPv6, check the documentation for your inetd daemon.
+.SH INETD CONFIGURATION 
+For
+.B scanbm
+it is also necessary to add a configuration line to
+.IR /etc/inetd.conf
+just like it is for saned.
+.PP
+The configuration line normally looks like this:
+.PP
+.RS
+sane\-port stream tcp nowait scanbd.scanbd @SBINDIR@/scanbm scanbm 
+.RE
+.PP
+However, if your system uses
+.BR tcpd (8)
+for additional security screening, you may want to disable saned
+access control by putting ``+'' in
+.IR saned.conf
+(see
+.IR saned (8)
+) and use a line of the following form in
+.IR /etc/inetd.conf
+instead:
+.PP
+.RS
+sane\-port stream tcp nowait scanbd.scanbd /usr/sbin/tcpd @SBINDIR@/scanbm
+.RE
+.PP
+Note that both examples assume that there is a
+.B scanbd
+group and a
+.B scanbd
+user.  If you follow this example, please make sure that the 
+access permissions on the special device are set such that
+.B scanbd and saned
+can access the scanner (the programs generally need read and
+write access to scanner devices).
+.PP
+If xinetd is installed on your system instead of inetd the following example
+for xinetd.conf may be helpful:
+.PP
+.RS
+.ft CR
+.nf
+# default: off
+# description: The sane server accepts requests 
+# for network access to a local scanner via the
+# network.
+service sane\-port
+{
+   port        = 6566
+   socket_type = stream
+   wait        = no
+   user        = scanbd
+   group       = scanbd
+   server      = @SBINDIR@/scanbd 
+   server_args = 
+}
+.fi
+.ft R
+.RE
+.PP
+Finally, it is also necessary to add a line of the following form to
+.IR /etc/services :
+.PP
+.RS
+sane\-port 6566/tcp # SANE network scanner daemon
+.RE
+.PP
+The official IANA short name for port 6566 is "sane\-port". The older name "sane"
+is now deprecated.
+.RE
+.PP
+scanbm does not do access control, but it relies on the access control done by 
+saned.
+.SH "SEE ALSO"
+.BR scanbd (8),
+.BR sane (7),
+.BR saned (8),
+.BR sane\-dll (5),
+.BR sane\-net (5)
+.br
+.I http://http://scanbd.sourceforge.net/
+.SH AUTHOR
+Louis Lagendijk
