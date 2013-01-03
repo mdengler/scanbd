@@ -8,8 +8,8 @@ The following unit files should installed in /lib/systemd/system or
 /etc/systemd/system:
 
 scanbd.service
-scanbd@.service
-scanbd.socket
+scanbm@.service
+scanbm.socket
 
 The following files goed to the dbus services directory 
 /usr/share/dbus-1/system-services:
@@ -18,11 +18,11 @@ de.kmux.scanbd.server.service
 
 Now enable the units:
 systemctl enable scanbd.service
-systemctl enable scanbd.socket
+systemctl enable scanbm.socket
 
-and stat them:
+and start them:
 systemctl start scanbd.service
-systemctl start scanbd.socket
+systemctl start scanbm.socket
 
 Background
 ==========
@@ -32,13 +32,12 @@ Systemd setup
 scanbd.service starts scanbd in polling mode to monitor the scanner for 
 button-presses.  It also defines the dbus service that we use to avoid double 
 activation.  The Environment directive allows for specification of the initial 
-environment. The sample contains the setting of an experimental variable for 
-Sane that I right now have only in my own source tree. You would normally leave
-this option out as the environment for sane can be set from scanbd.conf.
+environment. The sample contains the setting of SANE_CONFIG_DIR to point to 
+my scanbd configuration directory in /etc
 
 Scanbd.socket defines the port for saned.
 
-Scanbd@.service defines the settings for scanbd in manager mode. It gets
+Scanbm@.service defines the settings for scanbd in manager mode. It gets
 activated when an application wants to scan and opens the saned port.
 
 Dbus setup for systemd

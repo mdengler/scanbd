@@ -1,0 +1,16 @@
+This directory contains a number of files that help with the integration
+of scanbd in you operating system.
+
+99-saned.rules: 
+FreeBSD.rc		The FreeBSD startup script. Shall be installed
+			as /usr/local/etc/rc.d/scanbd. Read the file for
+			information on how to enable startup
+saned.fdi		?
+scanbd_dbus.conf	Required for dbus. Shall be instaled in 
+			(/usr/local/)/etc/dbus-1/system.d
+			Check the userid (saned) and change as appropriate
+			for your system (it shall match the userid in
+			scanbd.conf)
+scanbd.debian 		Startup script for debian based systems
+scanbdservice.conf 	? 
+systemd/ 		contains the files required for systemd startup 

@@ -1,4 +1,4 @@
-include_EXTRA = \
+EXTRA_DIST = \
 	scanbuttond/backend.h  \
 	scanbuttond/common.h  \
 	scanbuttond/libusbi.h  \

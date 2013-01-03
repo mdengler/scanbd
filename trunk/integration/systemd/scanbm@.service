@@ -1,0 +1,8 @@
+[Unit]
+Description=Scanner Service
+Requires=scanbm.socket
+
+[Service]
+ExecStart=/usr/sbin/scanbm 
+StandardInput=socket
+Environment=SANE_CONFIG_DIR=/etc/scanbd

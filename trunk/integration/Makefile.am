@@ -1,5 +1,6 @@
 EXTRA_DIST = \
 	99-saned.rules \
+	FreeBSD.rc \
 	saned.fdi \
 	scanbd_dbus.conf \
 	scanbd.debian \
@@ -7,5 +8,5 @@ EXTRA_DIST = \
 	systemd/scanbd.service \
 	systemd/de.kmux.scanbd.server.service \
 	systemd/README.systemd \
-	systemd/scanbd@.service \
-	systemd/scanbd.socket
+	systemd/scanbm@.service \
+	systemd/scanbm.socket
