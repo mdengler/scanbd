@@ -8,6 +8,9 @@ AC_CONFIG_MACRO_DIR([m4])
 # Do not enforce GNU file conventions like ChangeLog README etc.
 AM_INIT_AUTOMAKE( foreign )
 
+# Do not automatically rebuild autoconf stuff
+AM_MAINTAINER_MODE
+
 # Initialize libtool support
 LT_INIT([disable-static])
 
