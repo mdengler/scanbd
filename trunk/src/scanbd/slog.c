@@ -24,7 +24,7 @@
 #include "slog.h"
 
 bool debug = false;
-unsigned int debug_level = SLOG_ERROR;
+unsigned int debug_level = 0;
 
 static char lpre[LINE_MAX] = "";
 static int isInitialized = 0;
