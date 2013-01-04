@@ -42,6 +42,7 @@
 #include <scanbuttond/libusbi.h>
 #endif
 
+#include "config.h"
 #include "slog.h"
 #include "scanbd_dbus.h"
 #include "udev.h"

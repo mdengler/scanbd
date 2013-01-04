@@ -28,7 +28,7 @@ ifdef USE_SANE
 
 all: scanbd
 
-scanbd: scanbd.o slog.o sane.o daemonize.o dbus.o udev.o
+scanbd: scanbd.o config.o slog.o sane.o daemonize.o dbus.o udev.o
 
 else # USE_SANE
 
@@ -38,10 +38,10 @@ testonly: test
 
 test: testscanbuttond
 
-scanbd: scanbd.o slog.o daemonize.o dbus.o scanbuttond_wrapper.o scanbuttond_loader.o udev.o
+scanbd: scanbd.o slog.o config.o daemonize.o dbus.o scanbuttond_wrapper.o scanbuttond_loader.o udev.o
 	$(LINK.c) $^ ../scanbuttond/interface/libusbi.o $(LDLIBS) -o $@
 
-testscanbuttond: testscanbuttond.o scanbuttond_loader.o slog.o scanbuttond_wrapper.o dbus.o
+testscanbuttond: testscanbuttond.o scanbuttond_loader.o config.o slog.o scanbuttond_wrapper.o dbus.o
 	$(LINK.c) $^ ../scanbuttond/interface/libusbi.o $(LDLIBS) -o $@
 
 endif # USE_SANE

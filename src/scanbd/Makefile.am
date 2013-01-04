@@ -5,6 +5,8 @@ sbin_PROGRAMS = scanbd
 scanbd_SOURCES = \
 	scanbd.c \
 	common.h \
+	config.c \
+	config.h \
 	daemonize.c \
 	dbus.c \
 	udev.c \
@@ -79,6 +81,7 @@ scanbd_SOURCES += \
 
 testscanbuttond_SOURCES = \
 	testscanbuttond.c \
+	config.c \
 	slog.c \
 	scanbuttond_loader.c \
 	scanbuttond_wrapper.c \
