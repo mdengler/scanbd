@@ -175,8 +175,10 @@ void cfg_do_parse(void) {
     cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
     assert(cfg_sec_global);
 
-    debug |= cfg_getbool(cfg_sec_global, C_DEBUG);
-    debug_level = cfg_getint(cfg_sec_global, C_DEBUG_LEVEL);
+    if (!debug) {
+        debug |= cfg_getbool(cfg_sec_global, C_DEBUG);
+        debug_level = cfg_getint(cfg_sec_global, C_DEBUG_LEVEL);
+    }
 }
 
 void sig_hup_handler(int signal) {
@@ -396,9 +398,6 @@ int main(int argc, char** argv) {
     int trigger_device = -1;
     int trigger_action = -1;
 
-    // read & parse scanbd.conf
-    cfg_do_parse();
-
     // read the options of the commandline
     while(true) {
         int option_index = 0;
@@ -459,6 +458,9 @@ int main(int argc, char** argv) {
             break;
         }
     }
+
+    // read & parse scanbd.conf
+    cfg_do_parse();
 
     // We do this here as debugging is only completely initialized here
     char prog_path[PATH_MAX] = "";
