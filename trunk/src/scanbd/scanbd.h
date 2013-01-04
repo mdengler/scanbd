@@ -112,9 +112,9 @@
 #define C_SCANBUTTONS_BACKENDS_DIR_DEF SCANBUTTOND_LIB_DIR
 #else
 #ifndef USE_SANE
-#warning "Using predefined directory: /usr/local/etc/scanbd/scanbuttond/backends"
+#warning "Using predefined directory: /usr/local/lib/scanbd/scanbuttond/backends"
 #endif
-#define C_SCANBUTTONS_BACKENDS_DIR_DEF "/usr/local/etc/scanbd/scanbuttond/backends"
+#define C_SCANBUTTONS_BACKENDS_DIR_DEF "/usr/local/lib/scanbd/scanbuttond/backends"
 #endif
 
 #define C_SANED_ENVS "saned_env"
