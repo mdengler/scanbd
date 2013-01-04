@@ -1017,10 +1017,10 @@ static void* sane_poll(void* arg) {
                 if ((script[0] == '/') || (strcmp(script, SCANBD_NULL_STRING) == 0)) {
                     // Script has already an absolute path or is an empty string
                     strncpy(script_abs, script, PATH_MAX);
+                    slog(SLOG_DEBUG, "using absolute script path: %s", script_abs);
                 } else {
                     // script has a relative path, determine the directory
                     // get the scriptdir from the global config
-
                     const char* scriptdir =  cfg_getstr(cfg_sec_global, C_SCRIPTDIR);
                     if(!scriptdir || (strlen(scriptdir) == 0)) {
                         // scriptdir is not set, script is relative to SCANBD_CFG_DIR
@@ -1032,6 +1032,7 @@ static void* sane_poll(void* arg) {
                         // scriptdir is relative to config directory
                         snprintf(script_abs, PATH_MAX, "%s/%s/%s", SCANBD_CFG_DIR, scriptdir, script);
                     }
+                    slog(SLOG_DEBUG, "using relative script path: %s, expanded to: %s", script, script_abs);
                 } 
 
                 // leave the critical section

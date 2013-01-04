@@ -70,6 +70,7 @@
 #include <dirent.h>
 #include <assert.h>
 #include <regex.h>
+#include <ctype.h>
 
 #if defined(_POSIX_THREADS) && ((_POSIX_THREADS - 0) >= 0)
 #include <pthread.h>
