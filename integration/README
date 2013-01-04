@@ -5,12 +5,12 @@ of scanbd in you operating system.
 FreeBSD.rc		The FreeBSD startup script. Shall be installed
 			as /usr/local/etc/rc.d/scanbd. Read the file for
 			information on how to enable startup
-saned.fdi		?
+saned.fdi		HAL configuration file
 scanbd_dbus.conf	Required for dbus. Shall be instaled in 
 			(/usr/local/)/etc/dbus-1/system.d
 			Check the userid (saned) and change as appropriate
 			for your system (it shall match the userid in
 			scanbd.conf)
 scanbd.debian 		Startup script for debian based systems
-scanbdservice.conf 	? 
+scanbdservice.conf 	Startup start-stop script for scanbd
 systemd/ 		contains the files required for systemd startup 
