@@ -88,22 +88,23 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(noinst_PROGRAMS) $(sbin_PROGRAMS)
-am__scanbd_SOURCES_DIST = scanbd.c common.h daemonize.c dbus.c udev.c \
-	udev.h slog.c slog.h scanbd_dbus.h scanbd.h sane.c \
-	scanbuttond_wrapper.c scanbuttond_loader.c \
+am__scanbd_SOURCES_DIST = scanbd.c common.h config.c config.h \
+	daemonize.c dbus.c udev.c udev.h slog.c slog.h scanbd_dbus.h \
+	scanbd.h sane.c scanbuttond_wrapper.c scanbuttond_loader.c \
 	scanbuttond_wrapper.h scanbuttond_loader.h
 @USE_SANE_TRUE@am__objects_1 = sane.$(OBJEXT)
 @USE_SCANBUTTOND_TRUE@am__objects_2 = scanbuttond_wrapper.$(OBJEXT) \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_loader.$(OBJEXT)
-am_scanbd_OBJECTS = scanbd.$(OBJEXT) daemonize.$(OBJEXT) \
-	dbus.$(OBJEXT) udev.$(OBJEXT) slog.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_2)
+am_scanbd_OBJECTS = scanbd.$(OBJEXT) config.$(OBJEXT) \
+	daemonize.$(OBJEXT) dbus.$(OBJEXT) udev.$(OBJEXT) \
+	slog.$(OBJEXT) $(am__objects_1) $(am__objects_2)
 scanbd_OBJECTS = $(am_scanbd_OBJECTS)
 scanbd_LDADD = $(LDADD)
-am__testscanbuttond_SOURCES_DIST = testscanbuttond.c slog.c \
+am__testscanbuttond_SOURCES_DIST = testscanbuttond.c config.c slog.c \
 	scanbuttond_loader.c scanbuttond_wrapper.c dbus.c
 @USE_SCANBUTTOND_TRUE@am_testscanbuttond_OBJECTS =  \
-@USE_SCANBUTTOND_TRUE@	testscanbuttond.$(OBJEXT) slog.$(OBJEXT) \
+@USE_SCANBUTTOND_TRUE@	testscanbuttond.$(OBJEXT) \
+@USE_SCANBUTTOND_TRUE@	config.$(OBJEXT) slog.$(OBJEXT) \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_loader.$(OBJEXT) \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_wrapper.$(OBJEXT) \
 @USE_SCANBUTTOND_TRUE@	dbus.$(OBJEXT)
@@ -277,9 +278,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-scanbd_SOURCES = scanbd.c common.h daemonize.c dbus.c udev.c udev.h \
-	slog.c slog.h scanbd_dbus.h scanbd.h $(am__append_1) \
-	$(am__append_6)
+scanbd_SOURCES = scanbd.c common.h config.c config.h daemonize.c \
+	dbus.c udev.c udev.h slog.c slog.h scanbd_dbus.h scanbd.h \
+	$(am__append_1) $(am__append_6)
 EXTRA_DIST = \
 	Makefile.simple
 
@@ -294,6 +295,7 @@ AM_LDFLAGS = $(OS_LIBS) $(PTHREAD_LIBS) $(CONFUSE_LIBS) $(UDEV_LIBS) \
 	$(am__append_3) $(am__append_5)
 @USE_SCANBUTTOND_TRUE@testscanbuttond_SOURCES = \
 @USE_SCANBUTTOND_TRUE@	testscanbuttond.c \
+@USE_SCANBUTTOND_TRUE@	config.c \
 @USE_SCANBUTTOND_TRUE@	slog.c \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_loader.c \
 @USE_SCANBUTTOND_TRUE@	scanbuttond_wrapper.c \
@@ -401,6 +403,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daemonize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sane.Po@am__quote@

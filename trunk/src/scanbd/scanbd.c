@@ -51,128 +51,6 @@ static struct option options[] = {
     { 0,           0, NULL, 0}
 };
 
-// parsing the config-file via libconfuse
-void cfg_do_parse(void) {
-    slog(SLOG_INFO, "reading config file %s", scanbd_options.config_file_name);
-
-    cfg_opt_t cfg_numtrigger[] = {
-        CFG_INT(C_FROM_VALUE, C_FROM_VALUE_DEF_INT, CFGF_NONE),
-        CFG_INT(C_TO_VALUE, C_TO_VALUE_DEF_INT, CFGF_NONE),
-        CFG_END()
-    };
-
-    cfg_opt_t cfg_strtrigger[] = {
-        CFG_STR(C_FROM_VALUE, C_FROM_VALUE_DEF_STR, CFGF_NONE),
-        CFG_STR(C_TO_VALUE, C_TO_VALUE_DEF_STR, CFGF_NONE),
-        CFG_END()
-    };
-    
-    cfg_opt_t cfg_action[] = {
-        CFG_STR(C_FILTER, C_ACTION_DEF, CFGF_NONE),
-        CFG_SEC(C_NUMERICAL_TRIGGER, cfg_numtrigger, CFGF_NONE),
-        CFG_SEC(C_STRING_TRIGGER, cfg_strtrigger, CFGF_NONE),
-        CFG_STR(C_DESC, C_DESC_DEF, CFGF_NONE),
-        CFG_STR(C_SCRIPT, C_SCRIPT_DEF, CFGF_NONE),
-        CFG_END()
-    };
-
-    cfg_opt_t cfg_function[] = {
-        CFG_STR(C_FILTER, C_FUNCTION_DEF, CFGF_NONE),
-        CFG_STR(C_DESC, C_DESC_DEF, CFGF_NONE),
-        CFG_STR(C_ENV, C_ENV_FUNCTION_DEF, CFGF_NONE),
-        CFG_END()
-    };
-
-    cfg_opt_t cfg_environment[] = {
-        CFG_STR(C_ENV_DEVICE, C_ENV_DEVICE_DEF, CFGF_NONE),
-        CFG_STR(C_ENV_ACTION, C_ENV_ACTION_DEF, CFGF_NONE),
-        CFG_END()
-    };
-
-    cfg_opt_t cfg_global[] = {
-        CFG_BOOL(C_DEBUG, C_DEBUG_DEF, CFGF_NONE),
-        CFG_BOOL(C_MULTIPLE_ACTIONS, C_MULTIPLE_ACTIONS_DEF, CFGF_NONE),
-        CFG_INT(C_DEBUG_LEVEL, C_DEBUG_LEVEL_DEF, CFGF_NONE),
-        CFG_STR(C_USER, C_USER_DEF, CFGF_NONE),
-        CFG_STR(C_GROUP, C_GROUP_DEF, CFGF_NONE),
-        CFG_STR(C_SANED, C_SANED_DEF, CFGF_NONE),
-        CFG_STR_LIST(C_SANED_OPTS, C_SANED_OPTS_DEF, CFGF_NONE),
-        CFG_STR_LIST(C_SANED_ENVS, C_SANED_ENVS_DEF, CFGF_NONE),
-        CFG_STR(C_SCRIPTDIR, C_SCRIPTDIR_DEF, CFGF_NONE),
-        CFG_STR(C_SCANBUTTONS_BACKENDS_DIR, C_SCANBUTTONS_BACKENDS_DIR_DEF, CFGF_NONE),
-        CFG_INT(C_TIMEOUT, C_TIMEOUT_DEF, CFGF_NONE),
-        CFG_STR(C_PIDFILE, C_PIDFILE_DEF, CFGF_NONE),
-        CFG_SEC(C_ENVIRONMENT, cfg_environment, CFGF_NONE),
-        CFG_SEC(C_FUNCTION, cfg_function, CFGF_MULTI | CFGF_TITLE),
-        CFG_SEC(C_ACTION, cfg_action, CFGF_MULTI | CFGF_TITLE),
-        CFG_END()
-    };
-
-    cfg_opt_t cfg_device[] = {
-        CFG_STR(C_FILTER, "^fujitsu.*", CFGF_NONE),
-        CFG_STR(C_DESC, C_DESC_DEF, CFGF_NONE),
-        CFG_SEC(C_FUNCTION, cfg_function, CFGF_MULTI | CFGF_TITLE),
-        CFG_SEC(C_ACTION, cfg_action, CFGF_MULTI | CFGF_TITLE),
-        CFG_END()
-    };
-
-    cfg_opt_t cfg_options[] = {
-        CFG_SEC(C_GLOBAL, cfg_global, CFGF_NONE),
-        CFG_SEC(C_DEVICE, cfg_device, CFGF_MULTI | CFGF_TITLE),
-        CFG_FUNC(C_INCLUDE, cfg_include),
-        CFG_END()
-    };
-
-    if (cfg) {
-        cfg_free(cfg);
-        cfg = NULL;
-    }
-
-    char wd[PATH_MAX] = {};
-    char config_file[PATH_MAX] = {};
-    char* scanbd_conf_dir = NULL;
-
-    // get current directory
-    if (getcwd(wd, PATH_MAX) == NULL) {
-        slog(SLOG_ERROR, "can't get working directory");
-        exit(EXIT_FAILURE);
-    }
-
-    // cd into directory where scanbd.conf lives
-    
-    strncpy(config_file, scanbd_options.config_file_name, PATH_MAX);
-
-    scanbd_conf_dir = dirname(config_file);
-    assert(scanbd_conf_dir);
-
-    if (chdir(scanbd_conf_dir) != 0) {
-        slog(SLOG_ERROR, "can't access the directory for: %s", scanbd_options.config_file_name);
-        exit(EXIT_FAILURE);
-    }
-
-    cfg = cfg_init(cfg_options, CFGF_NONE);
-
-    int ret = 0;
-    if ((ret = cfg_parse(cfg, scanbd_options.config_file_name)) != CFG_SUCCESS) {
-        if (CFG_FILE_ERROR == ret) {
-            slog(SLOG_ERROR, "can't open config file: %s", scanbd_options.config_file_name);
-            exit(EXIT_FAILURE);
-        }
-        else {
-            slog(SLOG_ERROR, "parse error in config file");
-            exit(EXIT_FAILURE);
-        }
-        exit(EXIT_FAILURE); // not reached
-    }
-
-    // cd back to original
-    if (chdir(wd) < 0) {
-        slog(SLOG_ERROR, "can't cd back to: %s", wd);
-        exit(EXIT_FAILURE);
-    }
-
-}
-
 void sig_hup_handler(int signal) {
     slog(SLOG_DEBUG, "sig_hup_handler called");
 
@@ -199,7 +77,7 @@ void sig_hup_handler(int signal) {
     // really neccessary
 #endif
     slog(SLOG_DEBUG, "reread the config");
-    cfg_do_parse();
+    cfg_do_parse(scanbd_options.config_file_name);
 
     cfg_t* cfg_sec_global = NULL;
     cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
@@ -458,7 +336,7 @@ int main(int argc, char** argv) {
     }
 
     // read & parse scanbd.conf
-    cfg_do_parse();
+    cfg_do_parse(scanbd_options.config_file_name);
 
     cfg_t* cfg_sec_global = NULL;
     cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
