@@ -61,6 +61,20 @@ turn debug mode on. If specified, set the debug level to
 .TP
 .B \-f \-\-foreground
 Run scanbd in the foreground
+.SH SIGNALS
+.TP
+.B SIGUSR1
+Stop polling and relase the scanner (used by 
+.B scanbm
+)
+.TP
+.B SIGUSR1
+Resume polling (used by 
+.B scanbm
+)
+.TP
+.B SIGHUP 
+Rescan for avaiable devices (useful when no automatic detection is available (HAL, UDEV) )
 .SH MAIN SCANBD CONFIGURATION
 scanbd and scanbm are configured trough scanbd.conf (@SCANBDCFGDIR@/scanbd.conf).
 The distributed scanbd.conf
