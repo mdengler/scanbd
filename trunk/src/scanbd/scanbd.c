@@ -313,7 +313,7 @@ bool isNumber(const char* string) {
         return false;
     }
     while(*string) {
-        if (!isdigit(*string)) {
+        if (!isdigit((int)*string)) {
             return false;
         }
         ++string;
