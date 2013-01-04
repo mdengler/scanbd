@@ -331,6 +331,8 @@ void* scbtn_poll(void* arg) {
     sigfillset(&mask);
     pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
+    static int si = 0;
+
     // this thread uses the device and the san_thread_t datastructure
     // lock it
     pthread_cleanup_push(scbtn_thread_cleanup_mutex, ((void*)&st->mutex));
@@ -472,17 +474,17 @@ void* scbtn_poll(void* arg) {
         int button = backend->scanbtnd_get_button((scanner_t*)st->dev);
         slog(SLOG_INFO, "button %d", button);
 
-        for(int i = 0; i < st->num_of_options_with_scripts; i += 1) {
+        for(si = 0; si < st->num_of_options_with_scripts; si += 1) {
             //	    const scbtn_Option_Descriptor* odesc = NULL;
             //	    assert((odesc = scbtn_get_option_descriptor(st->h, st->opts[i].number)) != NULL);
 
             const backend_t* b = st->dev->meta_info;
-            slog(SLOG_INFO, "option: %d", st->opts[i].number);
-            const char* name = scanbtnd_button_name(b, st->opts[i].number);
+            slog(SLOG_INFO, "option: %d", st->opts[si].number);
+            const char* name = scanbtnd_button_name(b, st->opts[si].number);
             assert(name);
 
-            if (st->opts[i].script != NULL) {
-                if (strlen(st->opts[i].script) <= 0) {
+            if (st->opts[si].script != NULL) {
+                if (strlen(st->opts[si].script) <= 0) {
                     slog(SLOG_WARN, "No valid script for option %s for device %s",
                          name, st->dev->product);
                     continue;
@@ -493,8 +495,8 @@ void* scbtn_poll(void* arg) {
                      name, st->dev->product);
                 continue;
             }
-            assert(st->opts[i].script != NULL);
-            assert(strlen(st->opts[i].script) > 0);
+            assert(st->opts[si].script != NULL);
+            assert(strlen(st->opts[si].script) > 0);
 
             //	    scbtn_opt_value_t value;
             //	    scbtn_option_value_init(&value);
@@ -502,20 +504,20 @@ void* scbtn_poll(void* arg) {
             pthread_cleanup_push(scbtn_thread_cleanup_value, NULL);
 
             slog(SLOG_INFO, "checking option %s number %d (%d) for device %s",
-                 name, st->opts[i].number, i,
+                 name, st->opts[si].number, si,
                  st->dev->product);
 
 
             unsigned long value = 0;
 
-            if ((button > 0) && (button == st->opts[i].number)) {
+            if ((button > 0) && (button == st->opts[si].number)) {
                 value = 1;
                 slog(SLOG_INFO, "button %d has been pressed.", button);
-                if ((st->opts[i].from_value.num_value == st->opts[i].value.num_value) &&
-                        (st->opts[i].to_value.num_value == value)) {
+                if ((st->opts[si].from_value.num_value == st->opts[si].value.num_value) &&
+                        (st->opts[si].to_value.num_value == value)) {
                     slog(SLOG_DEBUG, "value trigger: numerical");
                     st->triggered = true;
-                    st->triggered_option = i;
+                    st->triggered_option = si;
                     // we need to trigger all waiting threads
                     if (pthread_cond_broadcast(&st->cv) < 0) {
                         slog(SLOG_ERROR, "pthread_cond_broadcats: this shouln't happen");
@@ -528,7 +530,7 @@ void* scbtn_poll(void* arg) {
             if (pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL) < 0) {
                 slog(SLOG_ERROR, "pthread_setcancelstate: %s", strerror(errno));
             }
-            st->opts[i].value.num_value = value;
+            st->opts[si].value.num_value = value;
             pthread_cleanup_pop(0);
             if (pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL) < 0) {
                 slog(SLOG_ERROR, "pthread_setcancelstate: %s", strerror(errno));
@@ -656,8 +658,38 @@ void* scbtn_poll(void* arg) {
                 // need to copy the values because we leave the
                 // critical section
                 // int triggered_option = st->triggered_option;
-                char* script = strdup(st->opts[st->triggered_option].script);
-                assert(script != NULL);
+
+//                char* script = strdup(st->opts[st->triggered_option].script);
+//                assert(script != NULL);
+
+
+                char* script_abs = malloc(PATH_MAX);
+                assert(script_abs);
+                strncpy(script_abs, SCANBD_NULL_STRING, PATH_MAX);
+
+                const char* script = st->opts[st->triggered_option].script;
+                assert(script);
+
+                if ((script[0] == '/') || (strcmp(script, SCANBD_NULL_STRING) == 0)) {
+                    // Script has already an absolute path or is an empty string
+                    strncpy(script_abs, script, PATH_MAX);
+                    slog(SLOG_DEBUG, "using absolute script path: %s", script_abs);
+                } else {
+                    // script has a relative path, determine the directory
+                    // get the scriptdir from the global config
+                    const char* scriptdir =  cfg_getstr(cfg_sec_global, C_SCRIPTDIR);
+                    if(!scriptdir || (strlen(scriptdir) == 0)) {
+                        // scriptdir is not set, script is relative to SCANBD_CFG_DIR
+                        snprintf(script_abs, PATH_MAX, "%s/%s", SCANBD_CFG_DIR, script);
+                    } else if (scriptdir[0] == '/') {
+                        // scriptdir is an absolute path
+                        snprintf(script_abs, PATH_MAX, "%s/%s", scriptdir, script);
+                    } else {
+                        // scriptdir is relative to config directory
+                        snprintf(script_abs, PATH_MAX, "%s/%s/%s", SCANBD_CFG_DIR, scriptdir, script);
+                    }
+                    slog(SLOG_DEBUG, "using relative script path: %s, expanded to: %s", script, script_abs);
+                }
 
                 // leave the critical section
                 if (pthread_mutex_unlock(&st->mutex) < 0) {
@@ -666,7 +698,7 @@ void* scbtn_poll(void* arg) {
                     pthread_exit(NULL);
                 }
 
-                if (strcmp(script, SCANBD_NULL_STRING) != 0) {
+                if (strcmp(script_abs, SCANBD_NULL_STRING) != 0) {
 
                     assert(timeout > 0);
                     usleep(timeout * 1000); //ms
@@ -676,31 +708,31 @@ void* scbtn_poll(void* arg) {
                         slog(SLOG_ERROR, "Can't fork: %s", strerror(errno));
                     }
                     else if (cpid > 0) { // parent
-                        slog(SLOG_INFO, "waiting for child: %s", script);
+                        slog(SLOG_INFO, "waiting for child: %s", script_abs);
                         int status;
                         if (waitpid(cpid, &status, 0) < 0) {
                             slog(SLOG_ERROR, "waitpid: %s", strerror(errno));
                         }
                         if (WIFEXITED(status)) {
                             slog(SLOG_INFO, "child %s exited with status: %d",
-                                 script, WEXITSTATUS(status));
+                                 script_abs, WEXITSTATUS(status));
                         }
                         if (WIFSIGNALED(status)) {
                             slog(SLOG_INFO, "child %s signaled with signal: %d",
-                                 script, WTERMSIG(status));
+                                 script_abs, WTERMSIG(status));
                         }
                     }
                     else { // child
-                        slog(SLOG_DEBUG, "exec for %s", script);
-                        if (execle(script, script, NULL, env) < 0) {
+                        slog(SLOG_DEBUG, "exec for %s", script_abs);
+                        if (execle(script_abs, script_abs, NULL, env) < 0) {
                             slog(SLOG_ERROR, "execlp: %s", strerror(errno));
                         }
                         exit(EXIT_FAILURE); // not reached
                     }
-                } // script == SCANBD_NULL_STRING
+                } // script_abs == SCANBD_NULL_STRING
 
-                assert(script != NULL);
-                free(script);
+                assert(script_abs != NULL);
+                free(script_abs);
 
                 // free (last element is the sentinel!)
                 assert(env != NULL);

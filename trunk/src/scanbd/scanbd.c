@@ -306,6 +306,19 @@ void sig_term_handler(int signal) {
     exit(EXIT_SUCCESS);
 }
 
+bool isNumber(const char* string) {
+    if (!string) {
+        return false;
+    }
+    while(*string) {
+        if (!isdigit(*string)) {
+            return false;
+        }
+        ++string;
+    }
+    return true;
+}
+
 int main(int argc, char** argv) {
     // init the logging feature
     slog_init(argv[0]);
@@ -405,8 +418,13 @@ int main(int argc, char** argv) {
         case 'd':
             slog(SLOG_INFO, "debug on");
             debug = true;
-            if (optarg != 0) {
-              debug_level = atoi(optarg);
+            if (optarg) {
+                if (isNumber(optarg)) {
+                  debug_level = atoi(optarg);
+                }
+                else {
+                    slog(SLOG_WARN, "use numerical argument for option -d");
+                }
             }
             break;
         case 'f':
@@ -419,13 +437,23 @@ int main(int argc, char** argv) {
             break;
         case 't':
             slog(SLOG_INFO, "trigger for device number: %d", atoi(optarg));
-            trigger_device = atoi(optarg);
-            scanbd_options.foreground = true;
+            if (isNumber(optarg)) {
+                trigger_device = atoi(optarg);
+                scanbd_options.foreground = true;
+            }
+            else {
+                slog(SLOG_WARN, "use numerical argument for option -t");
+            }
             break;
         case 'a':
             slog(SLOG_INFO, "trigger action number: %d", atoi(optarg));
-            trigger_action = atoi(optarg);
-            scanbd_options.foreground = true;
+            if (isNumber(optarg)) {
+                trigger_action = atoi(optarg);
+                scanbd_options.foreground = true;
+            }
+            else {
+                slog(SLOG_WARN, "use numerical argument for option -a");
+            }
             break;
         default:
             break;
