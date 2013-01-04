@@ -171,14 +171,6 @@ void cfg_do_parse(void) {
         exit(EXIT_FAILURE);
     }
 
-    cfg_t* cfg_sec_global = NULL;
-    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
-    assert(cfg_sec_global);
-
-    if (!debug) {
-        debug |= cfg_getbool(cfg_sec_global, C_DEBUG);
-        debug_level = cfg_getint(cfg_sec_global, C_DEBUG_LEVEL);
-    }
 }
 
 void sig_hup_handler(int signal) {
@@ -208,6 +200,12 @@ void sig_hup_handler(int signal) {
 #endif
     slog(SLOG_DEBUG, "reread the config");
     cfg_do_parse();
+
+    cfg_t* cfg_sec_global = NULL;
+    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+    assert(cfg_sec_global);
+    debug = cfg_getbool(cfg_sec_global, C_DEBUG);
+    debug_level = cfg_getint(cfg_sec_global, C_DEBUG_LEVEL);
 
     slog(SLOG_DEBUG, "sane_init");
 #ifdef USE_SANE
@@ -461,6 +459,17 @@ int main(int argc, char** argv) {
 
     // read & parse scanbd.conf
     cfg_do_parse();
+
+    cfg_t* cfg_sec_global = NULL;
+    cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+    assert(cfg_sec_global);
+
+    debug |= cfg_getbool(cfg_sec_global, C_DEBUG);
+
+    if (debug_level == 0 ) {
+        // not set from command-line
+        debug_level = cfg_getint(cfg_sec_global, C_DEBUG_LEVEL);
+    }
 
     // We do this here as debugging is only completely initialized here
     char prog_path[PATH_MAX] = "";
