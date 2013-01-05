@@ -72,16 +72,22 @@ GNU make, you may have to use gmake instead of make
 ===============================================================================
 
 1.1) Dependencies
-===============================================================================
+
+This chapter lists packages that are known to be required for compilation of 
+scanbd on different platforms. The list may not be exhaustive.
+
+1.1.1 Debian
 Needed packages on debian-based systems:
 libconfuse-dev libsane-dev libudev-dev libusb-dev
 
 To use HAL instead of libudev you need:
 libhal-dev
 
+1.1.2) Fedora
 Needed packages in Fedora systems:
 libusb-devel libconfuse-devel libudev-devel dbus-devel sane-backends-devel
 
+1.1.3 Suse
 On Suse based systems you will need the same of similar packages installed as
 on Fedora, but: sane-backends-devel in Suse does not pull in all required 
 dependencies. Please make sure that you alse have installed:
@@ -89,7 +95,15 @@ libjpeg8-devel
 libexif-devel
 libgphoto2-devel
 before you attempt compilation of scanbd.
-===============================================================================
+
+1.1.4 OpenBSD:
+You need to install the following packages from ports ($PORTSDIR is here the
+directory where you have the ports collection installed, normally /usr/ports):
+
+libconfuse: $PORTSDIR/ports/devel/libconfuse
+dbus: $PORTSDIR/
+libusb1: $PORTSDIR/devel/libusb1
+sane-backends: $PORTSDIR/graphics/sane-backends
 
 1.2) using autotools configure script
 
