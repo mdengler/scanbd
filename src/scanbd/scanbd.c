@@ -500,7 +500,7 @@ int main(int argc, char** argv) {
             if (setsid() < 0) {
                 slog(SLOG_WARN, "setsid: %s", strerror(errno));
             }
-            if (execl(saned, "saned", NULL) < 0) {
+            if (execl(saned, "saned", (char*)NULL) < 0) {
                 slog(SLOG_ERROR, "exec of saned failed: %s", strerror(errno));
                 exit(EXIT_FAILURE);
             }

@@ -25,4 +25,5 @@
 
 void cfg_do_parse(const char *config_file_name);
 char *make_script_path_abs(const char *script);
+
 #endif

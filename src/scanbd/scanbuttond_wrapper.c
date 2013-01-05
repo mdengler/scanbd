@@ -649,7 +649,9 @@ void* scbtn_poll(void* arg) {
                 //		scbtn_close(st->h);
                 //		st->h = NULL;
 
-                backend->scanbtnd_close((scanner_t*)st->dev);
+                if (backend->scanbtnd_close((scanner_t*)st->dev) < 0) {
+                    slog(SLOG_ERROR, "unable to close scanner backend");
+                }
 
                 assert(st->triggered_option >= 0);
                 assert(st->opts[st->triggered_option].script);
@@ -660,7 +662,7 @@ void* scbtn_poll(void* arg) {
                 // int triggered_option = st->triggered_option;
 
                 char* script_abs = make_script_path_abs(st->opts[st->triggered_option].script);
-		assert(script_abs);
+                assert(script_abs);
 
                 // leave the critical section
                 if (pthread_mutex_unlock(&st->mutex) < 0) {
@@ -704,6 +706,7 @@ void* scbtn_poll(void* arg) {
 
                 assert(script_abs != NULL);
                 free(script_abs);
+                script_abs = NULL;
 
                 // free (last element is the sentinel!)
                 assert(env != NULL);
