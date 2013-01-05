@@ -111,7 +111,7 @@ AC_ARG_ENABLE(Werror,
 
 if test x"${enable_Werror}" != "xno"
 then
-        EXTRA_CFLAGS+="-Werror"
+        EXTRA_CFLAGS=$EXTRA_CFLAGS" -Werror"
 fi
 
 # shall we set NDEBUG?
@@ -120,7 +120,7 @@ AC_ARG_ENABLE(debug,
 
 if test x"${enable_debug}" == "xno"
 then
-	EXTRA_CFLAGS+=" -DNDEBUG"
+	EXTRA_CFLAGS=$EXTRA_CFLAGS" -DNDEBUG"
 fi
 
 # check for enable-scanbuttond
