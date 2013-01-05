@@ -52,12 +52,12 @@ scanning daemon. If a scan request arrives to scanbm on the sane-port, scanbm
 stops the polling by sending a dbus-signal (default) or a posix-signal (SIGUSR1) 
 (signal-mode) to the polling scanbd-daemon. Then it starts the real saned which 
 scans and sends the data back to the requesting application. Afterwards the 
-scanbd-manager restarts the polling by sending another dbus-signal (or the 
+scanbd-manager scanbm restarts the polling by sending another dbus-signal (or the
 posix-signal SIGUSR2) to scanbd. scanbd now reenables polling of the devices.
 
 Scanbm is actually only a symbolic link to scanbd. Manager mode can be 
 activatied by calling scanbd as scanbm OR as scanbd -m as in previous version
-of scanbd
+of scanbd.
 
 So all applications must be enabled to use network-scanning (even if the 
 scanner is local, see below)!
@@ -94,28 +94,43 @@ sending SIGHUP).
 
 If you don't want to use the configure script to generate the Makefiles, you 
 can still use the (old) Makefile.simple as an input-file for the make tool.
-scanbd now uses libudev by default instead of HAL.
-If you want scanbd to use HAL, comment the line 
-USE_LIBUDEV=yes 
-out for your OS in the Makefile. conf.
+scanbd now uses libudev by default instead of HAL. If you want scanbd to use HAL,
+comment the line
 
-If you want to use the the scanbuttond backends USE_SCANBUTTOND=yes at the 
-start of Makefile.conf.. Otherwise sane is used. You could also set the
+USE_LIBUDEV=yes 
+
+out for your OS in the Makefile.conf.
+
+If you want to use the the scanbuttond backends enable
+
+USE_SCANBUTTOND=yes
+
+at the start of Makefile.conf. Otherwise sane is used. You could also set the
 variable on the make command-line:
 
 make -f Makefile.simple clean all
+
 -or-
+
 USE_SCANBUTTOND=yes make -e Makefile.simple clean  all
+
 -or-
+
 USE_SANE=yes make -e Makefile.simple clean all
 
 After building, copy the executable scanbd and config-files scanbd.conf, etc. 
 to useful places (or use 
-USE_SCANBUTTOND make install or
+
+USE_SCANBUTTOND make install
+
+-or-
+
 USE_SANE make install
+
 to copy to /usr/local/bin and /usr/local/etc/scanbd).
+
 If you use the scanbuttond-backends, copy the shared-objects from 
-scanbuttond/backends directory to /usr/local/etc/scanbd/scanbuttond/backends 
+scanbuttond/backends directory to /usr/local/lib/scanbd/scanbuttond/backends
 (make install as described above does this for you).
 
 Needed packages on debian-based systems:
@@ -153,19 +168,20 @@ edit the saned-line to use scanbd as a wrapper, e.g.:
 sane-port stream tcp4 nowait saned /usr/local/bin/scanbm scanbm 
 ---
 
-or 
+-or-
 
 (if the saned user can't open the devices, e.g. ubuntu)
 ---
 sane-port stream tcp4 nowait root /usr/local/bin/scanbm scanbm 
 ---
+
 If you installed the config files in a different location, you may have to add
-the  -c option to point to the configuration file (add 
--c /your/location/scanbd.conf to the configuation lines above.
+the  -c option to point to the configuration file with an absolute path (add
+-c /your/location/scanbd.conf to the configuation lines above).
 
-if you are worried about running scanbd with root privileges, see below on 7)
+If you are worried about running scanbd with root privileges, see below on 7).
 
-be sure to use scanbm or give the -m (and perhaps -s) flag to scanbd to enable 
+Be sure to use scanbm or give the -m (and perhaps -s) flag to scanbd to enable
 the "manager-mode" (if you add also the -s flag the "signal-mode" is used, e.g. 
 if dbus isn't available).
 
@@ -175,14 +191,14 @@ edit the config file (in /usr/local/etc/scanbd)
 
 5) scripts
 
-make some useful scripts (see the examples test.script, example.script or 
+Make some useful scripts (see the examples test.script, example.script or
 scanadf.script) (scanbd compiles and runs well on FreeBSD/NetBDS/OpenBSD, 
 but on these plattforms /bin/bash is usually not avaliable. So be sure to adapt
 the scripts!)
 
 6) sane config
 
-all desktop applications should only get access to the scanners via the net
+All desktop applications should only get access to the scanners via the net
 backend, so edit /etc/sane.d/dll.conf to only contain the net-backend on the 
 desktop machines. 
 
@@ -192,7 +208,7 @@ net
 ---
 
 Give the net-backend a suitable configuration and add the machines, where the 
-scanners (and scanbd) are (this could be also localhost, but see below!):
+scanners (and scanbd/scanbm) are (this could be also localhost, but see below!):
 Now the desktop applications (wich use libsane) use the above dll.conf with only
 the net backend. This prevents them from using the locally attached scanners 
 directly (and blocking them). 
@@ -245,7 +261,7 @@ or use one of the startup files from the integration directory.
 If you are unfamiliar with scanbd it would be best to first try starting scanbd 
 in the foreground (-f) and in debug mode (-d):
 
-/usr/local/bin/scanbd -df -c /usr/local/etc/scanbd/scanbd.conf
+/usr/local/bin/scanbd -d7 -f -c /usr/local/etc/scanbd/scanbd.conf
 
 Then you can watch scanbd recognizing all scanners and polling the options / 
 buttons. If you press the buttons or modify the function knob or insert/remove 
@@ -287,7 +303,7 @@ Also edit/check scanbd.conf to set the effective group = lp !
   send scanbd the SIGHUP signal to reconfigure and look for new devices. 
   This can be done also via udev-rules.
 
-- be sure to include only the necessary drivers in /usr/local/scanbd/dll.conf, 
+- be sure to include only the necessary drivers in /usr/local/etc/scanbd/dll.conf,
   since scanadf will hang (timeout)
 
 - to test an action for a specific device, use
