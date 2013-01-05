@@ -63,15 +63,35 @@ So all applications must be enabled to use network-scanning (even if the
 scanner is local, see below)!
 
 1) build
-
 There are two general options for building scanbd: using configure (preferred) 
-(see 1.1) or using the (old) simple Makefiles (see 1.2). 
+(see 1.2) or using the (old) simple Makefiles (see 1.3). 
 
 ===============================================================================
 IMPORTANT NOTE: Both solutions require GNU make, so on systems where make is not 
 GNU make, you may have to use gmake instead of make
 ===============================================================================
-1.1) using autotools configure script
+
+1.1) Dependencies
+===============================================================================
+Needed packages on debian-based systems:
+libconfuse-dev libsane-dev libudev-dev libusb-dev
+
+To use HAL instead of libudev you need:
+libhal-dev
+
+Needed packages in Fedora systems:
+libusb-devel libconfuse-devel libudev-devel dbus-devel sane-backends-devel
+
+On Suse based systems you will need the same of similar packages installed as
+on Fedora, but: sane-backends-devel in Suse does not pull in all required 
+dependencies. Please make sure that you alse have installed:
+libjpeg8-devel
+libexif-devel
+libgphoto2-devel
+before you attempt compilation of scanbd.
+===============================================================================
+
+1.2) using autotools configure script
 
 Please execute:
 
@@ -90,7 +110,7 @@ If neither HAL nor libudev is available (e.g. OpenBSD), scanbd works without
 dynamic detection of inserted or removed devices (but can be triggered by 
 sending SIGHUP).
 
-1.2) using plain Makefiles
+1.3) using plain Makefiles
 
 If you don't want to use the configure script to generate the Makefiles, you 
 can still use the (old) Makefile.simple as an input-file for the make tool.
