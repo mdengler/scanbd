@@ -21,6 +21,7 @@ AM_CFLAGS = \
 	$(OS_CFLAGS) \
 	$(OS_CPPFLAGS) \
 	$(EXTRA_CFLAGS) \
+	$(LIBUSB_CFLAGS) \
 	-I../include \
 	-Dsyslog=slog \
 	-DLOG_INFO=SLOG_INFO \
@@ -28,6 +29,7 @@ AM_CFLAGS = \
 	-DSCANBUTTOND_LIB_DIR=@SCANBUTTOND_LIB_DIR@/
 
 AM_LDFLAGS = \
+	$(LIBUSB_LDFLAGS) \
 	-shared \
 	-avoid-version \
 	-module 
