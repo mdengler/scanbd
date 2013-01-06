@@ -195,7 +195,7 @@ copy this file into the dbus system-bus configuration directory
 (/etc/dbus-1/system.d/ or /usr/local/etc/dbus-1/system.d/),
 then restart dbus and hald.
 
-3) inetd.conf
+3.1) inetd.conf
 
 edit the saned-line to use scanbd as a wrapper, e.g.:
 ---
@@ -218,6 +218,24 @@ If you are worried about running scanbd with root privileges, see below on 7).
 Be sure to use scanbm or give the -m (and perhaps -s) flag to scanbd to enable
 the "manager-mode" (if you add also the -s flag the "signal-mode" is used, e.g. 
 if dbus isn't available).
+
+3.2) xinetd
+
+Systems with xinetd instead of inetd (e.g. openSuse) must use a xinetd configuration
+file for sane. This is mostly /etc/xinetd.d/sane-port. The following is an example of
+sane-port:
+
+service sane-port
+{
+        port        = 6566
+        socket_type = stream
+        wait        = no
+        user        = saned
+        group       = scanner
+        server      = /usr/local/bin/scanbm
+        server_args = scanbm
+        disable     = no
+}
 
 4) scanbd.conf
 
