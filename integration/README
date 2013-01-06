@@ -14,3 +14,5 @@ scanbd_dbus.conf	Required for dbus. Shall be instaled in
 scanbd.debian 		Startup script for debian based systems
 scanbdservice.conf 	Startup start-stop script for scanbd
 systemd/ 		contains the files required for systemd startup 
+sane-port               for systems using xinetd instead of inetd (e.g. openSuse),
+                        put this file into /etc/xinted.d

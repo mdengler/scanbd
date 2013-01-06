@@ -1,9 +1,9 @@
 /*
- * $Id: slog.h 102 2012-12-11 20:11:47Z llagendijk $
+ * $Id$
  *
  *  scanbd - KMUX scanner button daemon
  *
- *  Copyright (C) 2008 - 2012  Wilhelm Meier (wilhelm.meier@fh-kl.de)
+ *  Copyright (C) 2008 - 2013  Wilhelm Meier (wilhelm.meier@fh-kl.de)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

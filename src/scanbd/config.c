@@ -1,9 +1,9 @@
 /*
- * $Id: scanbd.c 147 2013-01-04 22:02:51Z llagendijk $
+ * $Id$
  *
  *  scanbd - KMUX scanner button daemon
  *
- *  Copyright (C) 2008 - 2012  Wilhelm Meier (wilhelm.meier@fh-kl.de)
+ *  Copyright (C) 2008 - 2013  Wilhelm Meier (wilhelm.meier@fh-kl.de)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
