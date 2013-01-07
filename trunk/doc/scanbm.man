@@ -156,7 +156,7 @@ service sane\-port
    wait        = no
    user        = scanbd
    group       = scanbd
-   server      = @SBINDIR@/scanbd 
+   server      = @SBINDIR@/scanbm 
    server_args = 
 }
 .fi
