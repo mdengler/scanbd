@@ -351,7 +351,8 @@ Also edit/check scanbd.conf to set the effective group = lp !
   an udev-rule 98-snapscan.rule in the integration directory. You can put this into
   /etc/udev/rules.d. Be sure to add your device fingerprints to this file, e.g. change
   idVendor and idProduct in the rule line or add a new one. Actually I'm aware of
-  the Epson 1670 having this problem.
+  the Epson 1670 having this problem. You can check the status of usb devices with 
+  the script check_usb_autosuspend.sh in the integration directory.
 
 - There is another howto for scanbd by <alex@tomisch.de>:
   https://bbs.archlinux.de/viewtopic.php?id=20954 
