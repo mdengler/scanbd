@@ -347,6 +347,12 @@ Also edit/check scanbd.conf to set the effective group = lp !
 
 8) Additional hints:
 
+- if you are using scanner devices that don't support usb-autosuspend, please find
+  an udev-rule 98-snapscan.rule in the integration directory. You can put this into
+  /etc/udev/rules.d. Be sure to add your device fingerprints to this file, e.g. change
+  idVendor and idProduct in the rule line or add a new one. Actually I'm aware of
+  the Epson 1670 having this problem.
+
 - There is another howto for scanbd by <alex@tomisch.de>:
   https://bbs.archlinux.de/viewtopic.php?id=20954 
   It is written for ArchLinux but will also be valuable for other distros.
