@@ -76,7 +76,14 @@ instead of the default @SCANBDCFGDIR@/scanbd.conf configuration file.
 turn debug mode on. If specified, set the debug level to
 .I debuglevel
 .RS
- (1 = error, 2 = warn, 3 = info, 4 - 7 = debug)
+.br
+1 = error
+.br
+2 = warn
+.br
+3 = info
+.br
+4 - 7 = debug)
 .RE
 .TP
 .B \-s --signal

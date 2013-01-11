@@ -4,14 +4,17 @@
 .SH NAME
 scanbd\- Scanner button monitoring daemon
 .SH SYNOPSIS
-.SS Polling mode:
+.I Polling mode:
+.PP
 .B scanbd
 .B [\-c 
 .I configfile
 .B ] [\-f]
 .BI  [\-d [debuglevel]
 .B ]
-.SS Manager-mode
+.PP
+.I Manager-mode
+.PP
 The manager mode of 
 .B scanbd 
 that can be triggered by the 
@@ -55,9 +58,14 @@ instead of the default @SCANBDCFGDIR@/scanbd.conf configuration file.
 .BI \-d [debuglevel] " \-\-debug" [=debuglevel]
 turn debug mode on. If specified, set the debug level to 
 .I debuglevel
-.RS
- (1 = error, 2 = warn, 3 = info, 4 - 7 = debug)
-.RE
+.br
+1 = error 
+.br
+2 = warn
+.br
+3 = info
+.br
+4 - 7 = debug)
 .TP
 .B \-f \-\-foreground
 Run scanbd in the foreground
