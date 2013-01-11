@@ -91,7 +91,7 @@ libusb-devel libconfuse-devel libudev-devel dbus-devel sane-backends-devel
 On Suse based systems you will need the same of similar packages installed as
 on Fedora, but: sane-backends-devel in Suse does not pull in all required 
 dependencies. Please make sure that you alse have installed:
-libjpeg8-devel
+libjpeg-devel
 libexif-devel
 libgphoto2-devel
 before you attempt compilation of scanbd.
