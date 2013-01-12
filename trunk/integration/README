@@ -1,5 +1,5 @@
 This directory contains a number of files that help with the integration
-of scanbd in you operating system.
+of scanbd in your operating system.
 
 99-saned.rules: 
 FreeBSD.rc		The FreeBSD startup script. Shall be installed

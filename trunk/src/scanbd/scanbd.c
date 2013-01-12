@@ -486,6 +486,14 @@ int main(int argc, char** argv) {
             }
         }
         else { // child
+            // Ensure that saned gets the systemd fd's
+            // We do not call sd_listen_fds() as that sets FD_CLOEXEC on the fd's
+            char listen_fds[64] = "";
+            if (getenv("LISTEN_PID") != NULL) {
+                snprintf(listen_fds, 64, "LISTEN_PID=%ld", (long) getpid());
+                putenv(listen_fds);
+                slog(SLOG_DEBUG, "Systemd detected: Updating LISTEN_PID env. variable");
+            }
             size_t numberOfEnvs = cfg_size(cfg_sec_global, "saned_env");
             for(size_t i = 0; i < numberOfEnvs; i += 1) {
                 const char* e = cfg_getnstr(cfg_sec_global, "saned_env", i);
