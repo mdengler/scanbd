@@ -11,7 +11,14 @@ scanbd.service
 scanbm@.service
 scanbm.socket
 
-The following files goed to the dbus services directory 
+The file scanbm@.service.sane-git is a replacement for scanbm@.service for the
+case where you use the git version of sane. That has a patch that adds full
+systemd support to saned. That will allow you to add SANE_DEBUG_<backendname>
+environment variables and use the system log or systemd-journalctl to watch
+the debugging outputs. If you want to use it, it needs to be copied to
+/lib/systemd/system/scanbm@.service.
+
+The following files goes into the dbus services directory 
 /usr/share/dbus-1/system-services:
 
 de.kmux.scanbd.server.service
