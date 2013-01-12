@@ -16,7 +16,8 @@ case where you use the git version of sane. That has a patch that adds full
 systemd support to saned. That will allow you to add SANE_DEBUG_<backendname>
 environment variables and use the system log or systemd-journalctl to watch
 the debugging outputs. If you want to use it, it needs to be copied to
-/lib/systemd/system/scanbm@.service.
+/lib/systemd/system/scanbm@.service. Systemd socket activation also requires
+the patch in scanbd added after release of version 1.3
 
 The following files goes into the dbus services directory 
 /usr/share/dbus-1/system-services:
