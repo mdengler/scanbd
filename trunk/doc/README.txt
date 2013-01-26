@@ -79,6 +79,8 @@ scanbd on different platforms. The list may not be exhaustive.
 1.1.1 Debian
 Needed packages on debian-based systems:
 libconfuse-dev libsane-dev libudev-dev libusb-dev
+To use HAL instead of libudev you need:
+libhal-dev
 
 To use HAL instead of libudev you need:
 libhal-dev
@@ -87,7 +89,20 @@ libhal-dev
 Needed packages in Fedora systems:
 libusb-devel libconfuse-devel libudev-devel dbus-devel sane-backends-devel
 
-1.1.3 Suse
+1.1.3 Hint to ArchLinux users using old scanbuttond drivers:
+The libusb / libusb-compat seems to be broken for at least using it with the 
+old scanbuttond drivers.  Please find under contrib a PKGBUILD to build an old 
+version of libusb-compat at your own risk (other applications may fail now). 
+Do the following:
+
+cd contrib
+makepkg
+makepkg -i
+
+and (re)build scanbd:
+USE_SCANBUTTOND=yes make -e clean all
+
+1.1.4 Suse
 On Suse based systems you will need the same of similar packages installed as
 on Fedora, but: sane-backends-devel in Suse does not pull in all required 
 dependencies. Please make sure that you alse have installed:
@@ -96,7 +111,7 @@ libexif-devel
 libgphoto2-devel
 before you attempt compilation of scanbd.
 
-1.1.4 OpenBSD:
+1.1.5 OpenBSD:
 You need to install the following packages from ports ($PORTSDIR is here the
 directory where you have the ports collection installed, normally /usr/ports):
 
@@ -128,66 +143,37 @@ sending SIGHUP).
 
 If you don't want to use the configure script to generate the Makefiles, you 
 can still use the (old) Makefile.simple as an input-file for the make tool.
-scanbd now uses libudev by default instead of HAL. If you want scanbd to use HAL,
-comment the line
 
-USE_LIBUDEV=yes 
+Options can be set in Makefile.conf. This file will be generated the first time
+you run "make -f Makefile.simple" from Makefile.conf.in. 
 
-out for your OS in the Makefile.conf.
+Please review Makefile.conf (after running make -f Makefile.simple) before
+running make again. Edit the file as appropriate to set your preferences.
+It is still possible to set variables on the make command line (e.g.
+USE_SCANBUTTOND=yes make -f Makefile.simple
+but setting yorpreferences in Makefile.conf is much easier.
+
+scanbd now uses libudev by default instead of HAL. 
+We recommend setting 
+USE_LIBUDEV =
+in Makefile.conf to disable udev.
 
 If you want to use the the scanbuttond backends enable
 
 USE_SCANBUTTOND=yes
 
-at the start of Makefile.conf. Otherwise sane is used. You could also set the
-variable on the make command-line:
-
-make -f Makefile.simple clean all
-
--or-
-
-USE_SCANBUTTOND=yes make -e Makefile.simple clean  all
-
--or-
-
-USE_SANE=yes make -e Makefile.simple clean all
+in Makefile.conf. Otherwise sane is used. 
 
 After building, copy the executable scanbd and config-files scanbd.conf, etc. 
 to useful places (or use 
 
-USE_SCANBUTTOND make install
-
--or-
-
-USE_SANE make install
+make install
 
 to copy to /usr/local/bin and /usr/local/etc/scanbd).
 
 If you use the scanbuttond-backends, copy the shared-objects from 
 scanbuttond/backends directory to /usr/local/lib/scanbd/scanbuttond/backends
 (make install as described above does this for you).
-
-Needed packages on debian-based systems:
-libconfuse-dev libsane-dev libudev-dev libusb-dev
-
-To use HAL instead of libudev you need:
-libhal-dev
-
-Needed packages in Fedora systems:
-libusb-devel libconfuse-devel libudev-devel dbus-devel sane-backends-devel
-
-Hint to ArchLinux users using old scanbuttond drivers:
-The libusb / libusb-compat seems to be broken for at least using it with the 
-old scanbuttond drivers.  Please find under contrib a PKGBUILD to build an old 
-version of libusb-compat at your own risk (other applications may fail now). 
-Do the following:
-
-cd contrib
-makepkg
-makepkg -i
-
-and (re)build scanbd:
-USE_SCANBUTTOND=yes make -e clean all
 
 2) scanbd_dbus.conf
 

@@ -6,6 +6,9 @@ SUBDIRS = src/scanbd
 endif
 SUBDIRS += conf integration scripts contrib doc
 
+DISTCHECK_CONFIGURE_FLAGS = \
+	--with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir)
+
 EXTRA_DIST = \
 	Makefile.simple \
 	Makefile.conf.in \

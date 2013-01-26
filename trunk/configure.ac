@@ -25,6 +25,12 @@ AC_PROG_CXX
 AM_PROG_CC_C_O
 AC_PROG_LN_S
 
+# Find path to saned
+AC_PATH_PROG(SANED_PATH,[saned], 
+             [AC_MSG_ERROR([Saned not found!]) ],
+             [$PATH:/usr/libexec:/usr/sbin:/usr/local/libexec:/usr/local/sbin])
+	
+
 # autoscan complains about this being missing, but autoreconf thinks it is superfluous
 # AC_PROG_RANLIB
 
@@ -123,6 +129,19 @@ then
 	EXTRA_CFLAGS=$EXTRA_CFLAGS" -DNDEBUG"
 fi
 
+# Do we have systemd?
+PKG_PROG_PKG_CONFIG
+AC_ARG_WITH([systemdsystemunitdir],
+        AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),
+        [], [with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)])
+if test "x$with_systemdsystemunitdir" != xno; then
+        AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
+fi
+AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno ])
+
+# TODO: add check for udev
+# TODO: add check for HAL
+
 # check for enable-scanbuttond
 AC_ARG_ENABLE(scanbuttond,
 	AC_HELP_STRING([--enable-scanbuttond], [Use scanbuttond instead of Sane]))
@@ -174,6 +193,72 @@ then
 		SANE_CFLAGS=`sane-config --cflags`
 	fi
 fi
+
+#  user setting
+AC_ARG_WITH( user,
+	AC_HELP_STRING([--with-user=USER],
+	[userid to run as (guess)]),
+	[SCANBD_USER="${withval}"],
+	[ 
+	if test "x${UDEV_LIBS}" != "x"; then 
+		if ! grep saned: /etc/passwd > /dev/null; then
+			AC_MSG_NOTICE([For scanbd with udev we assume that user saned is available on your system!])
+		fi
+		SCANBD_USER=saned
+	else 
+		case ${host_os} in
+		*openbsd-* | *freebsd-* | *netbsd-*)
+			SCANBD_USER=root
+			;;
+		*linux-*)
+			SCANBD_USER=saned
+			AC_MSG_NOTICE([On linux we use user saned, plase make sure you add it!])
+			;;
+		*)
+			AC_MSG_ERROR([Target OS ${host_os} not known, please set option --with-user for configure!])
+			;;
+	
+		esac
+	fi
+	]
+)
+AC_MSG_NOTICE([Using user: ${SCANBD_USER}])
+AC_SUBST(SCANBD_USER)
+
+#  group setting
+AC_ARG_WITH( group,
+	AC_HELP_STRING([--with-group=GROUP],
+	[Groupid to run as (guess)]),
+	[SCANBD_GROUP="${withval}"],
+	[ 
+	if test "x${UDEV_LIBS}" != "x"; then 
+		if ! grep saned /etc/group > /dev/null; then
+			AC_MSG_NOTICE([For scanbd with udev we assume that group saned is available on your system!])
+		fi
+		SCANBD_GROUP=saned
+	else 
+		case ${host_os} in
+		*openbsd-* | *freebsd-* | *netbsd-*)
+			SCANBD_GROUP=daemon
+			;;
+		*linux-*)
+			if grep scanner: /etc/group > /dev/null; then
+				SCANBD_GROUP=scanner
+			else
+				SCANBD_GROUP=lp
+			fi
+			;;
+		*)
+			AC_MSG_ERROR([Target OS ${host_os} not known, please set option --with-group for configure!])
+			;;
+	
+		esac
+	fi
+	]
+)
+AC_MSG_NOTICE([Using group: ${SCANBD_GROUP}])
+AC_SUBST(SCANBD_GROUP)
+
 
 AM_CONDITIONAL(USE_SANE, test "x$use_sane" == "xyes")
 AM_CONDITIONAL(USE_SCANBUTTOND, test "x$use_scanbuttond" == xyes)

@@ -100,7 +100,11 @@
 #define C_GROUP_DEF "scanner"
 
 #define C_SANED "saned"
-#define C_SANED_DEF "/usr/sbin/saned"
+#ifdef SANED_PATH
+#define C_SANED_DEF SANED_PATH
+#else
+#error SANED_PATH is not set!
+#endif
 
 #define C_SANED_OPTS "saned_opt"
 #define C_SANED_OPTS_DEF "{}"
@@ -112,10 +116,7 @@
 #ifdef SCANBUTTOND_LIB_DIR
 #define C_SCANBUTTONS_BACKENDS_DIR_DEF SCANBUTTOND_LIB_DIR
 #else
-#ifndef USE_SANE
-#warning "Using predefined directory: /usr/local/lib/scanbd/scanbuttond/backends"
-#endif
-#define C_SCANBUTTONS_BACKENDS_DIR_DEF "/usr/local/lib/scanbd/scanbuttond/backends"
+#error SCANBUTTOND_LIB_DIR is not set!
 #endif
 
 #define C_SANED_ENVS "saned_env"
@@ -124,6 +125,8 @@
 #define C_TIMEOUT "timeout"
 #define C_TIMEOUT_DEF 500
 
+// TODO: move definition of scanbd.pid to configuration in Makefiles
+//
 #define C_PIDFILE "pidfile"
 #define C_PIDFILE_DEF "/var/run/scanbd.pid"
 
@@ -143,7 +146,7 @@
 #ifdef SCANBD_CFG_DIR
 #define SCANBD_CONF  SCANBD_CFG_DIR "/scanbd.conf"
 #else
-#define SCANBD_CONF "scanbd.conf"
+#error SCANBD_CFG_DIR is not set!
 #endif
 
 #define NAME_POLLING_MODE "scanbd"

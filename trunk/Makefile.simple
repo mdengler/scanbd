@@ -18,17 +18,30 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
+include Makefile.include
 
-include Makefile.conf
-
-.PHONY: scanbuttond scanbd doc all
+.PHONY: scanbuttond scanbd doc all Makefile.conf
 
 ifdef USE_SANE
-all: scanbd doc
+all: Makefile.conf scanbd doc
 else # USE_SANE
 all: scanbuttond scanbd doc
 endif # USE_SANE
 
+
+Makefile.conf: Makefile.conf.in
+	@if ! test -f Makefile.conf ; then \
+		cp Makefile.conf.in Makefile.conf ; \
+		echo "Makefile.conf is generated, edit it first, then run make -f Makefile.simpe again" ;\
+		exit 1;\
+	else 	if test Makefile.conf.in -nt Makefile.conf ; then \
+			echo "Makefile.conf is not up to data. Please consider starting over:" ; \
+			echo "rm Makefile.conf ; Make -f Makefile.simple Makefile.conf" ;\
+			echo "or edit (or touch) Makefile.conf"; \
+			exit 2; \
+		fi \
+	fi \
+	
 scanbd:
 	$(MAKE) -f Makefile.simple -C src/scanbd all
 
