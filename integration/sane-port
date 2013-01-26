@@ -5,7 +5,7 @@ service sane-port
         wait        = no
         user        = saned
         group       = scanner
-        server      = /usr/local/bin/scanbd
-        server_args = scanbd -m -c /usr/local/etc/scanbd/scanbd.conf
+        server      = /usr/local/bin/scanbm
+        server_args = scanbm -c /usr/local/etc/scanbd/scanbd.conf
         disable     = no
 }

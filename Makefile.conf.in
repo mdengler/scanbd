@@ -1,5 +1,4 @@
-#
-# $Id$
+# $Id: Makefile.conf.in 154 2013-01-06 07:24:56Z wimalopaan $
 #
 #  scanbd - KMUX scanner button daemon
 #
@@ -19,108 +18,74 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
-# Makefile.conf is generated from Makefile.conf.in by makefile from automake.
-# This will set package name and version
-#
-PACKAGE = @PACKAGENAME@
-PACKAGE_VERSION = @PACKAGEVERSION@
+# Makefile.localconf is generated from Makefile.localconf.in
+ 
+# prefix
+# =======
+# The makefile will normally build and install scanbd in /usr/local
+# Set a different prefix here if you want a different prefix
+# PREFIX=/usr/local
 
-OSTYPE := $(shell uname)
-PKGCFG := $(shell which pkg-config)
+# bin_dir
+# ========
+# Programs are normally installed in <prefix>/sbin
+# Uncomment the following line to change the install location
+# BIN_DIR=/my/own/path
 
-ifneq ($(findstring pkg-config, $(PKGCFG)),)
-DBUS_INCLUDE=$(shell pkg-config dbus-1 --cflags)
-else
-DBUS_INCLUDE=
-endif
+# Scanbd configuration directory. Default: <prefix>/etc
+# Uncomment the following line to change the location
+# SCANBD_CFG_DIR=/etc
 
-ifndef PREFIX
-PREFIX = /usr/local
-endif
+# scanbuttond backends location
+# =============================
+# Backends are normally installed in <prefix>/lib/scanbuttond/backends
+# This path is not used, unless scanbuttond backends are enables, see 
+# below
+# Uncomment the following line to change the location
+# SCANBUTTOND_LIB_DIR=$(SCANBD_CFG_DIR)/scanbuttond/backends
 
-ifndef DESTDIR
-SCANBD_CFG_DIR = $(PREFIX)/etc/scanbd
-else
-PREFIX = $(DESTDIR)/usr
-SCANBD_CFG_DIR = $(DESTDIR)/etc/scanbd
-endif
-SCANBUTTOND_LIB_DIR=$(SCANBD_CFG_DIR)/scanbuttond/backends
+# Use scanbuttond backends or sane?
+# =================================
+# If you want to use scanbuttond backends instead of sane, uncomment the 
+# following line:
+# USE_SCANBUTTOND=1
 
-BIN_DIR = $(PREFIX)/bin
+# Disable debugging code
+# ======================
+# If you want to disable debugging code, uncomment the following line
+# NDEBUG=1
 
-ifeq ($(OSTYPE),FreeBSD)
-DBUS_PREFIX = /usr/local
-else
-ifndef DESTDIR
-DBUS_PREFIX =
-else
-DBUS_PREFIX = $(DESTDIR)
-endif
-endif
+# Scanbd User
+# ===========
+# The Makefile will normally correctly set the userid for scanbd for you
+# Set the required userid here if you need to change it. This will
+# override the default
+# SCANBD_USER=myuser
 
-ifeq ($(OSTYPE),Linux)
-USE_LIBUDEV=yes
-else
-USE_LIBUDEV=
-endif
+# Scanbd group
+# ============
+# The Makefile will normally correctly set the groupid for scanbd for you
+# Set the required userid here if you need to change it. This will
+# override the default
+# GROUP=mygroup
 
-ifndef USE_LIBUDEV
-USE_HAL=yes
-endif
+# saned path
+# ==========
+# Path where saned lives. Defaults to /usr/sbin/saned
+# SANED_PATH=/usr/sbin/scanbd
 
-ifndef USE_SCANBUTTOND
-USE_SANE=yes # otherwise USE_SCANBUTTOND
-endif
+# Do we have UDEV?
+# Uncomment the following to enable UDEV
+# USE_LIBUDEV = yes
+# And this to disable UDEV
+# USE_LIBUDEV = 
 
-ifdef NDEBUG
-CPPFLAGS += -DNDEBUG
-endif
+# Do we have HAL?
+# Uncomment the following to enable HAL
+# USE_HAL = yes
+# And this to disable HAL
+# USE_HAL = 
 
-ifeq ($(OSTYPE),Linux)
-#DBUS_INCLUDE=$(shell pkg-config dbus-1 --cflags)
-CPPFLAGS += -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include $(DBUS_INCLUDE) -DHAVE_LINUX_LIMITS_H -I../scanbuttond/include
-endif
-
-ifeq ($(OSTYPE),FreeBSD)
-CPPFLAGS += -I/usr/local/include -I/usr/local/include/dbus-1.0 -I/usr/local/include/dbus-1.0/include $(DBUS_INCLUDE) -I../scanbuttond/include
-LDLIBS  += -L/usr/local/lib 
-endif
-ifeq ($(OSTYPE),NetBSD)
-CPPFLAGS += -I/usr/pkg/include -I/usr/pkg/include/dbus-1.0 -I/usr/pkg/lib/dbus-1.0/include $(DBUS_INCLUDE) -I../scanbuttond/include
-LDLIBS  +=  -lconfuse -lpthread -ldbus-1
-endif
-
-ifeq ($(OSTYPE),OpenBSD)
-USE_HAL=
-CPPFLAGS += -I/usr/local/include -I/usr/local/include/dbus-1.0 -I/usr/local/lib/dbus-1.0/include $(DBUS_INCLUDE) -I../scanbuttond/include
-LDLIBS  += -L/usr/local/lib 
-endif
-
-ifdef USE_SANE
-CPPFLAGS += -DUSE_SANE -UUSE_SCANBUTTOND
-LDLIBS += -lsane
-else # USE_SANE
-CPPFLAGS += -UUSE_SANE -DUSE_SCANBUTTOND -I./scanbuttond/include
-LDFLAGS += -rdynamic
-LDLIBS += -lusb
-ifeq ($(OSTYPE),Linux)
-LDLIBS += -ldl
-endif
-endif # USE_SANE
-
-ifdef USE_HAL
-CPPFLAGS += -DUSE_HAL
-LDLIBS  += -lhal
-endif # USE_HAL
-
-ifdef USE_LIBUDEV
-CPPFLAGS += -DUSE_LIBUDEV
-LDLIBS += -ludev
-endif # USE_LIBUDEV
-
-# Define common options
-CFLAGS   += -Wall -Wextra -std=c99 -g
-LDLIBS  += -lconfuse -lpthread -ldbus-1
-CPPFLAGS += -DSCANBD_CFG_DIR=\"$(SCANBD_CFG_DIR)\" -DSCANBUTTOND_LIB_DIR=\"$(SCANBUTTOND_LIB_DIR)\" 
-
-
+# Set the DBUS_PREFIX so we can find includes and libs
+# Should normally not be required
+# DBUS_PREFIX = /usr/local

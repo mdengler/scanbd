@@ -53,8 +53,9 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS compile \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS TODO \
+	compile config.guess config.sub depcomp install-sh ltmain.sh \
+	missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -209,10 +210,13 @@ PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
+SANED_PATH = @SANED_PATH@
 SANE_CFLAGS = @SANE_CFLAGS@
 SANE_CONFIG = @SANE_CONFIG@
 SANE_LIBS = @SANE_LIBS@
 SCANBD_CFG_DIR = @SCANBD_CFG_DIR@
+SCANBD_GROUP = @SCANBD_GROUP@
+SCANBD_USER = @SCANBD_USER@
 SCANBUTTOND_LIB_DIR = @SCANBUTTOND_LIB_DIR@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -271,6 +275,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
+systemdsystemunitdir = @systemdsystemunitdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
@@ -280,6 +285,9 @@ ACLOCAL_AMFLAGS = -I m4
 @USE_SCANBUTTOND_FALSE@	contrib doc
 @USE_SCANBUTTOND_TRUE@SUBDIRS = src/scanbuttond src/scanbd conf conf \
 @USE_SCANBUTTOND_TRUE@	integration scripts contrib doc
+DISTCHECK_CONFIGURE_FLAGS = \
+	--with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir)
+
 EXTRA_DIST = \
 	Makefile.simple \
 	Makefile.conf.in \

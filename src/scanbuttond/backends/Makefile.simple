@@ -20,7 +20,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-include ../../../Makefile.conf
+include ../../../Makefile.include
 
 CPPFLAGS +=  -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN -I../include
 

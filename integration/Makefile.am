@@ -5,8 +5,12 @@ EXTRA_DIST = \
 	scanbd_dbus.conf \
 	scanbd.debian \
 	scanbdservice.conf \
-	systemd/scanbd.service \
 	systemd/de.kmux.scanbd.server.service \
-	systemd/README.systemd \
+	systemd/README.systemd 
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA = \
+	systemd/scanbd.service \
 	systemd/scanbm@.service \
 	systemd/scanbm.socket
+endif

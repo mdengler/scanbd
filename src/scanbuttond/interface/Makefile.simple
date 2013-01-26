@@ -19,7 +19,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
-include ../../../Makefile.conf
+include ../../../Makefile.include
 
 CFLAGS   += -Wall -Wextra -std=c99 -g
 CPPFLAGS +=  -I../include -Dsyslog=slog -DLOG_INFO=SLOG_INFO -DLOG_WARNING=SLOG_WARN
