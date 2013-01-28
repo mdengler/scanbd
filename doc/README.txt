@@ -62,13 +62,21 @@ of scanbd.
 So all applications must be enabled to use network-scanning (even if the 
 scanner is local, see below)!
 
-1) build
+1) build & install
+
 There are two general options for building scanbd: using configure (preferred) 
 (see 1.2) or using the (old) simple Makefiles (see 1.3). 
 
 ===============================================================================
+Please note that scanbd is now installed in <prefi./sbin instead of 
+<prefix>/bin. Please manually remove the old scanbd/scanbm binaries from
+<prefix/bin.
+==============================================================================
+
+===============================================================================
 IMPORTANT NOTE: Both solutions require GNU make, so on systems where make is not 
-GNU make, you may have to use gmake instead of make
+GNU make, you may have to use gmake instead of make. All make command examples
+shown below therefore use gmake
 ===============================================================================
 
 1.1) Dependencies
@@ -100,7 +108,7 @@ makepkg
 makepkg -i
 
 and (re)build scanbd:
-USE_SCANBUTTOND=yes make -e clean all
+USE_SCANBUTTOND=yes gmake -e clean all
 
 1.1.4 Suse
 On Suse based systems you will need the same of similar packages installed as
@@ -125,7 +133,7 @@ sane-backends: $PORTSDIR/graphics/sane-backends
 Please execute:
 
 ./configure [--enable-scanbuttond]
-make all
+gmake all
 
 The use of HAL instead of libudev is now detected via configure. 
 If you want to use the scanbuttond-backends instead of sane-backends, use 
@@ -145,12 +153,12 @@ If you don't want to use the configure script to generate the Makefiles, you
 can still use the (old) Makefile.simple as an input-file for the make tool.
 
 Options can be set in Makefile.conf. This file will be generated the first time
-you run "make -f Makefile.simple" from Makefile.conf.in. 
+you run "gmake -f Makefile.simple" from Makefile.conf.in. 
 
-Please review Makefile.conf (after running make -f Makefile.simple) before
+Please review Makefile.conf (after running gmake -f Makefile.simple) before
 running make again. Edit the file as appropriate to set your preferences.
 It is still possible to set variables on the make command line (e.g.
-USE_SCANBUTTOND=yes make -f Makefile.simple
+USE_SCANBUTTOND=yes gmake -f Makefile.simple
 but setting yorpreferences in Makefile.conf is much easier.
 
 scanbd now uses libudev by default instead of HAL. 
@@ -167,13 +175,13 @@ in Makefile.conf. Otherwise sane is used.
 After building, copy the executable scanbd and config-files scanbd.conf, etc. 
 to useful places (or use 
 
-make install
+gmake install
 
 to copy to /usr/local/bin and /usr/local/etc/scanbd).
 
 If you use the scanbuttond-backends, copy the shared-objects from 
 scanbuttond/backends directory to /usr/local/lib/scanbd/scanbuttond/backends
-(make install as described above does this for you).
+(gmake install as described above does this for you).
 
 2) scanbd_dbus.conf
 

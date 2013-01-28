@@ -136,9 +136,9 @@ AC_ARG_WITH([systemdsystemunitdir],
         [], [with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)])
 if test "x$with_systemdsystemunitdir" != xno; then
         AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
+	AC_DEFINE(HAVE_SYSTEMD, [1], [Do we use systemd on this system?])
 fi
-AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno ])
-
+AM_CONDITIONAL(HAVE_SYSTEMD, [x$with_systemdsystemunitdir != "x"])
 # TODO: add check for udev
 # TODO: add check for HAL
 
@@ -207,10 +207,10 @@ AC_ARG_WITH( user,
 		SCANBD_USER=saned
 	else 
 		case ${host_os} in
-		*openbsd-* | *freebsd-* | *netbsd-*)
+		*-*-openbsd* | *-*-freebsd* | *-*-netbsd*)
 			SCANBD_USER=root
 			;;
-		*linux-*)
+		*-*-linux*)
 			SCANBD_USER=saned
 			AC_MSG_NOTICE([On linux we use user saned, plase make sure you add it!])
 			;;
@@ -238,10 +238,10 @@ AC_ARG_WITH( group,
 		SCANBD_GROUP=saned
 	else 
 		case ${host_os} in
-		*openbsd-* | *freebsd-* | *netbsd-*)
+		*-*-openbsd* | *-*-freebsd* | *-*-netbsd*)
 			SCANBD_GROUP=daemon
 			;;
-		*linux-*)
+		*-*-linux*)
 			if grep scanner: /etc/group > /dev/null; then
 				SCANBD_GROUP=scanner
 			else
