@@ -17866,8 +17866,11 @@ fi
 if test "x$with_systemdsystemunitdir" != xno; then
         systemdsystemunitdir=$with_systemdsystemunitdir
 
+
+$as_echo "#define HAVE_SYSTEMD 1" >>confdefs.h
+
 fi
- if test -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno ; then
+ if x$with_systemdsystemunitdir != "x"; then
   HAVE_SYSTEMD_TRUE=
   HAVE_SYSTEMD_FALSE='#'
 else
@@ -17875,6 +17878,8 @@ else
   HAVE_SYSTEMD_FALSE=
 fi
 
+# TODO: add check for udev
+# TODO: add check for HAL
 
 # check for enable-scanbuttond
 # Check whether --enable-scanbuttond was given.
