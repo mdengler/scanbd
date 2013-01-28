@@ -20,28 +20,40 @@
 #
 include Makefile.include
 
-.PHONY: scanbuttond scanbd doc all Makefile.conf
 
-ifdef USE_SANE
-all: Makefile.conf scanbd doc
-else # USE_SANE
-all: scanbuttond scanbd doc
-endif # USE_SANE
+#  Makefile.conf handling: we want this evaluated only once
+confisup2date := $(shell (if test -f Makefile.conf -a Makefile.conf -nt Makefile.conf.in ; then echo true; fi) )
 
+ifeq ($(confisup2date), true)
+
+# Makefile.con is up to date
+#
+ifdef USE_SCANBUTTOND
+# first build scanbuttond backends, then the rest
+all := scanbuttond scanbd doc
+.PHONY: scanbuttond scanbd doc
+else
+# no need to buils scanbuttond backends
+all := scanbd doc
+.PHONY: scanbd doc
+endif # USE_SCANBUTTOND
+
+else # confisup2date: Outdated Makefile.conf
+
+all := Makefile.conf
+.PHONY: Makefile.conf
+endif # confisup2date
+
+all: $(all)
 
 Makefile.conf: Makefile.conf.in
-	@if ! test -f Makefile.conf ; then \
-		cp Makefile.conf.in Makefile.conf ; \
-		echo "Makefile.conf is generated, edit it first, then run make -f Makefile.simpe again" ;\
-		exit 1;\
-	else 	if test Makefile.conf.in -nt Makefile.conf ; then \
-			echo "Makefile.conf is not up to data. Please consider starting over:" ; \
-			echo "rm Makefile.conf ; Make -f Makefile.simple Makefile.conf" ;\
-			echo "or edit (or touch) Makefile.conf"; \
-			exit 2; \
-		fi \
-	fi \
-	
+	@if test -f Makefile.conf ; then \
+		mv Makefile.conf Makefile.conf.old; \
+		echo "Makefile.conf was outdated, it is saved as Makefile.conf.old, please copy your customizations over to the new Makefile.conf" ;\
+	fi; \
+	cp Makefile.conf.in Makefile.conf ; \
+	echo "A new Makefile.conf is generated, edit it first, then run gmake -f Makefile.simpe again" 
+
 scanbd:
 	$(MAKE) -f Makefile.simple -C src/scanbd all
 
