@@ -66,15 +66,6 @@ endif
 # Set own directories
 # ==================
 #
-## ifndef DESTDIR
-## SCANBD_CFG_DIR = $(PREFIX)/etc/scanbd
-## else
-## PREFIX = $(DESTDIR)/usr
-## SCANBD_CFG_DIR = $(DESTDIR)/etc/scanbd
-## endif
-## SCANBUTTOND_LIB_DIR=$(SCANBD_CFG_DIR)/scanbuttond/backends
-## 
-## BIN_DIR = $(PREFIX)/bin
 
 ifndef BIN_DIR
 BIN_DIR := $(PREFIX)/sbin
