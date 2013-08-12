@@ -18,22 +18,22 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
-include Makefile.include
 
+include Makefile.include
 
 #  Makefile.conf handling: we want this evaluated only once
 confisup2date := $(shell (if test -f Makefile.conf -a Makefile.conf -nt Makefile.conf.in ; then echo true; fi) )
 
 ifeq ($(confisup2date), true)
 
-# Makefile.con is up to date
+# Makefile.conf is up to date
 #
 ifdef USE_SCANBUTTOND
 # first build scanbuttond backends, then the rest
 all := scanbuttond scanbd doc
 .PHONY: scanbuttond scanbd doc
 else
-# no need to buils scanbuttond backends
+# no need to build scanbuttond backends
 all := scanbd doc
 .PHONY: scanbd doc
 endif # USE_SCANBUTTOND

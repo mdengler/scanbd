@@ -27,7 +27,7 @@
 # Values set there will override the defaults here
 #
 #
-# TODO: add systemed config here
+# TODO: add systemd config here
 # TODO: add udev config here
 # TODO: add hald config here
 #

@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(scanbd, 1.91, wilhelm.meier@fh-kl.de)
+AC_INIT(scanbd, 1.92, wilhelm.meier@fh-kl.de)
 
 # allow check that we are really in the source directory
 AC_CONFIG_SRCDIR([src/scanbd/scanbd.c])
@@ -46,7 +46,7 @@ AC_CHECK_FUNCS([alarm dup2 ftruncate getcwd memset putenv regcomp strdup strerro
 		[], AC_MSG_ERROR([Required function is missing ]))
 
 # Check for required header files
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netinet/in.h sys/socket.h sys/time.h syslog.h],
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netinet/in.h sys/socket.h sys/time.h syslog.h pthread.h],
 		[], AC_MSG_ERROR([Required header file is missing ]))
 
 #  check for required types
@@ -63,8 +63,6 @@ AC_FUNC_CHOWN
 AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_HEADER_STDBOOL
-
-AX_PTHREAD
 
 OS_CFLAGS="-Wall -Wextra -std=c99 -g"
 
@@ -97,7 +95,7 @@ PKG_CHECK_MODULES([UDEV],[libudev],
 # scanbd configurationdir
 AC_ARG_WITH(scanbdconfdir,
 	AC_HELP_STRING([--with-scanbdconfdir=DIR],
-		[ scanbd configuration directory (PREFIX/etc/scanbd)]),
+		[scanbd configuration directory (PREFIX/etc/scanbd)]),
 	[SCANBD_CFG_DIR="${withval}"],
 	[SCANBD_CFG_DIR="${sysconfdir}/scanbd"])
 AC_SUBST(SCANBD_CFG_DIR)
@@ -124,7 +122,7 @@ fi
 AC_ARG_ENABLE(debug,
 	AC_HELP_STRING([--disable-debug], [disable debugging code (NDEBUG)]))
 
-if test x"${enable_debug}" == "xno"
+if test "x${enable_debug}" == "xno"
 then
 	EXTRA_CFLAGS=$EXTRA_CFLAGS" -DNDEBUG"
 fi
@@ -134,11 +132,11 @@ PKG_PROG_PKG_CONFIG
 AC_ARG_WITH([systemdsystemunitdir],
         AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),
         [], [with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)])
-if test "x$with_systemdsystemunitdir" != xno; then
+if test "x$with_systemdsystemunitdir" != "xno"; then
         AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
 	AC_DEFINE(HAVE_SYSTEMD, [1], [Do we use systemd on this system?])
 fi
-AM_CONDITIONAL(HAVE_SYSTEMD, [x$with_systemdsystemunitdir != "x"])
+AM_CONDITIONAL(HAVE_SYSTEMD, test "x$with_systemdsystemunitdir" != "x")
 # TODO: add check for udev
 # TODO: add check for HAL
 
