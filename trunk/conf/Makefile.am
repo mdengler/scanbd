@@ -9,7 +9,8 @@ scannerconf_DATA = \
 	scanner.d/fujitsu.conf \
 	scanner.d/hp.conf \
 	scanner.d/pixma.conf \
-	scanner.d/snapscan.conf
+	scanner.d/snapscan.conf \
+	scanner.d/canon.conf
 
 EXTRA_DIST = \
 	scanbd.conf \
@@ -18,5 +19,6 @@ EXTRA_DIST = \
 	scanner.d/fujitsu.conf \
 	scanner.d/hp.conf \
 	scanner.d/pixma.conf \
-	scanner.d/snapscan.conf
+	scanner.d/snapscan.conf \
+	scanner.d/canon.conf
 
