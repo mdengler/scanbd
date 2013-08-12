@@ -4,7 +4,7 @@ Files
 This directory includes the file required specifically for systemd integration.
 This is a work in progress and may change as development progresses.
 
-The following unit files should installed in /lib/systemd/system or
+The following unit files should be installed in /lib/systemd/system or
 /etc/systemd/system:
 
 scanbd.service

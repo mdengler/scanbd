@@ -41,6 +41,10 @@ AC_SEARCH_LIBS([dlopen], [dl dld], [], [
   AC_MSG_ERROR([unable to find the dlopen() function])
 ])
 
+AC_SEARCH_LIBS([pthread_create], [pthread], [], [
+  AC_MSG_ERROR([unable to find the pthread_create() function])
+])
+
 # Check for required functions
 AC_CHECK_FUNCS([alarm dup2 ftruncate getcwd memset putenv regcomp strdup strerror],
 		[], AC_MSG_ERROR([Required function is missing ]))
