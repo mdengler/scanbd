@@ -26,6 +26,11 @@
 # local changes shall be made in Makefile.conf
 # Values set there will override the defaults here
 #
+#
+# TODO: add systemd config here
+# TODO: add udev config here
+# TODO: add hald config here
+#
 # Include  Makefile.conf for local settings
 # ===============================================
 #
@@ -38,8 +43,9 @@ my_path := $(shell dirname $(my_name))
 # Set package name and version
 # ============================
 #
-PACKAGE := scanbd
-PACKAGE_VERSION := 1.91
+PACKAGE = scanbd
+PACKAGE_VERSION = 1.92
+
 
 OSTYPE := $(shell uname)
 PKGCFG := $(shell which pkg-config)
@@ -66,6 +72,15 @@ endif
 # Set own directories
 # ==================
 #
+## ifndef DESTDIR
+## SCANBD_CFG_DIR = $(PREFIX)/etc/scanbd
+## else
+## PREFIX = $(DESTDIR)/usr
+## SCANBD_CFG_DIR = $(DESTDIR)/etc/scanbd
+## endif
+## SCANBUTTOND_LIB_DIR=$(SCANBD_CFG_DIR)/scanbuttond/backends
+## 
+## BIN_DIR = $(PREFIX)/bin
 
 ifndef BIN_DIR
 BIN_DIR := $(PREFIX)/sbin
@@ -91,6 +106,7 @@ endif
 # OS dependent settings
 # ======================
 #
+ifndef DBUS_PREFIX
 ifeq ($(OSTYPE),FreeBSD)
 DBUS_PREFIX := /usr/local
 else
@@ -98,9 +114,12 @@ ifndef DESTDIR
 DBUS_PREFIX :=
 else
 DBUS_PREFIX := $(DESTDIR)
-endif
-endif
+endif # DESTDIR
+endif # OSTYPE
+endif # DBUS_PREFIX
 
+ifndef USE_LIBUDEV
+ifndef USE_HAL
 ifeq ($(OSTYPE),Linux)
 USE_LIBUDEV := yes
 else
@@ -110,6 +129,8 @@ endif
 ifndef USE_LIBUDEV
 USE_HAL := yes
 endif
+endif # USE_HAL
+endif # USE_UDEV
 
 #
 # Use sane or scanbuttond?

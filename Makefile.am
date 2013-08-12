@@ -12,12 +12,20 @@ DISTCHECK_CONFIGURE_FLAGS = \
 EXTRA_DIST = \
 	Makefile.simple \
 	Makefile.conf.in \
-	Makefile.conf
+	Makefile.conf \
+	Makefile.include.in \
+	Makefile.include
 
 noinst_DATA = \
-	Makefile.conf
+	Makefile.conf \
+	Makefile.include 
 
 Makefile.conf: Makefile.conf.in configure
+	echo "Generating $@...";
+	sed  -e 's|@PACKAGEVERSION@|$(PACKAGE_VERSION)|g' \
+	     -e 's|@PACKAGENAME@|$(PACKAGE)|g' $@.in  >$@
+
+Makefile.include: Makefile.include.in configure
 	echo "Generating $@...";
 	sed  -e 's|@PACKAGEVERSION@|$(PACKAGE_VERSION)|g' \
 	     -e 's|@PACKAGENAME@|$(PACKAGE)|g' $@.in  >$@
