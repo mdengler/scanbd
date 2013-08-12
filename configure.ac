@@ -86,7 +86,7 @@ PKG_CHECK_MODULES([DBUS], [dbus-1])
 
 dnl Check for udev and if we do not have it, check for hal
 PKG_CHECK_MODULES([UDEV],[libudev],
-	[AC_DEFINE([USE_UDEV], [1], [Use UDEV])],
+        [AC_DEFINE([USE_LIBUDEV], [1], [Use UDEV])],
 	[PKG_CHECK_MODULES([HAL], [hal],
 		[AC_DEFINE([USE_HAL], [1], [Use HAL])],
 		[AC_MSG_WARN([Neither Udev nor Hal are found, dynamic detection of scanners is not supported!])]
