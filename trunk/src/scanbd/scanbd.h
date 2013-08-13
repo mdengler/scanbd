@@ -24,12 +24,14 @@
 #define SCANBD_H
 
 #ifndef USE_SANE
-#ifndef USE_SCANBUTTOND
-#define USE_SCANBUTTOND
-#endif
+# ifndef USE_SCANBUTTOND
+#  define USE_SCANBUTTOND
+# endif
 #endif
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 
 #include "common.h"
 
@@ -37,9 +39,9 @@
 #include <confuse.h>
 
 #ifdef USE_SANE
-#include <sane/sane.h>
+# include <sane/sane.h>
 #else
-#include <scanbuttond/libusbi.h>
+# include <scanbuttond/libusbi.h>
 #endif
 
 #include "config.h"

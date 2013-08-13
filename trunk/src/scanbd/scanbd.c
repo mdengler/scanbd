@@ -23,8 +23,8 @@
 #include "scanbd.h"
 
 #ifdef USE_SCANBUTTOND
-#include "scanbuttond_loader.h"
-#include "scanbuttond_wrapper.h"
+# include "scanbuttond_loader.h"
+# include "scanbuttond_wrapper.h"
 backend_t* backend = NULL;
 #endif
 #include <libgen.h>

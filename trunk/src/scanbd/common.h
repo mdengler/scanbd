@@ -27,22 +27,22 @@
 
 #define _POSIX_C_SOURCE 200809L
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE	700
+# define _XOPEN_SOURCE	700
 #endif
 
 #ifdef __FreeBSD__
 // otherwise usleep() isn't declared
-#define __BSD_VISIBLE 1
+# define __BSD_VISIBLE 1
 #endif
 
 #ifdef __OpenBSD__
-#ifndef _POSIX_THREADS
-#define _POSIX_THREADS 1
-#endif
+# ifndef _POSIX_THREADS
+#  define _POSIX_THREADS 1
+# endif
 #endif
 
 #if defined(__STDC__) && (__STDC_VERSION__ >= 199901L)
-#include <stdbool.h>
+# include <stdbool.h>
 #endif
 
 #include <unistd.h>
@@ -73,61 +73,61 @@
 #include <ctype.h>
 
 #if defined(_POSIX_THREADS) && ((_POSIX_THREADS - 0) >= 0)
-#include <pthread.h>
+# include <pthread.h>
 #else
-#warning "No pthreads support"
+# warning "No pthreads support"
 #endif
 
 #if (_POSIX_MAPPED_FILES - 0) >= 0 || (_POSIX_SHARED_MEMORY_OBJECTS - 0) >= 0 || \
     (_POSIX_MEMLOCK - 0) >= 0 || (_POSIX_MEMORY_PROTECTION - 0) >= 0 || \
     (_POSIX_TYPED_MEMORY_OBJECTS - 0) >= 0 || (_POSIX_SYNCHRONIZED_IO - 0) >= 0 || \
     (_POSIX_ADVISORY_INFO - 0) >= 0
-#include <sys/mman.h>
+# include <sys/mman.h>
 #endif
 
 #if (_POSIX_MAPPED_FILES - 0) >= 0 || (_POSIX_SHARED_MEMORY_OBJECTS - 0) >= 0 || \
     (_POSIX_TYPED_MEMORY_OBJECTS - 0) >= 0
-#define _MC3 /* see POSIX Standard margin notes */
+# define _MC3 /* see POSIX Standard margin notes */
 #endif
 
 #if defined(_POSIX_MESSAGE_PASSING) && ((_POSIX_MESSAGE_PASSING - 0) >= 0)
-#include <mqueue.h>
+# include <mqueue.h>
 #endif
 
 #ifdef _XOPEN_UNIX
-#include <strings.h>
-#ifdef HAVE_UTMPX_H
-#include <utmpx.h>
-#else
-#ifdef HAVE_UTMP_H
-#include <utmp.h>
-#endif /* HAVE_UTMP_H */
-#endif /* HAVE_UTMPX_H */
-#include <sys/resource.h>
-#include <sys/uio.h>
-#include <sys/time.h>
-#include <sys/shm.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/msg.h>
-#ifndef CYGWIN
-#include <ftw.h>
-#endif
+# include <strings.h>
+# ifdef HAVE_UTMPX_H
+#  include <utmpx.h>
+# else
+#  ifdef HAVE_UTMP_H
+#   include <utmp.h>
+#  endif /* HAVE_UTMP_H */
+# endif /* HAVE_UTMPX_H */
+# include <sys/resource.h>
+# include <sys/uio.h>
+# include <sys/time.h>
+# include <sys/shm.h>
+# include <sys/ipc.h>
+# include <sys/sem.h>
+# include <sys/msg.h>
+# ifndef CYGWIN
+#  include <ftw.h>
+# endif
 #endif
 
 #if __cplusplus > 199711L || __GXX_EXPERIMENTAL_CXX0X__
-#define CXX11
+# define CXX11
 #endif
 
 #define PIPE_READ 0
 #define PIPE_WRITE 1
 
 #ifndef TRUE
-#define TRUE 1
+# define TRUE 1
 #endif
 
 #ifndef FALSE
-#define FALSE 0
+# define FALSE 0
 #endif
 
 #endif
