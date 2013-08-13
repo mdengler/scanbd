@@ -68,9 +68,9 @@ There are two general options for building scanbd: using configure (preferred)
 (see 1.2) or using the (old) simple Makefiles (see 1.3). 
 
 ===============================================================================
-Please note that scanbd is now installed in <prefi./sbin instead of 
+Please note that scanbd is now installed in <prefix>/sbin instead of
 <prefix>/bin. Please manually remove the old scanbd/scanbm binaries from
-<prefix/bin.
+<prefix>/bin.
 ==============================================================================
 
 ===============================================================================
@@ -84,12 +84,9 @@ shown below therefore use gmake
 This chapter lists packages that are known to be required for compilation of 
 scanbd on different platforms. The list may not be exhaustive.
 
-1.1.1 Debian
+1.1.1) Debian
 Needed packages on debian-based systems:
 libconfuse-dev libsane-dev libudev-dev libusb-dev
-To use HAL instead of libudev you need:
-libhal-dev
-
 To use HAL instead of libudev you need:
 libhal-dev
 
@@ -97,7 +94,16 @@ libhal-dev
 Needed packages in Fedora systems:
 libusb-devel libconfuse-devel libudev-devel dbus-devel sane-backends-devel
 
-1.1.3 Hint to ArchLinux users using old scanbuttond drivers:
+1.1.3) ArchLinux
+
+Needed additional packages in ArchLinux systems:
+confuse libusbx libusb-compat
+
+ArchLinux normally doesn't have the user saned if you install the sane package.
+You can use the daemon user instead of saned and the group scanner (please adjust
+scanbd.conf file, see below)
+
+(outdated hint)
 The libusb / libusb-compat seems to be broken for at least using it with the 
 old scanbuttond drivers.  Please find under contrib a PKGBUILD to build an old 
 version of libusb-compat at your own risk (other applications may fail now). 
@@ -108,9 +114,9 @@ makepkg
 makepkg -i
 
 and (re)build scanbd:
-USE_SCANBUTTOND=yes gmake -e clean all
+USE_SCANBUTTOND=yes gmake -e -f Makefile.simple clean all
 
-1.1.4 Suse
+1.1.4) Suse
 On Suse based systems you will need the same of similar packages installed as
 on Fedora, but: sane-backends-devel in Suse does not pull in all required 
 dependencies. Please make sure that you alse have installed:
@@ -119,7 +125,7 @@ libexif-devel
 libgphoto2-devel
 before you attempt compilation of scanbd.
 
-1.1.5 OpenBSD:
+1.1.5) OpenBSD:
 You need to install the following packages from ports ($PORTSDIR is here the
 directory where you have the ports collection installed, normally /usr/ports):
 
@@ -153,7 +159,7 @@ If you don't want to use the configure script to generate the Makefiles, you
 can still use the (old) Makefile.simple as an input-file for the make tool.
 
 Options can be set in Makefile.conf. This file will be generated the first time
-you run "gmake -f Makefile.simple" from Makefile.conf.in. 
+you run "gmake -f Makefile.simple" from Makefile.conf.in.
 
 Please review Makefile.conf (after running gmake -f Makefile.simple) before
 running make again. Edit the file as appropriate to set your preferences.
