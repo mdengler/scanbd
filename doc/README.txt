@@ -301,7 +301,7 @@ So as a safe rule:
 - copy all config-files from /etc/sane.d to /usr/local/etc/scanbd and edit 
 dll.conf as stated above (not include the net backend)
 
-6) start scanbd 
+7) start scanbd
 
 e.g.:
 
@@ -322,7 +322,7 @@ buttons. If you press the buttons or modify the function knob or insert/remove
 sheets of paper some of the options / buttons must change their value.
 Theses value changes can be used to define actions in scanbd.conf.
 
-7) some words on access rights
+8) some words on access rights
 
 if the saned-user can't access the scanners, e.g. if 
 
@@ -347,7 +347,7 @@ usermod -a -G lp saned
 
 Also edit/check scanbd.conf to set the effective group = lp !
 
-8) Additional hints:
+9) Additional hints:
 
 - if you are using scanner devices that don't support usb-autosuspend, please find
   an udev-rule 98-snapscan.rule in the integration directory. You can put this into
@@ -397,7 +397,7 @@ Also edit/check scanbd.conf to set the effective group = lp !
   Or use a web based application for scanning (see the frontends documentation 
   on the sane-project page)
 
-9) Actual problems
+10) Actual problems
 
 - if you use USE_SCANBUTTOND: the usb-device can't be opened if another 
   applications (say cupsd) does the same. In this case scanbd stops polling the 
@@ -412,7 +412,7 @@ Also edit/check scanbd.conf to set the effective group = lp !
   compile scanbd with USE_LIBUDEV=yes. If you don't have hal and libudev e.g. 
   OpenBSD, dynamic recognition of scanners isn't possible.
 
-10) TODO
+11) TODO
 - refactor dbus.c, udev.c
 - make a clean rewrite using boost/Qt
 - make a UI to list options/buttons, watch value changes an setup actions
