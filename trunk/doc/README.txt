@@ -138,10 +138,12 @@ sane-backends: $PORTSDIR/graphics/sane-backends
 
 Please execute:
 
-./configure [--enable-scanbuttond]
+./configure [--enable-scanbuttond] [--enable-hal] [--enable-udev]
 gmake all
 
-The use of HAL instead of libudev is now detected via configure. 
+The use of HAL instead of libudev is now detected via configure. If you want to override
+this, use --enable-hal or --enable-udev.
+
 If you want to use the scanbuttond-backends instead of sane-backends, use 
 --enable-scanbuttond for configure.
 

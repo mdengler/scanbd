@@ -75,6 +75,17 @@ AC_CHECK_HEADERS(linux/limits.h \
 		 utmp.h \
 		 utmpx.h) 
 
+# check for enable-hal
+AC_ARG_ENABLE(hal,
+        AC_HELP_STRING([--enable-hal], [force to use hal]),
+        [disable_hal_udev_autodetect=yes])
+
+# check for enable-udev
+AC_ARG_ENABLE(udev,
+        AC_HELP_STRING([--enable-udev], [force to use udev]),
+        [disable_hal_udev_autodetect=yes])
+
+
 # check for mandatory dependencies 
 #=================================
 
@@ -84,14 +95,28 @@ PKG_CHECK_MODULES([CONFUSE], [libconfuse])
 # check for dbus
 PKG_CHECK_MODULES([DBUS], [dbus-1])
 
-dnl Check for udev and if we do not have it, check for hal
-PKG_CHECK_MODULES([UDEV],[libudev],
-        [AC_DEFINE([USE_LIBUDEV], [1], [Use UDEV])],
-	[PKG_CHECK_MODULES([HAL], [hal],
-		[AC_DEFINE([USE_HAL], [1], [Use HAL])],
-		[AC_MSG_WARN([Neither Udev nor Hal are found, dynamic detection of scanners is not supported!])]
-	)]
-)
+
+if test x"${disable_hal_udev_autodetect}" == "xyes"
+then
+    AC_MSG_NOTICE([disabling autodetecting hal or udev])
+    if test x"${enable_hal}" == x"yes"
+    then
+        PKG_CHECK_MODULES([HAL], [hal],[AC_DEFINE([USE_HAL], [1], [Use HAL])])
+    fi
+    if test x"${enable_udev}" == x"yes"
+    then
+        PKG_CHECK_MODULES([UDEV],[libudev],[AC_DEFINE([USE_LIBUDEV], [1], [Use UDEV])])
+    fi
+else
+    dnl Check for udev and if we do not have it, check for hal
+    PKG_CHECK_MODULES([UDEV],[libudev],
+            [AC_DEFINE([USE_LIBUDEV], [1], [Use UDEV])],
+            [PKG_CHECK_MODULES([HAL], [hal],
+                    [AC_DEFINE([USE_HAL], [1], [Use HAL])],
+                    [AC_MSG_WARN([Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead.])]
+            )]
+    )
+fi
 
 # check configuration options 
 #============================
@@ -212,7 +237,7 @@ AC_ARG_WITH( user,
 		*-*-openbsd* | *-*-freebsd* | *-*-netbsd*)
 			SCANBD_USER=root
 			;;
-		*-*-linux*)
+                *-*-linux* | linux-*)
 			SCANBD_USER=saned
 			AC_MSG_NOTICE([On linux we use user saned, plase make sure you add it!])
 			;;
@@ -243,7 +268,7 @@ AC_ARG_WITH( group,
 		*-*-openbsd* | *-*-freebsd* | *-*-netbsd*)
 			SCANBD_GROUP=daemon
 			;;
-		*-*-linux*)
+                *-*-linux* | linux-*)
 			if grep scanner: /etc/group > /dev/null; then
 				SCANBD_GROUP=scanner
 			else
