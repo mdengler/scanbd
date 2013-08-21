@@ -654,10 +654,10 @@ HAVE_SYSTEMD_TRUE
 systemdsystemunitdir
 SCANBUTTOND_LIB_DIR
 SCANBD_CFG_DIR
-HAL_LIBS
-HAL_CFLAGS
 UDEV_LIBS
 UDEV_CFLAGS
+HAL_LIBS
+HAL_CFLAGS
 DBUS_LIBS
 DBUS_CFLAGS
 CONFUSE_LIBS
@@ -802,6 +802,8 @@ enable_dependency_tracking
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+enable_hal
+enable_udev
 with_scanbdconfdir
 with_scanbuttondlibdir
 enable_Werror
@@ -831,10 +833,10 @@ CONFUSE_CFLAGS
 CONFUSE_LIBS
 DBUS_CFLAGS
 DBUS_LIBS
-UDEV_CFLAGS
-UDEV_LIBS
 HAL_CFLAGS
 HAL_LIBS
+UDEV_CFLAGS
+UDEV_LIBS
 LIBUSB_CFLAGS
 LIBUSB_LIBS
 SANE_CFLAGS
@@ -1471,6 +1473,8 @@ Optional Features:
   --disable-dependency-tracking
                           speeds up one-time build
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --enable-hal            force to use hal
+  --enable-udev           force to use udev
   --disable-Werror        don't use gcc's -Werror option when building
   --disable-debug         disable debugging code (NDEBUG)
   --enable-scanbuttond    Use scanbuttond instead of Sane
@@ -1516,10 +1520,10 @@ Some influential environment variables:
               linker flags for CONFUSE, overriding pkg-config
   DBUS_CFLAGS C compiler flags for DBUS, overriding pkg-config
   DBUS_LIBS   linker flags for DBUS, overriding pkg-config
-  UDEV_CFLAGS C compiler flags for UDEV, overriding pkg-config
-  UDEV_LIBS   linker flags for UDEV, overriding pkg-config
   HAL_CFLAGS  C compiler flags for HAL, overriding pkg-config
   HAL_LIBS    linker flags for HAL, overriding pkg-config
+  UDEV_CFLAGS C compiler flags for UDEV, overriding pkg-config
+  UDEV_LIBS   linker flags for UDEV, overriding pkg-config
   LIBUSB_CFLAGS
               C compiler flags for LIBUSB, overriding pkg-config
   LIBUSB_LIBS linker flags for LIBUSB, overriding pkg-config
@@ -16928,6 +16932,21 @@ fi
 done
 
 
+# check for enable-hal
+# Check whether --enable-hal was given.
+if test "${enable_hal+set}" = set; then :
+  enableval=$enable_hal; disable_hal_udev_autodetect=yes
+fi
+
+
+# check for enable-udev
+# Check whether --enable-udev was given.
+if test "${enable_udev+set}" = set; then :
+  enableval=$enable_udev; disable_hal_udev_autodetect=yes
+fi
+
+
+
 # check for mandatory dependencies
 #=================================
 
@@ -17238,6 +17257,204 @@ $as_echo "yes" >&6; }
 fi
 
 
+if test x"${disable_hal_udev_autodetect}" == "xyes"
+then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: disabling autodetecting hal or udev" >&5
+$as_echo "$as_me: disabling autodetecting hal or udev" >&6;}
+    if test x"${enable_hal}" == x"yes"
+    then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for HAL" >&5
+$as_echo_n "checking for HAL... " >&6; }
+
+if test -n "$HAL_CFLAGS"; then
+    pkg_cv_HAL_CFLAGS="$HAL_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"hal\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "hal") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_HAL_CFLAGS=`$PKG_CONFIG --cflags "hal" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$HAL_LIBS"; then
+    pkg_cv_HAL_LIBS="$HAL_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"hal\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "hal") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_HAL_LIBS=`$PKG_CONFIG --libs "hal" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        HAL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "hal" 2>&1`
+        else
+	        HAL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "hal" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$HAL_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (hal) were not met:
+
+$HAL_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables HAL_CFLAGS
+and HAL_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables HAL_CFLAGS
+and HAL_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	HAL_CFLAGS=$pkg_cv_HAL_CFLAGS
+	HAL_LIBS=$pkg_cv_HAL_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define USE_HAL 1" >>confdefs.h
+
+fi
+    fi
+    if test x"${enable_udev}" == x"yes"
+    then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for UDEV" >&5
+$as_echo_n "checking for UDEV... " >&6; }
+
+if test -n "$UDEV_CFLAGS"; then
+    pkg_cv_UDEV_CFLAGS="$UDEV_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libudev\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libudev") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_UDEV_CFLAGS=`$PKG_CONFIG --cflags "libudev" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$UDEV_LIBS"; then
+    pkg_cv_UDEV_LIBS="$UDEV_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libudev\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libudev") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_UDEV_LIBS=`$PKG_CONFIG --libs "libudev" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        UDEV_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libudev" 2>&1`
+        else
+	        UDEV_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libudev" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$UDEV_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libudev) were not met:
+
+$UDEV_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables UDEV_CFLAGS
+and UDEV_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables UDEV_CFLAGS
+and UDEV_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	UDEV_CFLAGS=$pkg_cv_UDEV_CFLAGS
+	UDEV_LIBS=$pkg_cv_UDEV_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define USE_LIBUDEV 1" >>confdefs.h
+
+fi
+    fi
+else
+
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for UDEV" >&5
 $as_echo_n "checking for UDEV... " >&6; }
@@ -17355,14 +17572,14 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$HAL_PKG_ERRORS" >&5
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Neither Udev nor Hal are found, dynamic detection of scanners is not supported!" >&5
-$as_echo "$as_me: WARNING: Neither Udev nor Hal are found, dynamic detection of scanners is not supported!" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead." >&5
+$as_echo "$as_me: WARNING: Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead." >&2;}
 
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Neither Udev nor Hal are found, dynamic detection of scanners is not supported!" >&5
-$as_echo "$as_me: WARNING: Neither Udev nor Hal are found, dynamic detection of scanners is not supported!" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead." >&5
+$as_echo "$as_me: WARNING: Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead." >&2;}
 
 else
 	HAL_CFLAGS=$pkg_cv_HAL_CFLAGS
@@ -17436,14 +17653,14 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$HAL_PKG_ERRORS" >&5
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Neither Udev nor Hal are found, dynamic detection of scanners is not supported!" >&5
-$as_echo "$as_me: WARNING: Neither Udev nor Hal are found, dynamic detection of scanners is not supported!" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead." >&5
+$as_echo "$as_me: WARNING: Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead." >&2;}
 
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Neither Udev nor Hal are found, dynamic detection of scanners is not supported!" >&5
-$as_echo "$as_me: WARNING: Neither Udev nor Hal are found, dynamic detection of scanners is not supported!" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead." >&5
+$as_echo "$as_me: WARNING: Neither Udev nor Hal are found, automatic dynamic detection of scanners is not supported! Use SIGHUP instead." >&2;}
 
 else
 	HAL_CFLAGS=$pkg_cv_HAL_CFLAGS
@@ -17463,6 +17680,7 @@ $as_echo "yes" >&6; }
 
 $as_echo "#define USE_LIBUDEV 1" >>confdefs.h
 
+fi
 fi
 
 # check configuration options
@@ -17934,7 +18152,7 @@ $as_echo "$as_me: For scanbd with udev we assume that user saned is available on
 		*-*-openbsd* | *-*-freebsd* | *-*-netbsd*)
 			SCANBD_USER=root
 			;;
-		*-*-linux*)
+                *-*-linux* | linux-*)
 			SCANBD_USER=saned
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: On linux we use user saned, plase make sure you add it!" >&5
 $as_echo "$as_me: On linux we use user saned, plase make sure you add it!" >&6;}
@@ -17971,7 +18189,7 @@ $as_echo "$as_me: For scanbd with udev we assume that group saned is available o
 		*-*-openbsd* | *-*-freebsd* | *-*-netbsd*)
 			SCANBD_GROUP=daemon
 			;;
-		*-*-linux*)
+                *-*-linux* | linux-*)
 			if grep scanner: /etc/group > /dev/null; then
 				SCANBD_GROUP=scanner
 			else
