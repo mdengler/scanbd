@@ -267,7 +267,7 @@ Now the desktop applications (wich use libsane) use the above dll.conf with only
 the net backend. This prevents them from using the locally attached scanners 
 directly (and blocking them). 
 
-example net.conf remove the comments from the appropriate lines!
+example saned.conf remove the comments from the appropriate lines!
 ---
 connect_timeout = 3
 scanbd-host1.local.net   # the host with the scanbd running 

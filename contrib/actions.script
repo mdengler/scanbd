@@ -1,0 +1,136 @@
+#!/bin/bash
+#
+# Scanbd actions script v1.0 for EPSON Perfection V200 Photo (4 buttons)
+#
+# Copyright (C) 2012 - The Home Server Handbook - thehomeserverhandbook.com
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+#                    *************************
+#
+# Usage:
+#
+# Press [Start] button to scan a document and save it as a JPEG image.
+# In Pdf mode, pressing the [Start] button scans the next page.
+#
+# Press [Copy] button to scan and print a single page document.
+#
+# Press [Email] button to scan a document and save it as a JPEG attachment
+# to an .eml file. To edit the email, import / drag'n drop it in the drafts
+# folder of your preferred eml compatible email client.
+# In Pdf mode, pressing the [Email] button saves the scan(s) as a single
+# PDF attachment to an .eml file.
+#
+# Press [Pdf] button to enter Pdf mode and scan the first page of a
+# document. Then, each press on the [Start] button scans the next page.
+# Finally, press again the [Pdf] button to save the scan(s) as a PDF file
+# and exit the Pdf mode.
+
+TMPDIR="/mnt/data/tmp/"
+SCANDIR="/mnt/data/Public/Scans/" # modify according to your own setup
+FILENAME="scan-`date +%F_%H%M%S`"
+PAGEBASE="page-"
+TIMEOUT="2" # in minutes, specify auto escape delay for the Pdf mode
+PRINTER="Lexmark_E260d" # modify according to your own setup
+EMAIL="someone@example.org" # email address of receiver
+USER="user" # useful when saving scans in NFS shared directory
+GROUP="group" # useful when saving scans in NFS shared directory
+
+export MAGICK_TMPDIR=${TMPDIR} # Override default cache of convert command. Needed for systems with very small /tmp (e.g. ramdisk).
+
+case $SCANBD_ACTION in
+
+    scan)
+	STARTANEW=`find ${TMPDIR} -mindepth 1 -maxdepth 1 -name "${PAGEBASE}*.tif" -mmin -${TIMEOUT} 2> /dev/null | wc -l`
+
+	if [ "0${STARTANEW}" -eq 0 ]; then
+		scanimage -d $SCANBD_DEVICE \
+		--icc-profile=/usr/share/color/icc/sRGB.icm --format=tiff \
+		--mode=Color --depth=8 --resolution=300 \
+		> ${TMPDIR}${FILENAME}.tif
+
+		convert -rotate 180 ${TMPDIR}${FILENAME}.tif ${SCANDIR}${FILENAME}.jpg
+		chown ${USER}:${GROUP} ${SCANDIR}${FILENAME}.jpg
+
+		rm ${TMPDIR}${FILENAME}.tif
+	else
+		NEXTPAGE=`expr 1 + \`ls -1 ${TMPDIR}${PAGEBASE}*.tif | wc -l\``
+
+		scanimage -d $SCANBD_DEVICE \
+		--icc-profile=/usr/share/color/icc/sRGB.icm --format=tiff \
+		--mode=Color --depth=8 --resolution=150 \
+		> ${TMPDIR}${PAGEBASE}`printf %.5d ${NEXTPAGE}`.tif
+	fi
+    ;;
+
+    copy)
+	scanimage -d $SCANBD_DEVICE --format=tiff --mode=Gray --depth=8 \
+	--resolution=300 \
+	| convert - -density 300 ps:- \
+	| lp -d ${PRINTER}
+    ;;
+
+    email)
+	STARTANEW=`find ${TMPDIR} -mindepth 1 -maxdepth 1 -name "${PAGEBASE}*.tif" -mmin -${TIMEOUT} 2> /dev/null | wc -l`
+
+	if [ "0${STARTANEW}" -eq 0 ]; then
+		scanimage -d $SCANBD_DEVICE \
+		--icc-profile=/usr/share/color/icc/sRGB.icm --format=tiff \
+		--mode=Color --depth=8 --resolution=150 \
+		> ${TMPDIR}${FILENAME}.tif
+
+		convert -rotate 180 ${TMPDIR}${FILENAME}.tif ${TMPDIR}${FILENAME}.jpg
+		touch ${TMPDIR}${FILENAME}.txt
+		mpack -s "Scanned document ${FILENAME}" -d ${TMPDIR}${FILENAME}.txt \
+		-o ${TMPDIR}${FILENAME}.eml ${TMPDIR}${FILENAME}.jpg 
+
+		cat ${TMPDIR}${FILENAME}.eml | sendmail -v ${EMAIL}
+
+		rm ${TMPDIR}${FILENAME}.tif ${TMPDIR}${FILENAME}.eml ${TMPDIR}${FILENAME}.jpg ${TMPDIR}${FILENAME}.txt
+	else
+		convert -rotate 180 -units PixelsPerInch -density 150 -compress jpeg \
+		${TMPDIR}${PAGEBASE}*.tif ${TMPDIR}${FILENAME}.pdf
+
+		touch ${TMPDIR}${FILENAME}.txt
+		mpack -s "Scanned document ${FILENAME}" -d ${TMPDIR}${FILENAME}.txt \
+		-o ${TMPDIR}${FILENAME}.eml ${TMPDIR}${FILENAME}.pdf
+
+		cat ${TMPDIR}${FILENAME}.eml | sendmail -v ${EMAIL}
+
+		rm ${TMPDIR}${PAGEBASE}*.tif ${TMPDIR}${FILENAME}.eml ${TMPDIR}${FILENAME}.pdf ${TMPDIR}${FILENAME}.txt
+	fi
+    ;;
+
+    file)
+	STARTANEW=`find ${TMPDIR} -mindepth 1 -maxdepth 1 -name "${PAGEBASE}*.tif" -mmin -${TIMEOUT} 2> /dev/null | wc -l`
+
+	if [ "0${STARTANEW}" -eq 0 ]; then
+		rm ${TMPDIR}${PAGEBASE}*.tif &> /dev/null
+
+		scanimage -d $SCANBD_DEVICE \
+		--icc-profile=/usr/share/color/icc/sRGB.icm --format=tiff \
+		--mode=Color --depth=8 --resolution=150 \
+		> ${TMPDIR}${PAGEBASE}00001.tif
+	else
+		convert -rotate 180 -units PixelsPerInch -density 150 -compress jpeg \
+		${TMPDIR}${PAGEBASE}*.tif ${SCANDIR}${FILENAME}.pdf
+		chown ${USER}:${GROUP} ${SCANDIR}${FILENAME}.pdf
+
+		rm ${TMPDIR}${PAGEBASE}*.tif
+	fi
+    ;;
+
+esac
+
+exit 0
