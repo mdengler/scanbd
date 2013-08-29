@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
     // install the SIGHUP handler also for SIGALARM
     // SIGALARM is used if there is a open failure of the
     // scanbuutond backends, possible cause is a device scanning from other
-    // prosesses like cupsd
+    // processes like cupsd
     if (sigaction(SIGALRM, &sa, NULL) < 0) {
         slog(SLOG_ERROR, "Can't install signalhandler for SIGALARM: %s", strerror(errno));
         exit(EXIT_FAILURE);
