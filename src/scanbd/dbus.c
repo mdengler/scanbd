@@ -164,6 +164,9 @@ static void hal_device_added(LibHalContext* ctx, const char *udi) {
         sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
         // really neccessary
 #endif
+
+        // TODO: call the device insertion / removal callback
+
         slog(SLOG_DEBUG, "sane_init");
 #ifdef USE_SANE
         sane_init(NULL, NULL);
@@ -213,6 +216,9 @@ static void hal_device_removed(LibHalContext* ctx, const char *udi) {
 #ifdef SANE_REINIT_TIMEOUT
     sleep(SANE_REINIT_TIMEOUT);// TODO: don't know if this is really neccessary
 #endif
+
+    // TODO: call the device insertion / removal callback
+
     slog(SLOG_DEBUG, "sane_init");
 #ifdef USE_SANE
     sane_init(NULL, NULL);
@@ -255,6 +261,8 @@ void dbus_signal_device_added(void) {
     sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
     // really neccessary
 #endif
+
+    // TODO: call the device insertion / removal callback
 
 #ifdef USE_SANE
     slog(SLOG_DEBUG, "sane_init");
@@ -301,6 +309,9 @@ void dbus_signal_device_removed(void) {
     sleep(SANE_REINIT_TIMEOUT); // TODO: don't know if this is
     // really neccessary
 #endif
+
+    // TODO: call the device insertion / removal callback
+
     slog(SLOG_DEBUG, "sane_init");
 #ifdef USE_SANE
     sane_init(NULL, NULL);
@@ -312,8 +323,8 @@ void dbus_signal_device_removed(void) {
         exit(EXIT_FAILURE);
     }
     assert(backend);
-
 #endif
+
 #endif
     if (pthread_mutex_unlock(&dbus_mutex)) {
         slog(SLOG_ERROR, "Can't unlock mutex");
