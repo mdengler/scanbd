@@ -1323,7 +1323,7 @@ void stop_sane_threads(void) {
             sane_poll_threads[i].h = NULL;
         }
         if (sane_poll_threads[i].opts) {
-            slog(SLOG_DEBUG, "freeing opt ressources for device %s thread",
+            slog(SLOG_DEBUG, "freeing opt resources for device %s thread",
                  sane_poll_threads[i].dev->name);
             // free the matching options list of that device / threads
             for (int k = 0; k < sane_poll_threads[i].num_of_options; k += 1) {
@@ -1335,7 +1335,7 @@ void stop_sane_threads(void) {
             sane_poll_threads[i].opts = NULL;
         }
         if (sane_poll_threads[i].functions) {
-            slog(SLOG_DEBUG, "freeing funtion ressources for device %s thread",
+            slog(SLOG_DEBUG, "freeing function resources for device %s thread",
                  sane_poll_threads[i].dev->name);
             free(sane_poll_threads[i].functions);
             sane_poll_threads[i].functions = NULL;

@@ -911,7 +911,7 @@ void stop_scbtn_threads() {
         backend->scanbtnd_close((scanner_t*)scbtn_poll_threads[i].dev);
 
         if (scbtn_poll_threads[i].opts) {
-            slog(SLOG_DEBUG, "freeing opt ressources for device %s thread",
+            slog(SLOG_DEBUG, "freeing opt resources for device %s thread",
                  scbtn_poll_threads[i].dev->product);
             // free the matching options list of that device / threads
             //	    for (int k = 0; k < scbtn_poll_threads[i].num_of_options; k += 1) {
@@ -923,7 +923,7 @@ void stop_scbtn_threads() {
             scbtn_poll_threads[i].opts = NULL;
         }
         if (scbtn_poll_threads[i].functions) {
-            slog(SLOG_DEBUG, "freeing funtion ressources for device %s thread",
+            slog(SLOG_DEBUG, "freeing function resources for device %s thread",
                  scbtn_poll_threads[i].dev->product);
             free(scbtn_poll_threads[i].functions);
             scbtn_poll_threads[i].functions = NULL;

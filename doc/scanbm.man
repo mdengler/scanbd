@@ -2,7 +2,7 @@
 .TH scanbm 8 "02 Jan 2013" "@PACKAGENAME@ @PACKAGEVERSION@" "Scanner button daemon"
 .IX scanbm
 .SH NAME
-scanbm\- User scanning suppport daemon for scanbd / scanbd manager
+scanbm\- User scanning support daemon for scanbd / scanbd manager
 .SH SYNOPSIS
 .B scanbm
 .B [\-c 
