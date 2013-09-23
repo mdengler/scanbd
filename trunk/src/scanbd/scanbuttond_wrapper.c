@@ -472,7 +472,11 @@ void* scbtn_poll(void* arg) {
         slog(SLOG_DEBUG, "polling device %s", st->dev->product);
 
         int button = backend->scanbtnd_get_button((scanner_t*)st->dev);
-        slog(SLOG_INFO, "button %d", button);
+        if (button) {
+            slog(SLOG_INFO, "################ button %d pressed ################", button);
+        } else {
+            slog(SLOG_INFO, "button %d", button);
+        }
 
         for(si = 0; si < st->num_of_options_with_scripts; si += 1) {
             //	    const scbtn_Option_Descriptor* odesc = NULL;
@@ -1038,22 +1042,25 @@ const char* scanbtnd_button_name(const backend_t* backend, unsigned int button) 
     assert(backend_name);
 
     if (strcmp("snapscan", backend_name)) {
-        assert(button <= 4);
+        assert(button <= 5);
         switch(button) {
         case 0:
             return NULL;
             break;
         case 1:
-            return "web";
+            return "scan"; // "web";
             break;
         case 2:
-            return "email";
+            return "copy"; // "email";
             break;
         case 3:
-            return "copy";
+            return "email"; // "copy";
             break;
         case 4:
-            return "send";
+            return "pdf"; // "send";
+            break;
+        case 5:
+            return "stop";
             break;
         default:
             return NULL;
