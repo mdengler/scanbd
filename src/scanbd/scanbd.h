@@ -114,6 +114,11 @@
 #define C_SCRIPTDIR "scriptdir"
 #define C_SCRIPTDIR_DEF ""
 
+#define C_DEVICE_INSERT_SCRIPT "device_insert_script"
+#define C_DEVICE_INSERT_SCRIPT_DEF ""
+#define C_DEVICE_REMOVE_SCRIPT "device_remove_script"
+#define C_DEVICE_REMOVE_SCRIPT_DEF ""
+
 #define C_SCANBUTTONS_BACKENDS_DIR "scanbuttond_backends_dir"
 #ifdef SCANBUTTOND_LIB_DIR
 #define C_SCANBUTTONS_BACKENDS_DIR_DEF SCANBUTTOND_LIB_DIR

@@ -287,11 +287,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 scanbdconfdir = @SCANBD_CFG_DIR@/
 scanbdconf_SCRIPTS = \
-	action.script 
+	action.script \
+	insert.script 
 
 EXTRA_DIST = \
 	PKGBUILD \
-	action.script 
+	action.script \
+	insert.script 
 
 all: all-am
 

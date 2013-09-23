@@ -136,6 +136,145 @@ void dbus_send_signal(const char* signal_name, const char* arg) {
     dbus_message_unref(signal);
 }
 
+static void hook_device_ex(const char *param, const char *action_name, const char *dev_name) {
+    cfg_t* cfg_sec_global = cfg_getsec(cfg, C_GLOBAL);
+    assert(cfg_sec_global);
+    const char* script = cfg_getstr(cfg_sec_global, param);
+
+    if (!script || (strlen(script) == 0)) {
+        //script = SCANBD_NULL_STRING;
+        return; // No hook script, nothing for us to do here.
+    }       
+
+    cfg_t* global_envs = cfg_getsec(cfg_sec_global, C_ENVIRONMENT);
+    // number of env-vars =
+    // the values in the environment-section (2):
+    // device, action
+    // plus those 4:
+    // PATH, PWD, USER, HOME
+    // plus the sentinel
+    int number_of_envs = 4 + 2 + 1;
+    char** env = calloc(number_of_envs, sizeof(char*));
+    for(int e = 0; e < number_of_envs; e += 1) {
+        env[e] = calloc(NAME_MAX + 1, sizeof(char));
+    }
+    int e = 0;
+    const char* ev = "PATH";
+    if (getenv(ev) != NULL) {
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, getenv(ev));
+        slog(SLOG_DEBUG, "setting env: %s", env[e]);
+        e += 1;
+    }
+    else {
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, "/usr/sbin:/usr/bin:/sbin:/bin");
+        slog(SLOG_DEBUG, "No PATH, setting env: %s", env[e]);
+        e += 1;
+    }
+    ev = "PWD";
+    if (getenv(ev) != NULL) {
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, getenv(ev));
+        slog(SLOG_DEBUG, "setting env: %s", env[e]);
+        e += 1;
+    }
+    else {
+        char buf[PATH_MAX];
+        char* ptr = getcwd(buf, PATH_MAX - 1);
+        if (!ptr) {
+            slog(SLOG_ERROR, "can't get pwd");
+        }
+        else {
+            assert(ptr);
+            snprintf(env[e], NAME_MAX, "%s=%s", ev, ptr);
+            slog(SLOG_DEBUG, "No PWD, setting env: %s", env[e]);
+            e += 1;
+        }
+    }
+    ev = "USER";
+    if (getenv(ev) != NULL) {
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, getenv(ev));
+        slog(SLOG_DEBUG, "setting env: %s", env[e]);
+        e += 1;
+    }
+    else {
+        struct passwd* pwd = NULL;
+        pwd = getpwuid(geteuid());
+        assert(pwd);
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, pwd->pw_name);
+        slog(SLOG_DEBUG, "No USER, setting env: %s", env[e]);
+        e += 1;
+    }
+    ev = "HOME";
+    if (getenv(ev) != NULL) {
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, getenv(ev));
+        slog(SLOG_DEBUG, "setting env: %s", env[e]);
+        e += 1;
+    }
+    else {
+        struct passwd* pwd = 0;
+        pwd = getpwuid(geteuid());
+        assert(pwd);
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, pwd->pw_dir);
+        slog(SLOG_DEBUG, "No HOME, setting env: %s", env[e]);
+        e += 1;
+    }
+    ev = cfg_getstr(global_envs, C_DEVICE);
+    if (ev != NULL) {
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, dev_name);
+        slog(SLOG_DEBUG, "setting env: %s", env[e]);
+        e += 1;
+    }
+    ev = cfg_getstr(global_envs, C_ACTION);
+    if (ev != NULL) {
+        snprintf(env[e], NAME_MAX, "%s=%s", ev, action_name);
+        slog(SLOG_DEBUG, "setting env: %s", env[e]);
+        e += 1;
+    }
+    env[e] = NULL;
+    assert(e == number_of_envs-1);
+
+    char *script_abs = make_script_path_abs(script);
+    assert(script_abs);
+    if (strcmp(script_abs, SCANBD_NULL_STRING) != 0) {
+        pid_t cpid;
+        if ((cpid = fork()) < 0) {
+            slog(SLOG_ERROR, "Can't fork: %s", strerror(errno));
+        }
+        else if (cpid > 0) { // parent
+            slog(SLOG_INFO, "waiting for child: %s", script_abs);
+            int status;
+            if (waitpid(cpid, &status, 0) < 0) {
+                slog(SLOG_ERROR, "waitpid: %s", strerror(errno));
+            }
+            if (WIFEXITED(status)) {
+                slog(SLOG_INFO, "child %s exited with status: %d",
+                     script_abs, WEXITSTATUS(status));
+            }
+            if (WIFSIGNALED(status)) {
+                slog(SLOG_INFO, "child %s signaled with signal: %d",
+                     script_abs, WTERMSIG(status));
+            }
+        }
+        else { // child
+            slog(SLOG_DEBUG, "exec for %s", script_abs);
+            if (execle(script_abs, script_abs, NULL, env) < 0) {
+                slog(SLOG_ERROR, "execlp: %s", strerror(errno));
+            }
+            exit(EXIT_FAILURE); // not reached
+        }
+    } // script_abs == SCANBD_NULL_STRING
+
+    assert(script_abs != NULL);
+    free(script_abs);
+}
+
+static void hook_device_insert(const char *dev_name) {
+    hook_device_ex(C_DEVICE_INSERT_SCRIPT, "insert", dev_name);
+}
+
+static void hook_device_remove(const char *dev_name) {
+    hook_device_ex(C_DEVICE_REMOVE_SCRIPT, "remove", dev_name);
+}
+
 #ifdef USE_HAL
 static void hal_device_added(LibHalContext* ctx, const char *udi) {
     (void)ctx;
@@ -165,7 +304,7 @@ static void hal_device_added(LibHalContext* ctx, const char *udi) {
         // really neccessary
 #endif
 
-        // TODO: call the device insertion / removal callback
+        hook_device_insert(udi);
 
         slog(SLOG_DEBUG, "sane_init");
 #ifdef USE_SANE
@@ -217,7 +356,7 @@ static void hal_device_removed(LibHalContext* ctx, const char *udi) {
     sleep(SANE_REINIT_TIMEOUT);// TODO: don't know if this is really neccessary
 #endif
 
-    // TODO: call the device insertion / removal callback
+    hook_device_remove(udi);
 
     slog(SLOG_DEBUG, "sane_init");
 #ifdef USE_SANE
@@ -262,7 +401,7 @@ void dbus_signal_device_added(void) {
     // really neccessary
 #endif
 
-    // TODO: call the device insertion / removal callback
+    hook_device_insert("dbus device");
 
 #ifdef USE_SANE
     slog(SLOG_DEBUG, "sane_init");
@@ -310,7 +449,7 @@ void dbus_signal_device_removed(void) {
     // really neccessary
 #endif
 
-    // TODO: call the device insertion / removal callback
+    hook_device_remove("dbus device");
 
     slog(SLOG_DEBUG, "sane_init");
 #ifdef USE_SANE
