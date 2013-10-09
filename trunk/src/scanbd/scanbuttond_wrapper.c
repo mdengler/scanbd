@@ -1037,9 +1037,10 @@ void scbtn_shutdown(void)
 
 const char* scanbtnd_button_name(const backend_t* backend, unsigned int button) {
     slog(SLOG_INFO, "scanbtnd_button_name (%d)", button);
+    assert(backend);
     const char* backend_name = backend->scanbtnd_get_backend_name();
-    slog(SLOG_INFO, "scanbtnd_button_name, backend: %s", backend_name);
     assert(backend_name);
+    slog(SLOG_INFO, "scanbtnd_button_name, backend: %s", backend_name);
 
     if (strcmp("snapscan", backend_name)) {
         assert(button <= 5);
