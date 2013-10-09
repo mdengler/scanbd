@@ -31,16 +31,18 @@
 
 static char* backend_name = "Epson VX00 Photo USB";
 
-#define NUM_SUPPORTED_USB_DEVICES 2
+#define NUM_SUPPORTED_USB_DEVICES 3
 
 static int supported_usb_devices[NUM_SUPPORTED_USB_DEVICES][3] = {
 	// vendor, product, num_buttons
 	{ 0x04B8, 0x012E, 4 },	// Epson Perfection V200
-	{ 0x04B8, 0x0133, 5 }   // Epson GT-1500, buttons: 1=scan, 2=copy, 3=email, 4=pdf, 5=stop
+    { 0x04B8, 0x0119, 4 },  // Epson Perfection 4490
+    { 0x04B8, 0x0133, 5 }   // Epson GT-1500, buttons: 1=scan, 2=copy, 3=email, 4=pdf, 5=stop
 };
 
 static char* usb_device_descriptions[NUM_SUPPORTED_USB_DEVICES][2] = {
 	{ "Epson", "Perfection V200"},
+    { "Epson", "Perfection 4490"},
 	{ "Epson", "GT-1500"}
 };
 
