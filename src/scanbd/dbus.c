@@ -636,7 +636,7 @@ static void* dbus_thread(void* arg) {
     slog(SLOG_DEBUG, "timeout: %d ms", timeout);
 
     while(dbus_connection_read_write_dispatch(conn, timeout)) {
-        slog(SLOG_DEBUG, "Iteration on dbus call");
+        //slog(SLOG_DEBUG, "Iteration on dbus call");
         usleep(timeout * 1000);
     }
     return NULL;
