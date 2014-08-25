@@ -139,9 +139,11 @@ void get_sane_devices(void) {
         slog(SLOG_WARN, "Can't get the sane device list");
     }
     const SANE_Device** dev = sane_device_list;
-    if (dev == NULL) {
-        slog(SLOG_DEBUG, "device list null");
+    if (dev == NULL || *dev == NULL) {
+        slog(SLOG_WARN, "device list null");
         goto cleanup;
+    } else {
+	slog(SLOG_DEBUG, "got some devices");
     }
     while(*dev != NULL) {
         slog(SLOG_DEBUG, "found device: %s %s %s %s",
@@ -149,6 +151,7 @@ void get_sane_devices(void) {
         num_devices += 1;
         dev++;
     }
+    slog(SLOG_DEBUG, "got %i devices", num_devices);
     if (pthread_cond_broadcast(&sane_cv)) {
         slog(SLOG_ERROR, "pthread_cond_broadcast: %s", strerror(errno));
     }
